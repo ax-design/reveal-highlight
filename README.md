@@ -75,9 +75,7 @@ const App: React.FC<AppProps> = () => {
 
 ### `RevealHighlightBoundary`
 
-#### Props
-
-##### dynamicBoundingRect
+#### dynamicBoundingRect
 
 **Type:** Boolean
 
@@ -85,9 +83,9 @@ const App: React.FC<AppProps> = () => {
 
 **Description:** If the boundary it self or it children contain scrolling element, please set this props to `true` for correct rendering result. While enabled `DynamicBoundingRect`, the reveal state manager will call `Element.getBoundingClientRect()` for each frame, which may impact the performance, so it's disabled by default.
 
-#### `RevealHighlight`
+### `RevealHighlight`
 
-##### color
+#### color
 
 **Type:** `string`
 
@@ -95,7 +93,7 @@ const App: React.FC<AppProps> = () => {
 
 **Description:**  The color of the reveal highlight. the string should contain color information in "RGB" format, sepererate by comma.
 
-##### borderStyle
+#### borderStyle
 
 **Type:** `'full' | 'half' | 'none'`
 
@@ -103,7 +101,7 @@ const App: React.FC<AppProps> = () => {
 
 **Description:**  If `full` provided, there'll be four sides of the element will have light effect, if `half` provided, only top and bottom side will have light effect, `none` literally no border.
 
-##### borderWidth
+#### borderWidth
 
 **Type:** number
 
@@ -111,7 +109,7 @@ const App: React.FC<AppProps> = () => {
 
 **Description:**  Border width in `px`.
 
-##### fillMode
+#### fillMode
 
 **Type:** `'relative' | 'absolute' | 'none'`
 
@@ -131,7 +129,7 @@ the unit is pixel.
 
 If `none` provided, nothing will happen, you won't need this option.
 
-##### fillRadius
+#### fillRadius
 
 **Type:** number
 
