@@ -1,10 +1,10 @@
 <h1 align="center">
   <img src="https://raw.githubusercontent.com/ax-design/reveal-highlight-react/master/docs/logo.png" alt="Reveal Hightlight">
-
-  <p>
-  React component that impolement Reveal Highlight of Axiom Design System.
-  </p>
 </h1>
+
+<p>
+  React component that impolement Reveal Highlight of Axiom Design System.
+</p>
 
 <p align="center">
   <img src="https://raw.githubusercontent.com/ax-design/reveal-highlight-react/master/docs/screen-record.gif" alt="Screenshot">
