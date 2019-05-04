@@ -1,9 +1,9 @@
-<h1>
+<h1 align="center">
   <img src="https://raw.githubusercontent.com/ax-design/reveal-highlight-react/master/docs/logo.png" alt="Reveal Hightlight">
 </h1>
 
 <p align="center">
-React component that impolement Reveal Highlight of Axiom Design System.
+  React component that impolement Reveal Highlight of Axiom Design System.
 </p>
 
 <p align="center">
