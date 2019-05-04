@@ -2,7 +2,7 @@
   <img src="https://raw.githubusercontent.com/ax-design/reveal-highlight-react/master/docs/logo.png" alt="Reveal Hightlight">
 </h1>
 
-<p>
+<p align="center">
   React component that impolement Reveal Highlight of Axiom Design System.
 </p>
 
