@@ -1,3 +1,6 @@
+# env
+.vscode
+
 # build
 /es
 /build

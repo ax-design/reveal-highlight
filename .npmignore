@@ -1,3 +1,6 @@
+# env
+.vscode
+
 # Cache
 tsconfig.tsbuildinfo
 /.rpt2_cache
