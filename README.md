@@ -3,7 +3,7 @@
 </h1>
 
 <p align="center">
-  React component that impolement Reveal Highlight of Axiom Design System.
+  React component that implements Reveal Highlight of Axiom Design System.
 </p>
 
 <p align="center">
@@ -26,7 +26,7 @@ To add a reveal effect on your web application, you need to wrap a `RevealHighli
 
 `RevealHighlightProvider` will manage the global reveal style, and cache the rendered highlight bitmap for better performance (WIP).
 
-`RevealHighlightBoundary` will manage the rendering behavior of `RevealHighlight` components, while your mouse enter the boundary, the highlight components will get started to rendering, while your mouse leave the boundary component, all highlight effect will disappear.
+`RevealHighlightBoundary` will manage the rendering behavior of `RevealHighlight` components, while your mouse enters the boundary, the highlight components will get started to rendering, while your mouse leaves the boundary component, all highlight effect will disappear.
 
 Say, we wrapped a button component:
 
@@ -73,15 +73,11 @@ const App: React.FC<AppProps> = () => {
 
 ### `RevealHighlightProvider`
 
+No props needed.
+
 ### `RevealHighlightBoundary`
 
-#### dynamicBoundingRect
-
-**Type:** Boolean
-
-**Default:** false
-
-**Description:** If the boundary it self or it children contain scrolling element, please set this props to `true` for correct rendering result. While enabled `DynamicBoundingRect`, the reveal state manager will call `Element.getBoundingClientRect()` for each frame, which may impact the performance, so it's disabled by default.
+No props needed.
 
 ### `RevealHighlight`
 
@@ -91,7 +87,7 @@ const App: React.FC<AppProps> = () => {
 
 **Default:** `'0, 0, 0'`
 
-**Description:**  The color of the reveal highlight. the string should contain color information in "RGB" format, sepererate by comma.
+**Description:**  The color of the reveal highlight. the string should contain color information in "RGB" format, separated by a comma.
 
 #### borderStyle
 
@@ -99,7 +95,7 @@ const App: React.FC<AppProps> = () => {
 
 **Default:** `'full'`
 
-**Description:**  If `full` provided, there'll be four sides of the element will have light effect, if `half` provided, only top and bottom side will have light effect, `none` literally no border.
+**Description:**  If `full` provided, there'll be four sides of the element will have a light effect, if `half` provided, only the top and bottom side will have a light effect, `none` literally no border.
 
 #### borderWidth
 
