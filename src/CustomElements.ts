@@ -1,13 +1,13 @@
 import RevealStateManager, { RevealBoundaryStore } from './RevealStateManager.js';
 
-export class AcrylicRevealProvider extends HTMLElement {
-    static readonly ElementName = 'acrylic-reveal-provider';
+export class AxRevealProvider extends HTMLElement {
+    static readonly ElementName = 'ax-reveal-provider';
     readonly stateManager = new RevealStateManager();
 }
 
-export class AcrylicRevealBoundary extends HTMLElement {
+export class AxRevealBoundary extends HTMLElement {
     static readonly storage = new RevealStateManager();
-    static readonly ElementName = 'acrylic-reveal-bound';
+    static readonly ElementName = 'ax-reveal-bound';
     private _storage!: RevealBoundaryStore | undefined;
     static readonly removeStorageEvent = 'removeStorage';
     static readonly attachStorageEvent = 'attachStorage';
@@ -17,27 +17,27 @@ export class AcrylicRevealBoundary extends HTMLElement {
     }
     private set storage(newS) {
         const old = this._storage;
-        if (old) this.dispatchEvent(new CustomEvent(AcrylicRevealBoundary.removeStorageEvent, { detail: old }));
+        if (old) this.dispatchEvent(new CustomEvent(AxRevealBoundary.removeStorageEvent, { detail: old }));
         if (newS) {
             this._storage = newS;
-            this.dispatchEvent(new CustomEvent(AcrylicRevealBoundary.attachStorageEvent, { detail: this._storage }));
+            this.dispatchEvent(new CustomEvent(AxRevealBoundary.attachStorageEvent, { detail: this._storage }));
             if (old)
                 this.dispatchEvent(
-                    new CustomEvent(AcrylicRevealBoundary.replaceStorageEvent, { detail: { old, new: newS } })
+                    new CustomEvent(AxRevealBoundary.replaceStorageEvent, { detail: { old, new: newS } })
                 );
         }
     }
     public waitForStorage(f: (storage: RevealBoundaryStore) => void) {
         if (this.storage === undefined)
-            this.addEventListener(AcrylicRevealBoundary.attachStorageEvent, () => f(this.storage!), {
+            this.addEventListener(AxRevealBoundary.attachStorageEvent, () => f(this.storage!), {
                 once: true
             });
         else f(this.storage);
     }
     private appendStorage(force = false) {
         if (!force) if (this.storage) return;
-        const parent = this.closest(AcrylicRevealProvider.ElementName) as AcrylicRevealProvider;
-        const stateManager = parent ? parent.stateManager : AcrylicRevealBoundary.storage;
+        const parent = this.closest(AxRevealProvider.ElementName) as AxRevealProvider;
+        const stateManager = parent ? parent.stateManager : AxRevealBoundary.storage;
         this.storage = stateManager.newBoundary();
     }
     handlePointerEnter = () => this.waitForStorage(storage => storage.onPointerEnterBoundary());
@@ -62,11 +62,11 @@ export class AcrylicRevealBoundary extends HTMLElement {
     }
 }
 
-export class AcrylicReveal extends HTMLElement {
-    static readonly ElementName = 'acrylic-reveal';
+export class AxReveal extends HTMLElement {
+    static readonly ElementName = 'ax-reveal';
     private root = this.attachShadow({ mode: 'open' });
     private canvas: HTMLCanvasElement;
-    private boundary!: AcrylicRevealBoundary;
+    private boundary!: AxRevealBoundary;
     adoptedCallback() {
         this.disconnectedCallback();
         this.connectedCallback();
@@ -75,9 +75,9 @@ export class AcrylicReveal extends HTMLElement {
         this.boundary && this.boundary.waitForStorage(storage => storage.removeReveal(this.canvas));
     }
     connectedCallback() {
-        this.boundary = this.closest(AcrylicRevealBoundary.ElementName) as AcrylicRevealBoundary;
+        this.boundary = this.closest(AxRevealBoundary.ElementName) as AxRevealBoundary;
         if (!this.boundary)
-            throw new SyntaxError('You must use ' + AcrylicRevealBoundary.ElementName + ' as the boundary of acrylic!');
+            throw new SyntaxError('You must use ' + AxRevealBoundary.ElementName + ' as the boundary of acrylic!');
         this.boundary.waitForStorage(storage =>
             storage.addReveal(this.canvas, {
                 color: '0, 0, 0',
@@ -85,6 +85,7 @@ export class AcrylicReveal extends HTMLElement {
                 borderWidth: 1,
                 fillMode: 'relative',
                 fillRadius: 1.5,
+                diffuse: true,
                 borderWhileNotHover: true,
                 revealAnimateSpeed: 2000,
                 revealReleasedAccelerateRate: 6

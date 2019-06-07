@@ -1,6 +1,6 @@
-import { AcrylicRevealProvider, AcrylicRevealBoundary, AcrylicReveal } from './CustomElements.js';
+import { AxRevealProvider, AxRevealBoundary, AxReveal } from './CustomElements.js';
 export function register() {
-    customElements.define(AcrylicRevealProvider.ElementName, AcrylicRevealProvider);
-    customElements.define(AcrylicRevealBoundary.ElementName, AcrylicRevealBoundary);
-    customElements.define(AcrylicReveal.ElementName, AcrylicReveal);
+    customElements.define(AxRevealProvider.ElementName, AxRevealProvider);
+    customElements.define(AxRevealBoundary.ElementName, AxRevealBoundary);
+    customElements.define(AxReveal.ElementName, AxReveal);
 }
