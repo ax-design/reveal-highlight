@@ -1,0 +1,26 @@
+language: node_js
+node_js: "11"
+cache: yarn
+before_script:
+  - yarn
+script: yarn build
+
+before_deploy:
+ - cd build
+ - tar -cvzf build.tar.gz ./*
+
+deploy:
+  -
+  provider: releases
+  api_key: "$GITHUB_KEY"
+  file: "./build/*"
+  skip_cleanup: true
+  on:
+    tags: true
+  -  
+  provider: npm
+  email: "$NPM_EMAIL"
+  api_key: "$NPM_KEY"
+  skip_cleanup: true
+  on:
+    tags: true
