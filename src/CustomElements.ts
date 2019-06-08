@@ -1,5 +1,3 @@
-import Color from 'color';
-
 import RevealStateManager, { RevealBoundaryStore } from './RevealStateManager.js';
 
 export class AxRevealProvider extends HTMLElement {
