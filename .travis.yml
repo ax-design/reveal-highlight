@@ -6,12 +6,13 @@ before_script:
 script: yarn build
 
 before_deploy:
- - tar czvf build.tar.gz -C build .
+  - tar czvf umd.tar.gz -C build .
+  - tar czvf es.tar.gz -C es .
 
 deploy:
   - provider: releases
     api_key: "$GITHUB_KEY"
-    file: "./build.tar.gz"
+    file: "./*.tar.gz"
     skip_cleanup: true
     on:
       tags: true
