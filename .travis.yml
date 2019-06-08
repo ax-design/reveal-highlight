@@ -7,13 +7,13 @@ script: yarn build
 
 before_deploy:
  - cd build
- - tar -cvzf build.tar.gz ./*
+ - tar -cvzf ../build.tar.gz ./*
 
 deploy:
   -
   provider: releases
   api_key: "$GITHUB_KEY"
-  file: "./build/*"
+  file: "build.tar.gz"
   skip_cleanup: true
   on:
     tags: true
