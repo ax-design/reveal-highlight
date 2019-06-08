@@ -141,7 +141,6 @@ class RevealStateManager {
                             , color, borderStyle, borderWidth
                             , fillMode, fillRadius = 0, diffuse
                             , revealAnimateSpeed, revealReleasedAccelerateRate;
-
                         if (canvasConfig.currentFrameId !== canvasConfig.cachedFrameId) {
                             const boundingRect = $el.getBoundingClientRect();
                             const computedStyle = $el.computedStyleMap();
@@ -176,7 +175,7 @@ class RevealStateManager {
                                 default:
                                     throw new SyntaxError('The value of `--reveal-border-style` must be `relative`, `absolute` or `none`!');
                             }
-    
+
                             const cacheCanvasSize = trueFillRadius[1] * 2;
 
                             canvasConfig.cachedStyle = {
@@ -302,7 +301,7 @@ class RevealStateManager {
             onPointerEnterBoundary: () => {
                 storage.mouseInBoundary = true;
 
-                if (!storage.raf) storage.raf = window.requestAnimationFrame(() => storage.paintAll());
+                if (!storage.raf) storage.raf = window.requestAnimationFrame((frame) => storage.paintAll(frame));
             },
 
             onPointerLeaveBoundary: () => {
@@ -340,6 +339,7 @@ class RevealStateManager {
                 });
 
                 storage.canvasList.forEach((config, index) => {
+                    config.currentFrameId = frame;
                     paintCanvas(config, storage, force);
                 });
 
