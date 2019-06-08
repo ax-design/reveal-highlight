@@ -19,12 +19,23 @@
 
 ## Installation
 
-```
+```bash
 // with npm
 npm install @ax-design/reveal-highlight
 
 // with yarn
 yarn add @ax-design/reveal-highlight
+```
+
+and import it:
+
+```javascript
+//CommonJS
+require('@ax-design/reveal-highlight').register();
+
+//ESModule
+import { register } from '@ax-design/reveal-highlight';
+register();
 ```
 
 ## Usage
