@@ -52,7 +52,7 @@ export function register() {
             syntax: '<number>',
             initialValue: '6',
             inherits: true
-        });  
+        });
     }
 
 }
