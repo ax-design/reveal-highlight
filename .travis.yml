@@ -6,8 +6,7 @@ before_script:
 script: yarn build
 
 before_deploy:
- - cd build
- - tar -cvzf ../build.tar.gz ./*
+ - tar czvf build.tar.gz -C build .
 
 deploy:
   - provider: releases
