@@ -40,14 +40,19 @@ export class AxRevealBoundary extends HTMLElement {
         const stateManager = parent ? parent.stateManager : AxRevealBoundary.storage;
         this.storage = stateManager.newBoundary();
     }
-    handlePointerEnter = () => this.waitForStorage(storage => storage.onPointerEnterBoundary());
-    handlePointerLeave = () => this.waitForStorage(storage => storage.onPointerLeaveBoundary());
-    handlePointerMove = (ev: MouseEvent) =>
+    updatePointerPosition = (ev: MouseEvent) => {
         this.waitForStorage(storage => {
             storage.clientX = ev.clientX;
             storage.clientY = ev.clientY;
         });
-    handlePointerDown = () => this.waitForStorage(storage => storage.initializeAnimation());
+    }
+    handlePointerEnter = () => this.waitForStorage(storage => storage.onPointerEnterBoundary());
+    handlePointerLeave = () => this.waitForStorage(storage => storage.onPointerLeaveBoundary());
+    handlePointerMove = (ev: MouseEvent) => this.updatePointerPosition(ev);
+    handlePointerDown = (ev: MouseEvent) => this.waitForStorage(storage => {
+        this.updatePointerPosition(ev);
+        storage.initializeAnimation();
+    });
     handlePointerUp = () => this.waitForStorage(storage => storage.switchAnimation());
     connectedCallback() {
         this.appendStorage(true);
