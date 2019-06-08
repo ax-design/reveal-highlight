@@ -1,20 +1,38 @@
-interface RevealStyle {
+import { stringify } from "querystring";
+
+// interface RevealStyle {
+//     color: string;
+//     borderStyle: 'full' | 'half' | 'none';
+//     borderWidth: number;
+//     fillMode: 'relative' | 'absolute' | 'none';
+//     fillRadius: number;
+//     diffuse: boolean;
+//     revealAnimateSpeed: number;
+//     revealReleasedAccelerateRate: number;
+// }
+
+interface CachedStyle {
+    top: number;
+    left: number;
+    width: number;
+    height: number;
     color: string;
-    borderStyle: 'full' | 'half' | 'none';
+    trueFillRadius: number[];
+    cacheCanvasSize: number;
+    borderStyle: string;
     borderWidth: number;
-    fillMode: 'relative' | 'absolute' | 'none';
+    fillMode: string;
     fillRadius: number;
     diffuse: boolean;
     revealAnimateSpeed: number;
     revealReleasedAccelerateRate: number;
-    borderWhileNotHover: boolean;
 }
+
 interface CanvasConfig {
     canvas: HTMLCanvasElement;
     ctx: CanvasRenderingContext2D | null;
     width: number;
     height: number;
-    style: RevealStyle;
     cachedRevealBitmap: CachedRevealBitmap[];
     mouseUpClientX: number | null;
     mouseUpClientY: number | null;
@@ -24,15 +42,11 @@ interface CanvasConfig {
     mouseDownAnimateLogicFrame: number | null;
     mousePressed: boolean;
     mouseReleased: boolean;
+    cachedStyle: CachedStyle;
+    currentFrameId: any;
+    cachedFrameId: any;
 
-    getCanvasPaintingStyle(): {
-        top: number;
-        left: number;
-        width: number;
-        height: number;
-        trueFillRadius: number[];
-        cacheCanvasSize: number;
-    };
+    getCanvasPaintingStyle(): CachedStyle;
     cacheRevealBitmaps(): void;
     mouseInCanvas(): boolean;
     getAnimateGrd(frame: number, grd: CanvasGradient): void;
@@ -49,7 +63,7 @@ export interface RevealBoundaryStore extends Partial<CanvasConfig> {
     paintedClientY: number;
     destroy(): void;
     // Add a new reveal effect.
-    addReveal($el: HTMLCanvasElement, style: RevealStyle): void;
+    addReveal($el: HTMLCanvasElement): void;
     removeReveal($el: HTMLCanvasElement): void;
     mouseInBoundary: boolean;
     canvasList: CanvasConfig[];
@@ -96,35 +110,87 @@ class RevealStateManager {
                     return answer;
                 });
             },
-            addReveal: ($el: HTMLCanvasElement, style: RevealStyle) => {
+            addReveal: ($el: HTMLCanvasElement) => {
                 const canvasConfig: CanvasConfig = {
                     canvas: $el,
                     ctx: $el.getContext('2d'),
                     cachedRevealBitmap: [],
                     width: 0,
                     height: 0,
-                    style,
+                    cachedStyle: {
+                        top: -1,
+                        left: -1,
+                        width: -1,
+                        height: -1,
+                        trueFillRadius: [0, 0],
+                        cacheCanvasSize: -1,
+                        color: '',
+                        borderStyle: '',
+                        borderWidth: 1,
+                        fillMode: '',
+                        fillRadius: 0,
+                        diffuse: true,
+                        revealAnimateSpeed: 0,
+                        revealReleasedAccelerateRate: 0
+                    },
+                    currentFrameId: -1,
+                    cachedFrameId: -2,
 
                     getCanvasPaintingStyle: () => {
-                        let { top, left, width, height } = $el.getBoundingClientRect();
+                        let top, left, width, height
+                            , color, borderStyle, borderWidth
+                            , fillMode, fillRadius = 0, diffuse
+                            , revealAnimateSpeed, revealReleasedAccelerateRate;
 
-                        top = Math.round(top);
-                        left = Math.round(left);
-                        width = Math.round(width);
-                        height = Math.round(height);
+                        if (canvasConfig.currentFrameId !== canvasConfig.cachedFrameId) {
+                            const boundingRect = $el.getBoundingClientRect();
+                            const computedStyle = $el.computedStyleMap();
 
-                        let trueFillRadius;
+                            const colorStringMatch = computedStyle.get('--reveal-color').toString().match(/\((\d+,\s*\d+,\s*\d+)[\s\S]*?\)/);
 
-                        if (canvasConfig.style.fillMode === 'none') {
-                            trueFillRadius = [0, 0];
-                        } else {
-                            trueFillRadius =
-                                canvasConfig.style.fillMode === 'relative'
-                                    ? [width, height].sort((a, b) => a - b).map(x => x * canvasConfig.style.fillRadius)
-                                    : [canvasConfig.style.fillRadius];
+                            color = colorStringMatch && colorStringMatch.length > 1 ? colorStringMatch[1] : '0, 0, 0';
+                            borderStyle = computedStyle.get('--reveal-border-style').value as string;
+                            borderWidth = computedStyle.get('--reveal-border-width').value as number;
+                            fillMode = computedStyle.get('--reveal-fill-mode').value as string;
+                            fillRadius = computedStyle.get('--reveal-fill-radius').value as number;
+                            diffuse = computedStyle.get('--reveal-diffuse').value === 'true';
+                            revealAnimateSpeed = computedStyle.get('--reveal-animate-speed').value as number;
+                            revealReleasedAccelerateRate = computedStyle.get('--reveal-released-accelerate-rate').value as number;
+
+                            top = Math.round(boundingRect.top);
+                            left = Math.round(boundingRect.left);
+                            width = Math.round(boundingRect.width);
+                            height = Math.round(boundingRect.height);
+
+                            let trueFillRadius = [0, 0];
+
+                            switch (fillMode) {
+                                case 'none':
+                                    break;
+                                case 'relative':
+                                    trueFillRadius = [width, height].sort((a, b) => a - b).map(x => x * fillRadius);
+                                    break;
+                                case 'absolute':
+                                    trueFillRadius = [fillRadius, fillRadius];
+                                    break;
+                                default:
+                                    throw new SyntaxError('The value of `--reveal-border-style` must be `relative`, `absolute` or `none`!');
+                            }
+    
+                            const cacheCanvasSize = trueFillRadius[1] * 2;
+
+                            canvasConfig.cachedStyle = {
+                                top, left, width, height,
+                                trueFillRadius, cacheCanvasSize,
+                                color, borderStyle, borderWidth,
+                                fillMode, fillRadius, diffuse,
+                                revealAnimateSpeed, revealReleasedAccelerateRate
+                            };
+
+                            canvasConfig.cachedFrameId = canvasConfig.currentFrameId;
                         }
-                        const cacheCanvasSize = trueFillRadius[1] * 2;
-                        return { top, left, width, height, trueFillRadius, cacheCanvasSize };
+
+                        return canvasConfig.cachedStyle;
                     },
 
                     cacheRevealBitmaps: () => {
@@ -135,6 +201,9 @@ class RevealStateManager {
                             trueFillRadius,
                             cacheCanvasSize
                         } = canvasConfig.getCanvasPaintingStyle();
+
+                        const color = canvasConfig.cachedStyle.color;
+
                         canvasConfig.width = width;
                         canvasConfig.height = height;
                         canvasConfig.canvas.width = width;
@@ -163,8 +232,8 @@ class RevealStateManager {
                                 trueFillRadius[i]
                             );
 
-                            grd.addColorStop(0, 'rgba(' + canvasConfig.style.color + fillAlpha);
-                            grd.addColorStop(1, 'rgba(' + canvasConfig.style.color + ', 0.0)');
+                            grd.addColorStop(0, 'rgba(' + color + fillAlpha);
+                            grd.addColorStop(1, 'rgba(' + color + ', 0.0)');
 
                             revealCtx.fillStyle = grd;
                             revealCtx.fillRect(0, 0, cacheCanvasSize, cacheCanvasSize);
@@ -190,6 +259,8 @@ class RevealStateManager {
                     getAnimateGrd: (frame: number, grd: CanvasGradient) => {
                         if (!canvasConfig.ctx) return null;
 
+                        const color = canvasConfig.cachedStyle.color;
+
                         const _innerAlpha = 0.2 - frame;
                         const _outerAlpha = 0.1 - frame * 0.07;
                         const _outerBorder = 0.1 + frame * 0.8;
@@ -198,9 +269,9 @@ class RevealStateManager {
                         const outerAlpha = _outerAlpha < 0 ? 0 : _outerAlpha;
                         const outerBorder = _outerBorder > 1 ? 1 : _outerBorder;
 
-                        grd.addColorStop(0, `rgba(0,0,0,${innerAlpha})`);
-                        grd.addColorStop(outerBorder * 0.55, `rgba(${canvasConfig.style.color} ,${outerAlpha})`);
-                        grd.addColorStop(outerBorder, `rgba(${canvasConfig.style.color}, 0)`);
+                        grd.addColorStop(0, `rgba(${color},${innerAlpha})`);
+                        grd.addColorStop(outerBorder * 0.55, `rgba(${color},${outerAlpha})`);
+                        grd.addColorStop(outerBorder, `rgba(${color}, 0)`);
 
                         return grd;
                     },
@@ -249,19 +320,21 @@ class RevealStateManager {
                 storage.animationQueue.forEach(config => {
                     if (!frame) return;
 
+                    config.currentFrameId = frame;
+
                     if (config.mouseDownAnimateStartFrame === null) config.mouseDownAnimateStartFrame = frame;
 
                     const relativeFrame = frame - config.mouseDownAnimateStartFrame;
                     config.mouseDownAnimateCurrentFrame = relativeFrame;
 
-                    const speed = config.style.revealAnimateSpeed;
-                    const accelerateRate = config.style.revealReleasedAccelerateRate;
+                    const speed = config.cachedStyle.revealAnimateSpeed;
+                    const accelerateRate = config.cachedStyle.revealReleasedAccelerateRate;
 
                     config.mouseDownAnimateLogicFrame =
                         !config.mouseReleased || !config.mouseDownAnimateReleasedFrame
                             ? relativeFrame / speed
                             : relativeFrame / speed +
-                              ((relativeFrame - config.mouseDownAnimateReleasedFrame) / speed) * accelerateRate;
+                            ((relativeFrame - config.mouseDownAnimateReleasedFrame) / speed) * accelerateRate;
 
                     if (config.mouseDownAnimateLogicFrame > 1) storage.cleanUpAnimation(config);
                 });
@@ -373,14 +446,16 @@ const paintCanvas = (config: CanvasConfig, storage: RevealBoundaryStore, force?:
         config.cacheRevealBitmaps();
     }
 
-    const { borderStyle, borderWidth, fillMode } = config.style;
+    const borderStyle = config.cachedStyle.borderStyle;
+    const borderWidth = config.cachedStyle.borderWidth;
+    const fillMode = config.cachedStyle.fillMode;
 
     const relativeX = storage.clientX - left;
     const relativeY = storage.clientY - top;
 
     const mouseInCanvas = relativeX > 0 && relativeX < width && (relativeY > 0 && relativeY < height);
 
-    if (!mouseInCanvas && !config.style.diffuse && !animationPlaying) return;
+    if (!mouseInCanvas && !config.cachedStyle.diffuse && !animationPlaying) return;
 
     let fillX = 0,
         fillY = 0,
@@ -406,6 +481,8 @@ const paintCanvas = (config: CanvasConfig, storage: RevealBoundaryStore, force?:
             fillW = width;
             fillH = height;
             break;
+        default:
+            throw new SyntaxError('The value of `--reveal-border-style` must be `full`, `half` or `none`!');
     }
 
     const putX = relativeX - cacheCanvasSize / 2;

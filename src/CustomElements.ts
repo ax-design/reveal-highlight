@@ -1,3 +1,5 @@
+import Color from 'color';
+
 import RevealStateManager, { RevealBoundaryStore } from './RevealStateManager.js';
 
 export class AxRevealProvider extends HTMLElement {
@@ -78,19 +80,8 @@ export class AxReveal extends HTMLElement {
         this.boundary = this.closest(AxRevealBoundary.ElementName) as AxRevealBoundary;
         if (!this.boundary)
             throw new SyntaxError('You must use ' + AxRevealBoundary.ElementName + ' as the boundary of acrylic!');
-        this.boundary.waitForStorage(storage =>
-            storage.addReveal(this.canvas, {
-                color: '0, 0, 0',
-                borderStyle: 'full',
-                borderWidth: 1,
-                fillMode: 'relative',
-                fillRadius: 1.5,
-                diffuse: true,
-                borderWhileNotHover: true,
-                revealAnimateSpeed: 2000,
-                revealReleasedAccelerateRate: 6
-            })
-        );
+
+        this.boundary.waitForStorage(storage => setTimeout(() => storage.addReveal(this.canvas), 0));
     }
     constructor() {
         super();
