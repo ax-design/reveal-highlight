@@ -12,7 +12,9 @@ before_deploy:
 deploy:
   - provider: releases
     api_key: "$GITHUB_KEY"
-    file: "./*.tar.gz"
+    file: 
+      - "./umd.tar.gz"
+      - "./es.tar.gz"
     skip_cleanup: true
     on:
       tags: true
