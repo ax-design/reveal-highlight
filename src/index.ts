@@ -1,10 +1,9 @@
 import { AxRevealProvider, AxRevealBoundary, AxReveal } from './CustomElements.js';
 export function register() {
-    customElements.define(AxRevealProvider.ElementName, AxRevealProvider);
-    customElements.define(AxRevealBoundary.ElementName, AxRevealBoundary);
-    customElements.define(AxReveal.ElementName, AxReveal);
-
     if (window.CSS && CSS.registerProperty) {
+        customElements.define(AxRevealProvider.ElementName, AxRevealProvider);
+        customElements.define(AxRevealBoundary.ElementName, AxRevealBoundary);
+        customElements.define(AxReveal.ElementName, AxReveal);
         CSS.registerProperty({
             name: '--reveal-color',
             syntax: '<color>',
@@ -53,6 +52,8 @@ export function register() {
             initialValue: '6',
             inherits: true
         });
+    } else {
+        console.warn('Your browser do NOT support `CSS.registerProperty` method, register failed!');
     }
 
 }
