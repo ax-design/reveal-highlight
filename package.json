@@ -23,7 +23,9 @@
         "build": "npm-run-all clean --parallel build-tsc build-rollup",
         "build-tsc": "tsc",
         "build-rollup": "rollup -c",
+        "build-demo": "rollup -c ./docs/demo/rollup.config.js",
         "clean": "rimraf ./es ./build",
         "prepublishOnly": "npm run build"
-    }
+    },
+    "dependencies": {}
 }
