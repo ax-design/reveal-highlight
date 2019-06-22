@@ -8,7 +8,7 @@
 
 <p align="center">
   <a href="https://www.npmjs.com/package/@ax-design/reveal-highlight"><img src="https://img.shields.io/npm/v/@ax-design/reveal-highlight.svg" alt="npm version"></a>
-  <a href="https://travis-ci.org/ax-design/reveal-highlight"><img src="https://travis-ci.org/ax-design/reveal-highlight.svg?branch=master" alt="CI Status"></a>
+  <a href="https://travis-ci.com/ax-design/reveal-highlight"><img src="https://travis-ci.com/ax-design/reveal-highlight.svg?branch=master" alt="CI Status"></a>
   <img src="https://img.shields.io/badge/license-MIT-green.svg" alt="MIT Licence" />
 
 </p>
