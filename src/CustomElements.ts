@@ -89,21 +89,22 @@ export class AxReveal extends HTMLElement {
     constructor() {
         super();
         this.root.innerHTML = `
-    <div>
-      <slot></slot>
-      <canvas></canvas>
-      </div>
-    <style>
-      div { display: content; }
-      canvas { top: 0; left: 0; pointer-events: none; width: 100%; height: 100%; position: absolute; }
-      :host { display: inline-block; position: relative; }
-      :host([block]) { display: block; }
-      :host([inline-block]) { display: inline-block; }
-      :host([flex]) { display: flex; }
-      :host([inline-flex]) { display: inline-flex; }
-      :host([grid]) { display: grid; }
-      :host([inline-grid]) { display: inline-grid; }
-      </style>`;
+<div>
+    <slot></slot>
+    <canvas></canvas>
+    </div>
+<style>
+    div { display: content; }
+    canvas { top: 0; left: 0; pointer-events: none; width: 100%; height: 100%; position: absolute; }
+    :host { display: inline-block; position: relative; }
+    :host([block]) { display: block; }
+    :host([inline-block]) { display: inline-block; }
+    :host([flex]) { display: flex; }
+    :host([inline-flex]) { display: inline-flex; }
+    :host([grid]) { display: grid; }
+    :host([inline-grid]) { display: inline-grid; }
+    ::slotted(button) { outline:none; }
+</style>`;
         this.canvas = this.root.querySelector('canvas')!;
     }
 }
