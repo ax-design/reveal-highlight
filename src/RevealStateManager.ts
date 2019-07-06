@@ -318,6 +318,7 @@ class RevealStateManager {
 
                 storage.animationQueue.forEach(config => {
                     if (!frame) return;
+                    if (config.currentFrameId === frame) return;
 
                     config.currentFrameId = frame;
 
@@ -396,7 +397,7 @@ class RevealStateManager {
 
                 storage.animationQueue.delete(config);
 
-                storage.paintAll(0, true);
+                paintCanvas(config, storage, true);
             },
 
             animationQueue: new Set(),
