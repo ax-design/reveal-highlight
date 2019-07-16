@@ -11,6 +11,12 @@ export function register() {
             inherits: true
         });
         CSS.registerProperty({
+            name: '--reveal-opacity',
+            syntax: '<number>',
+            initialValue: '1',
+            inherits: true
+        });
+        CSS.registerProperty({
             name: '--reveal-border-style',
             syntax: '<custom-ident>',
             initialValue: 'full',
