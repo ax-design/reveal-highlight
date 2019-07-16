@@ -95,7 +95,7 @@ export class AxReveal extends HTMLElement {
     </div>
 <style>
     div { display: content; }
-    canvas { top: 0; left: 0; pointer-events: none; width: 100%; height: 100%; position: absolute; }
+    canvas { top: 0; left: 0; pointer-events: none; width: 100%; height: 100%; position: absolute; opacity: var(--reveal-opacity); }
     :host { display: inline-block; position: relative; }
     :host([block]) { display: block; }
     :host([inline-block]) { display: inline-block; }
