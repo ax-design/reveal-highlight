@@ -44,7 +44,7 @@ interface HTMLElement {
 }
 
 interface StylePropertyMap {
+  readonly size: number;
   get(stylePropertyName: string): CSSUnitValue | CSSKeywordValue;
   set(stylePropertyName: string, value: CSSUnitValue | string): void,
 }
-
