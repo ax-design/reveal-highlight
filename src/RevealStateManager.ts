@@ -143,6 +143,8 @@ class RevealStateManager {
                             const boundingRect = $el.getBoundingClientRect();
                             const computedStyle = $el.computedStyleMap();
 
+                            if (computedStyle.size === 0) return canvasConfig.cachedStyle;
+
                             const colorStringMatch = computedStyle.get('--reveal-color').toString().match(/\((\d+,\s*\d+,\s*\d+)[\s\S]*?\)/);
 
                             color = colorStringMatch && colorStringMatch.length > 1 ? colorStringMatch[1] : '0, 0, 0';
