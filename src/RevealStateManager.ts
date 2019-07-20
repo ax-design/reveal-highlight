@@ -221,7 +221,7 @@ class RevealStateManager {
                             revealCtx = revealCanvas.getContext('2d');
                             if (!revealCtx) return;
 
-                            fillAlpha = opacity * (i === 0 ? 0.6 : 0.3);
+                            fillAlpha = i === 0 ? opacity : (opacity * 0.5);
 
                             grd = revealCtx.createRadialGradient(
                                 cacheCanvasSize / 2,
