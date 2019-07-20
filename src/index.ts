@@ -13,7 +13,7 @@ export function register() {
         CSS.registerProperty({
             name: '--reveal-opacity',
             syntax: '<number>',
-            initialValue: '1',
+            initialValue: '0.12',
             inherits: true
         });
         CSS.registerProperty({
