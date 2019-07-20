@@ -15,6 +15,7 @@ interface CachedStyle {
     width: number;
     height: number;
     color: string;
+    opacity: number;
     trueFillRadius: number[];
     cacheCanvasSize: number;
     borderStyle: string;
@@ -123,6 +124,7 @@ class RevealStateManager {
                         trueFillRadius: [0, 0],
                         cacheCanvasSize: -1,
                         color: '',
+                        opacity: 1,
                         borderStyle: '',
                         borderWidth: 1,
                         fillMode: '',
@@ -136,7 +138,7 @@ class RevealStateManager {
 
                     getCanvasPaintingStyle: () => {
                         let top, left, width, height
-                            , color, borderStyle, borderWidth
+                            , color, opacity, borderStyle, borderWidth
                             , fillMode, fillRadius = 0, diffuse
                             , revealAnimateSpeed, revealReleasedAccelerateRate;
                         if (canvasConfig.currentFrameId !== canvasConfig.cachedFrameId) {
@@ -148,6 +150,7 @@ class RevealStateManager {
                             const colorStringMatch = computedStyle.get('--reveal-color').toString().match(/\((\d+,\s*\d+,\s*\d+)[\s\S]*?\)/);
 
                             color = colorStringMatch && colorStringMatch.length > 1 ? colorStringMatch[1] : '0, 0, 0';
+                            opacity = computedStyle.get('--reveal-opacity').value as number;
                             borderStyle = computedStyle.get('--reveal-border-style').value as string;
                             borderWidth = computedStyle.get('--reveal-border-width').value as number;
                             fillMode = computedStyle.get('--reveal-fill-mode').value as string;
@@ -181,7 +184,7 @@ class RevealStateManager {
                             canvasConfig.cachedStyle = {
                                 top, left, width, height,
                                 trueFillRadius, cacheCanvasSize,
-                                color, borderStyle, borderWidth,
+                                color, opacity, borderStyle, borderWidth,
                                 fillMode, fillRadius, diffuse,
                                 revealAnimateSpeed, revealReleasedAccelerateRate
                             };
@@ -201,7 +204,7 @@ class RevealStateManager {
                             cacheCanvasSize
                         } = canvasConfig.getCanvasPaintingStyle();
 
-                        const color = canvasConfig.cachedStyle.color;
+                        const { color, opacity }= canvasConfig.cachedStyle;
 
                         canvasConfig.width = width;
                         canvasConfig.height = height;
@@ -220,7 +223,7 @@ class RevealStateManager {
                             revealCtx = revealCanvas.getContext('2d');
                             if (!revealCtx) return;
 
-                            fillAlpha = i === 0 ? ', 0.6)' : ', 0.3)';
+                            fillAlpha = i === 0 ? opacity : (opacity * 0.5);
 
                             grd = revealCtx.createRadialGradient(
                                 cacheCanvasSize / 2,
@@ -231,7 +234,7 @@ class RevealStateManager {
                                 trueFillRadius[i]
                             );
 
-                            grd.addColorStop(0, 'rgba(' + color + fillAlpha);
+                            grd.addColorStop(0, 'rgba(' + color + ', ' + fillAlpha + ')');
                             grd.addColorStop(1, 'rgba(' + color + ', 0.0)');
 
                             revealCtx.fillStyle = grd;
@@ -258,10 +261,10 @@ class RevealStateManager {
                     getAnimateGrd: (frame: number, grd: CanvasGradient) => {
                         if (!canvasConfig.ctx) return null;
 
-                        const color = canvasConfig.cachedStyle.color;
+                        const { color, opacity } = canvasConfig.cachedStyle;
 
-                        const _innerAlpha = 0.2 - frame;
-                        const _outerAlpha = 0.1 - frame * 0.07;
+                        const _innerAlpha = opacity * (0.2 - frame);
+                        const _outerAlpha = opacity * (0.1 - frame * 0.07);
                         const _outerBorder = 0.1 + frame * 0.8;
 
                         const innerAlpha = _innerAlpha < 0 ? 0 : _innerAlpha;
