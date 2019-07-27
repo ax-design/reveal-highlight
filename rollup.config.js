@@ -6,7 +6,7 @@ const config = {
     output: {
         file: './build/main.js',
         format: 'umd',
-        name: 'AxDesignRevealHighlight'
+        name: 'AxRevealHighlight'
     },
     plugins: [babelminify(), typescript()]
 };
