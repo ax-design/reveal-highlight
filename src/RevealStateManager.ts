@@ -294,6 +294,8 @@ class RevealStateManager {
 
             removeReveal: ($el: HTMLCanvasElement) => {
                 storage.canvasList.find((el, idx) => {
+                    if (!el) return false;
+                    
                     const answer = $el === el.canvas;
 
                     storage.canvasList.splice(idx, 1);
