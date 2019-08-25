@@ -178,7 +178,7 @@ class RevealStateManager {
                             case 'none':
                                 break;
                             case 'relative':
-                                trueFillRadius = [width, height].sort().map(x => x * fillRadius);
+                                trueFillRadius = [width, height].sort((a, b) => a - b).map(x => x * fillRadius);
                                 break;
                             case 'absolute':
                                 trueFillRadius = [fillRadius, fillRadius];
@@ -209,7 +209,7 @@ class RevealStateManager {
                             cacheCanvasSize
                         } = canvasConfig.getCanvasPaintingStyle();
 
-                        const { color, opacity }= canvasConfig.cachedStyle;
+                        const { color, opacity } = canvasConfig.cachedStyle;
 
                         canvasConfig.width = width;
                         canvasConfig.height = height;
