@@ -136,6 +136,8 @@ class RevealStateManager {
                         revealReleasedAccelerateRate: 0
                     },
                     currentFrameId: -1,
+                    cachedFrameId: -2,
+
                     getCanvasPaintingStyle: () => {
                         if (canvasConfig.currentFrameId === canvasConfig.cachedFrameId) {
                             return canvasConfig.cachedStyle;
@@ -197,8 +199,6 @@ class RevealStateManager {
 
                         return canvasConfig.cachedStyle;
                     },
-
-                    cachedFrameId: -2,
 
                     cacheRevealBitmaps: () => {
                         if (!canvasConfig.ctx) return;
