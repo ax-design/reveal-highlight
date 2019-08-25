@@ -9,6 +9,8 @@
 //     revealReleasedAccelerateRate: number;
 // }
 
+import { createStorage } from './ComputedStyleStorage.js';
+
 interface CachedStyle {
     top: number;
     left: number;
@@ -134,66 +136,69 @@ class RevealStateManager {
                         revealReleasedAccelerateRate: 0
                     },
                     currentFrameId: -1,
-                    cachedFrameId: -2,
-
                     getCanvasPaintingStyle: () => {
-                        let top, left, width, height
-                            , color, opacity, borderStyle, borderWidth
-                            , fillMode, fillRadius = 0, diffuse
-                            , revealAnimateSpeed, revealReleasedAccelerateRate;
-                        if (canvasConfig.currentFrameId !== canvasConfig.cachedFrameId) {
-                            const boundingRect = $el.getBoundingClientRect();
-                            const computedStyle = $el.computedStyleMap();
-
-                            if (computedStyle.size === 0) return canvasConfig.cachedStyle;
-
-                            const colorStringMatch = computedStyle.get('--reveal-color').toString().match(/\((\d+,\s*\d+,\s*\d+)[\s\S]*?\)/);
-
-                            color = colorStringMatch && colorStringMatch.length > 1 ? colorStringMatch[1] : '0, 0, 0';
-                            opacity = computedStyle.get('--reveal-opacity').value as number;
-                            borderStyle = computedStyle.get('--reveal-border-style').value as string;
-                            borderWidth = computedStyle.get('--reveal-border-width').value as number;
-                            fillMode = computedStyle.get('--reveal-fill-mode').value as string;
-                            fillRadius = computedStyle.get('--reveal-fill-radius').value as number;
-                            diffuse = computedStyle.get('--reveal-diffuse').value === 'true';
-                            revealAnimateSpeed = computedStyle.get('--reveal-animate-speed').value as number;
-                            revealReleasedAccelerateRate = computedStyle.get('--reveal-released-accelerate-rate').value as number;
-
-                            top = Math.round(boundingRect.top);
-                            left = Math.round(boundingRect.left);
-                            width = Math.round(boundingRect.width);
-                            height = Math.round(boundingRect.height);
-
-                            let trueFillRadius = [0, 0];
-
-                            switch (fillMode) {
-                                case 'none':
-                                    break;
-                                case 'relative':
-                                    trueFillRadius = [width, height].sort((a, b) => a - b).map(x => x * fillRadius);
-                                    break;
-                                case 'absolute':
-                                    trueFillRadius = [fillRadius, fillRadius];
-                                    break;
-                                default:
-                                    throw new SyntaxError('The value of `--reveal-border-style` must be `relative`, `absolute` or `none`!');
-                            }
-
-                            const cacheCanvasSize = trueFillRadius[1] * 2;
-
-                            canvasConfig.cachedStyle = {
-                                top, left, width, height,
-                                trueFillRadius, cacheCanvasSize,
-                                color, opacity, borderStyle, borderWidth,
-                                fillMode, fillRadius, diffuse,
-                                revealAnimateSpeed, revealReleasedAccelerateRate
-                            };
-
-                            canvasConfig.cachedFrameId = canvasConfig.currentFrameId;
+                        if (canvasConfig.currentFrameId === canvasConfig.cachedFrameId) {
+                            return canvasConfig.cachedStyle;
                         }
+
+                        const compat = !!document.documentElement.dataset.revealCompat;
+                        const computedStyle = createStorage($el, compat);
+
+                        if (computedStyle.size() === 0) {
+                            return canvasConfig.cachedStyle;
+                        }
+
+                        const boundingRect = $el.getBoundingClientRect();
+
+                        const colorStringMatch = computedStyle.get('--reveal-color').match(/\((\d+,\s*\d+,\s*\d+)[\s\S]*?\)/);
+
+                        const cachedStyle = {
+                            top: Math.round(boundingRect.top),
+                            left: Math.round(boundingRect.left),
+                            width: Math.round(boundingRect.width),
+                            height: Math.round(boundingRect.height),
+                            color: colorStringMatch && colorStringMatch.length > 1 ? colorStringMatch[1] : '0, 0, 0',
+                            opacity: computedStyle.getNumber('--reveal-opacity'),
+                            borderStyle: computedStyle.get('--reveal-border-style'),
+                            borderWidth: computedStyle.getNumber('--reveal-border-width'),
+                            fillMode: computedStyle.get('--reveal-fill-mode'),
+                            fillRadius: computedStyle.getNumber('--reveal-fill-radius'),
+                            diffuse: computedStyle.get('--reveal-diffuse') === 'true',
+                            revealAnimateSpeed: computedStyle.getNumber('--reveal-animate-speed'),
+                            revealReleasedAccelerateRate: computedStyle.getNumber('--reveal-released-accelerate-rate'),
+                        };
+
+                        const { width, height, fillMode, fillRadius } = cachedStyle;
+
+                        let trueFillRadius = [0, 0];
+
+                        switch (fillMode) {
+                            case 'none':
+                                break;
+                            case 'relative':
+                                trueFillRadius = [width, height].sort().map(x => x * fillRadius);
+                                break;
+                            case 'absolute':
+                                trueFillRadius = [fillRadius, fillRadius];
+                                break;
+                            default:
+                                throw new SyntaxError('The value of `--reveal-border-style` must be `relative`, `absolute` or `none`!');
+                        }
+
+                        const cacheCanvasSize = trueFillRadius[1] * 2;
+
+                        canvasConfig.cachedStyle = {
+                            ...cachedStyle,
+                            trueFillRadius,
+                            cacheCanvasSize,
+                        };
+
+                        canvasConfig.cachedFrameId = canvasConfig.currentFrameId;
 
                         return canvasConfig.cachedStyle;
                     },
+
+                    cachedFrameId: -2,
 
                     cacheRevealBitmaps: () => {
                         if (!canvasConfig.ctx) return;
@@ -293,11 +298,13 @@ class RevealStateManager {
             },
 
             removeReveal: ($el: HTMLCanvasElement) => {
-                storage.canvasList.find((el, idx) => {
-                    if (!el || $el !== el.canvas) return false;
+                storage.canvasList.find((config, idx) => {
+                    if (config && $el === config.canvas) {
+                        storage.canvasList.splice(idx, 1);
+                        return true;
+                    }
 
-                    storage.canvasList.splice(idx, 1);
-                    return true;
+                    return false;
                 });
             },
 

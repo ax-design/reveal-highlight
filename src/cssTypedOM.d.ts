@@ -18,16 +18,17 @@ interface CSSPropertyRule {
   inherits: boolean
 }
 
-interface CSSUnitValue {
+interface CSSStyleValue {
+  toString(): string;
+  value: unknown;
+}
+
+interface CSSUnitValue extends CSSStyleValue {
   unit: string;
   value: number
 }
 
-interface CSSBooleanValue {
-  value: boolean
-}
-
-interface CSSColorValue {
+interface CSSColorValue extends CSSStyleValue {
   red: number;
   green: number;
   blue: number;
@@ -35,7 +36,7 @@ interface CSSColorValue {
   value: string
 }
 
-interface CSSKeywordValue {
+interface CSSKeywordValue extends CSSStyleValue {
   value: string
 }
 
@@ -45,6 +46,6 @@ interface HTMLElement {
 
 interface StylePropertyMap {
   readonly size: number;
-  get(stylePropertyName: string): CSSUnitValue | CSSKeywordValue;
-  set(stylePropertyName: string, value: CSSUnitValue | string): void,
+  get(stylePropertyName: string): CSSStyleValue;
+  set(stylePropertyName: string, value: CSSStyleValue | string): void,
 }

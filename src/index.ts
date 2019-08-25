@@ -1,13 +1,15 @@
 import { AxRevealProvider, AxRevealBoundary, AxReveal } from './CustomElements.js';
-export function register() {
+
+export function register(compat: boolean = false) {
+    customElements.define(AxRevealProvider.ElementName, AxRevealProvider);
+    customElements.define(AxRevealBoundary.ElementName, AxRevealBoundary);
+    customElements.define(AxReveal.ElementName, AxReveal);
+
     if (window.CSS && CSS.registerProperty) {
-        customElements.define(AxRevealProvider.ElementName, AxRevealProvider);
-        customElements.define(AxRevealBoundary.ElementName, AxRevealBoundary);
-        customElements.define(AxReveal.ElementName, AxReveal);
         CSS.registerProperty({
             name: '--reveal-color',
             syntax: '<color>',
-            initialValue: 'rgb(0,0,0)',
+            initialValue: 'rgb(0, 0, 0)',
             inherits: true
         });
         CSS.registerProperty({
@@ -58,8 +60,23 @@ export function register() {
             initialValue: '6',
             inherits: true
         });
+    } else if (compat) {
+        const root = document.documentElement;
+
+        root.dataset.revealCompat = 'true';
+
+        root.style.setProperty('--reveal-color', 'rgb(0, 0, 0)');
+        root.style.setProperty('--reveal-opacity', '0.26');
+        root.style.setProperty('--reveal-border-style', 'full');
+        root.style.setProperty('--reveal-border-width', '1px');
+        root.style.setProperty('--reveal-fill-mode', 'relative');
+        root.style.setProperty('--reveal-fill-radius', '1.5');
+        root.style.setProperty('--reveal-diffuse', 'true');
+        root.style.setProperty('--reveal-animate-speed', '2000');
+        root.style.setProperty('--reveal-released-accelerate-rate', '6');
     } else {
-        console.warn('Your browser do NOT support `CSS.registerProperty` method, register failed!');
+        console.warn('Your browser do NOT support `CSS.registerProperty` method, registration failed!');
+        console.warn('If you are the developer, try using `register(true)` to support old browsers.');
     }
 
 }
