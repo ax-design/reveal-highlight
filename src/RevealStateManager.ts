@@ -152,7 +152,8 @@ class RevealStateManager {
 
                         const boundingRect = $el.getBoundingClientRect();
 
-                        const colorStringMatch = computedStyle.get('--reveal-color').match(/\((\d+,\s*\d+,\s*\d+)[\s\S]*?\)/);
+                        const colorString = computedStyle.getColor('--reveal-color');
+                        const colorStringMatch = colorString.match(/\((\d+,\s*\d+,\s*\d+)[\s\S]*?\)/);
 
                         const cachedStyle = {
                             top: Math.round(boundingRect.top),
