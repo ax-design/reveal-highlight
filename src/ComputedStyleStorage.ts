@@ -6,8 +6,8 @@ interface ComputedStyleStorage {
 }
 
 class ComputedStyleCompat implements ComputedStyleStorage {
-    static colorParser: HTMLDivElement;
-    static colorParserStyle: CSSStyleDeclaration;
+    protected static colorParser: HTMLDivElement;
+    protected static colorParserStyle: CSSStyleDeclaration;
 
     el: HTMLElement;
     style: CSSStyleDeclaration;
