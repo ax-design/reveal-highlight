@@ -1,10 +1,12 @@
 import { AxRevealProvider, AxRevealBoundary, AxReveal } from './CustomElements.js';
 
-export function register(compat: boolean = false) {
+function registerCustomElements() {
     customElements.define(AxRevealProvider.ElementName, AxRevealProvider);
     customElements.define(AxRevealBoundary.ElementName, AxRevealBoundary);
     customElements.define(AxReveal.ElementName, AxReveal);
+}
 
+export function register(compat: boolean = false) {
     if (window.CSS && CSS.registerProperty) {
         CSS.registerProperty({
             name: '--reveal-color',
@@ -60,6 +62,8 @@ export function register(compat: boolean = false) {
             initialValue: '6',
             inherits: true
         });
+
+        registerCustomElements();
     } else if (compat) {
         const root = document.documentElement;
 
@@ -74,6 +78,8 @@ export function register(compat: boolean = false) {
         root.style.setProperty('--reveal-diffuse', 'true');
         root.style.setProperty('--reveal-animate-speed', '2000');
         root.style.setProperty('--reveal-released-accelerate-rate', '6');
+
+        registerCustomElements();
     } else {
         console.warn('Your browser do NOT support `CSS.registerProperty` method, registration failed!');
         console.warn('If you are the developer, try using `register(true)` to support old browsers.');
