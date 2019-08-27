@@ -1,4 +1,5 @@
-import RevealStateManager, { RevealBoundaryStore } from './RevealStateManager.js';
+import { RevealStateManager } from './RevealStateManager.js';
+import { RevealBoundaryStore } from './RevealBoundryStore.js';
 
 export class AxRevealProvider extends HTMLElement {
     static readonly ElementName = 'ax-reveal-provider';
@@ -6,54 +7,75 @@ export class AxRevealProvider extends HTMLElement {
 }
 
 export class AxRevealBoundary extends HTMLElement {
-    static readonly storage = new RevealStateManager();
     static readonly ElementName = 'ax-reveal-bound';
-    private _storage!: RevealBoundaryStore | undefined;
+
     static readonly removeStorageEvent = 'removeStorage';
     static readonly attachStorageEvent = 'attachStorage';
     static readonly replaceStorageEvent = 'replaceStorage';
+
+    static readonly stateManager = new RevealStateManager();
+
+    private _storage!: RevealBoundaryStore | undefined;
+
     private get storage() {
         return this._storage;
     }
-    private set storage(newS) {
-        const old = this._storage;
-        if (old) this.dispatchEvent(new CustomEvent(AxRevealBoundary.removeStorageEvent, { detail: old }));
-        if (newS) {
-            this._storage = newS;
-            this.dispatchEvent(new CustomEvent(AxRevealBoundary.attachStorageEvent, { detail: this._storage }));
-            if (old)
-                this.dispatchEvent(
-                    new CustomEvent(AxRevealBoundary.replaceStorageEvent, { detail: { old, new: newS } })
-                );
+
+    private set storage(newStorage) {
+        const oldStorage = this._storage;
+
+        if (oldStorage) {
+            this.dispatchEvent(new CustomEvent(AxRevealBoundary.removeStorageEvent, { detail: oldStorage }));
+            AxRevealBoundary.stateManager.removeBoundary(oldStorage);
+        }
+
+        if (newStorage) {
+            this._storage = newStorage;
+            this.dispatchEvent(new CustomEvent(AxRevealBoundary.attachStorageEvent, { detail: newStorage }));
+        }
+
+        if (oldStorage && newStorage) {
+            this.dispatchEvent(new CustomEvent(AxRevealBoundary.replaceStorageEvent, {
+                detail: { old: oldStorage, new: newStorage },
+            }));
         }
     }
+
     public waitForStorage(f: (storage: RevealBoundaryStore) => void) {
-        if (this.storage === undefined)
-            this.addEventListener(AxRevealBoundary.attachStorageEvent, () => f(this.storage!), {
-                once: true
-            });
-        else f(this.storage);
+        if (this.storage === undefined) {
+            this.addEventListener(AxRevealBoundary.attachStorageEvent, () => f(this.storage!), { once: true });
+        } else {
+            f(this.storage);
+        }
     }
+
     private appendStorage(force = false) {
-        if (!force) if (this.storage) return;
+        if (!force && this.storage) {
+            return;
+        }
+
         const parent = this.closest(AxRevealProvider.ElementName) as AxRevealProvider;
-        const stateManager = parent ? parent.stateManager : AxRevealBoundary.storage;
+        const stateManager = parent ? parent.stateManager : AxRevealBoundary.stateManager;
+
         this.storage = stateManager.newBoundary();
     }
+
     updatePointerPosition = (ev: MouseEvent) => {
         this.waitForStorage(storage => {
             storage.clientX = ev.clientX;
             storage.clientY = ev.clientY;
         });
-    }
+    };
+
     handlePointerEnter = () => this.waitForStorage(storage => storage.onPointerEnterBoundary());
     handlePointerLeave = () => this.waitForStorage(storage => storage.onPointerLeaveBoundary());
     handlePointerMove = (ev: MouseEvent) => this.updatePointerPosition(ev);
+    handlePointerUp = () => this.waitForStorage(storage => storage.switchAnimation());
     handlePointerDown = (ev: MouseEvent) => this.waitForStorage(storage => {
         this.updatePointerPosition(ev);
         storage.initializeAnimation();
     });
-    handlePointerUp = () => this.waitForStorage(storage => storage.switchAnimation());
+
     connectedCallback() {
         this.appendStorage(true);
         this.addEventListener('pointerenter', this.handlePointerEnter);
@@ -62,6 +84,7 @@ export class AxRevealBoundary extends HTMLElement {
         this.addEventListener('pointerdown', this.handlePointerDown);
         this.addEventListener('pointerup', this.handlePointerUp);
     }
+
     disconnectedCallback() {
         this.storage = undefined;
     }
@@ -72,13 +95,16 @@ export class AxReveal extends HTMLElement {
     private root = this.attachShadow({ mode: 'open' });
     private canvas: HTMLCanvasElement;
     private boundary!: AxRevealBoundary;
+
     adoptedCallback() {
         this.disconnectedCallback();
         this.connectedCallback();
     }
+
     disconnectedCallback() {
         this.boundary && this.boundary.waitForStorage(storage => storage.removeReveal(this.canvas));
     }
+
     connectedCallback() {
         this.boundary = this.closest(AxRevealBoundary.ElementName) as AxRevealBoundary;
         if (!this.boundary)
@@ -86,6 +112,7 @@ export class AxReveal extends HTMLElement {
 
         this.boundary.waitForStorage(storage => setTimeout(() => storage.addReveal(this.canvas), 0));
     }
+
     constructor() {
         super();
         this.root.innerHTML = `
