@@ -41,13 +41,8 @@ export class RevealBoundaryStore {
     };
 
     removeReveal = ($el: HTMLCanvasElement) => {
-        this.canvasList.find((config, idx) => {
-            if (config && $el === config.canvas) {
-                this.canvasList.splice(idx, 1);
-                return true;
-            }
-
-            return false;
+        this.canvasList = this.canvasList.filter((config) => {
+            return config && config.canvas === $el;
         });
     };
 
@@ -55,7 +50,7 @@ export class RevealBoundaryStore {
         this.mouseInBoundary = true;
 
         if (!this.animationFrame) {
-            this.animationFrame = window.requestAnimationFrame((frame) => this.paintAll(frame));
+            this.animationFrame = window.requestAnimationFrame(this.paintAll);
         }
     };
 
@@ -65,19 +60,20 @@ export class RevealBoundaryStore {
     };
 
     paintAll = (frame?: number, force?: boolean) => {
-        if (!force) {
-            if (!this.mouseInBoundary && this.animationQueue.size === 0) {
-                return;
-            }
+        if (!force && !this.mouseInBoundary && this.animationQueue.size === 0) {
+            return;
         }
 
         this.animationQueue.forEach(config => {
-            if (!frame) return;
-            if (config.currentFrameId === frame) return;
+            if (!frame || config.currentFrameId === frame) {
+                return;
+            }
 
             config.currentFrameId = frame;
 
-            if (config.mouseDownAnimateStartFrame === null) config.mouseDownAnimateStartFrame = frame;
+            if (config.mouseDownAnimateStartFrame === null) {
+                config.mouseDownAnimateStartFrame = frame;
+            }
 
             const relativeFrame = frame - config.mouseDownAnimateStartFrame;
             config.mouseDownAnimateCurrentFrame = relativeFrame;
@@ -85,18 +81,20 @@ export class RevealBoundaryStore {
             const speed = config.cachedStyle.revealAnimateSpeed;
             const accelerateRate = config.cachedStyle.revealReleasedAccelerateRate;
 
-            config.mouseDownAnimateLogicFrame =
-                !config.mouseReleased || !config.mouseDownAnimateReleasedFrame
-                    ? relativeFrame / speed
-                    : relativeFrame / speed +
-                    ((relativeFrame - config.mouseDownAnimateReleasedFrame) / speed) * accelerateRate;
+            let unitLogicFrame = relativeFrame;
+            if (config.mouseReleased && config.mouseDownAnimateReleasedFrame) {
+                unitLogicFrame += (relativeFrame - config.mouseDownAnimateReleasedFrame) * accelerateRate;
+            }
+            config.mouseDownAnimateLogicFrame = unitLogicFrame / speed;
 
-            if (config.mouseDownAnimateLogicFrame > 1) this.cleanUpAnimation(config);
+            if (config.mouseDownAnimateLogicFrame > 1) {
+                this.cleanUpAnimation(config);
+            }
         });
 
-        this.canvasList.forEach((config, index) => {
+        this.canvasList.forEach((config) => {
             config.currentFrameId = frame;
-            paintCanvas(config, this, force);
+            config.paint(force);
         });
 
         this.dirty = true;
@@ -104,9 +102,7 @@ export class RevealBoundaryStore {
         this.paintedClientY = this.clientY;
 
         if (this.mouseInBoundary || this.animationQueue.size !== 0) {
-            window.requestAnimationFrame(frame => {
-                this.paintAll(frame);
-            });
+            this.animationFrame = window.requestAnimationFrame(this.paintAll);
         } else {
             this.animationFrame = null;
         }
@@ -114,7 +110,7 @@ export class RevealBoundaryStore {
 
     resetAll = () => {
         this.canvasList.forEach(config => {
-            paintCanvas(config, this);
+            config.paint();
         });
     };
 
@@ -152,148 +148,10 @@ export class RevealBoundaryStore {
 
         this.animationQueue.delete(config);
 
-        paintCanvas(config, this, true);
+        config.paint(true);
     };
 
     getRevealAnimationConfig = () => {
         return this.canvasList.find(x => x.mouseInCanvas()) || null;
     };
 }
-
-const paintCanvas = (config: CanvasConfig, storage: RevealBoundaryStore, force?: boolean, debug?: boolean) => {
-    const animationPlaying = storage.animationQueue.has(config);
-    const samePosition = storage.clientX === storage.paintedClientX && storage.clientY === storage.paintedClientY;
-
-    if (samePosition && !animationPlaying && !force) {
-        return;
-    }
-
-    if (!config.ctx) {
-        return;
-    }
-
-    config.ctx.clearRect(0, 0, config.width, config.height);
-    storage.dirty = false;
-
-    if (!storage.mouseInBoundary && !animationPlaying) {
-        return;
-    }
-
-    if (config.cachedRevealBitmap.bitmaps.length < 2) {
-        return;
-    }
-
-    config.cacheCanvasPaintingStyle();
-    config.cacheRevealBitmaps();
-
-    const { top, left, width, height, cacheCanvasSize, trueFillRadius } = config.cachedStyle;
-
-    const borderStyle = config.cachedStyle.borderStyle;
-    const borderWidth = config.cachedStyle.borderWidth;
-    const fillMode = config.cachedStyle.fillMode;
-
-    const relativeX = storage.clientX - left;
-    const relativeY = storage.clientY - top;
-
-    const mouseInCanvas = relativeX > 0 && relativeX < width && (relativeY > 0 && relativeY < height);
-
-    if (!mouseInCanvas && !config.cachedStyle.diffuse && !animationPlaying) {
-        return;
-    }
-
-    let fillX = 0,
-        fillY = 0,
-        fillW = 0,
-        fillH = 0;
-
-    switch (borderStyle) {
-        case 'full':
-            fillX = borderWidth;
-            fillY = borderWidth;
-            fillW = width - 2 * borderWidth;
-            fillH = height - 2 * borderWidth;
-            break;
-
-        case 'half':
-            fillX = 0;
-            fillY = borderWidth;
-            fillW = width;
-            fillH = height - 2 * borderWidth;
-            break;
-
-        case 'none':
-            fillX = 0;
-            fillY = 0;
-            fillW = width;
-            fillH = height;
-            break;
-
-        default:
-            throw new SyntaxError('The value of `--reveal-border-style` must be `full`, `half` or `none`!');
-    }
-
-    const putX = relativeX - cacheCanvasSize / 2;
-    const putY = relativeY - cacheCanvasSize / 2;
-
-    if (isNaN(relativeX) || isNaN(relativeY)) {
-        return;
-    }
-
-    if (storage.mouseInBoundary) {
-        if (borderStyle !== 'none') {
-            config.ctx.putImageData(
-                config.cachedRevealBitmap.bitmaps[0],
-                putX,
-                putY,
-                -putX,
-                -putY,
-                width,
-                height,
-            );
-            config.ctx.clearRect(fillX, fillY, fillW, fillH);
-        }
-
-        if (fillMode !== 'none' && mouseInCanvas) {
-            config.ctx.putImageData(
-                config.cachedRevealBitmap.bitmaps[1],
-                putX,
-                putY,
-                fillX - putX,
-                fillY - putY,
-                fillW,
-                fillH,
-            );
-        }
-    }
-
-    if (!config.mousePressed || !config.mouseDownAnimateLogicFrame) {
-        return;
-    }
-
-    let animateGrd;
-
-    if (config.mouseReleased && config.mouseUpClientX && config.mouseUpClientY) {
-        animateGrd = config.ctx.createRadialGradient(
-            config.mouseUpClientX - left,
-            config.mouseUpClientY - top,
-            0,
-            config.mouseUpClientX - left,
-            config.mouseUpClientY - top,
-            trueFillRadius[1],
-        );
-    } else {
-        animateGrd = config.ctx.createRadialGradient(
-            relativeX,
-            relativeY,
-            0,
-            relativeX,
-            relativeY,
-            trueFillRadius[1],
-        );
-    }
-
-    config.getAnimateGrd(config.mouseDownAnimateLogicFrame, animateGrd);
-
-    config.ctx.fillStyle = animateGrd;
-    config.ctx.fillRect(fillX, fillY, fillW * 1.5, fillH * 1.5);
-};

@@ -14,14 +14,7 @@ export class RevealStateManager {
         return store;
     };
 
-    removeBoundary = (storeToRemove: RevealBoundaryStore) => {
-        this._storage.find((store, idx) => {
-            if (store === storeToRemove) {
-                this._storage.splice(idx, 1);
-                return true;
-            }
-
-            return false;
-        });
+    removeBoundary = (store: RevealBoundaryStore) => {
+        this._storage = this._storage.filter(x => x === store);
     };
 }

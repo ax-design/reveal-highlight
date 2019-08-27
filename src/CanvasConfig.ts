@@ -9,7 +9,6 @@ export interface CachedStyle {
     color: string;
     opacity: number;
     trueFillRadius: number[];
-    cacheCanvasSize: number;
     borderStyle: string;
     borderWidth: number;
     fillMode: string;
@@ -20,8 +19,7 @@ export interface CachedStyle {
 }
 
 export interface CachedRevealBitmap {
-    width: number;
-    height: number;
+    radius: number;
     color: string;
     opacity: number;
     bitmaps: ImageData[];
@@ -33,12 +31,13 @@ export class CanvasConfig {
     canvas: HTMLCanvasElement;
     ctx: CanvasRenderingContext2D | null;
 
-    width = 0;
-    height = 0;
+    paintedWidth = 0;
+    paintedHeight = 0;
+
+    revealCanvas: HTMLCanvasElement;
 
     cachedRevealBitmap: CachedRevealBitmap = {
-        width: 0,
-        height: 0,
+        radius: 0,
         color: '',
         opacity: 0,
         bitmaps: [] as ImageData[],
@@ -50,7 +49,6 @@ export class CanvasConfig {
         width: -1,
         height: -1,
         trueFillRadius: [0, 0],
-        cacheCanvasSize: -1,
         color: '',
         opacity: 1,
         borderStyle: '',
@@ -77,8 +75,11 @@ export class CanvasConfig {
 
     constructor(store: RevealBoundaryStore, $el: HTMLCanvasElement) {
         this._store = store;
+
         this.canvas = $el;
         this.ctx = $el.getContext('2d');
+
+        this.revealCanvas = document.createElement('canvas');
     }
 
     cacheCanvasPaintingStyle = () => {
@@ -131,12 +132,9 @@ export class CanvasConfig {
                 throw new SyntaxError('The value of `--reveal-border-style` must be `relative`, `absolute` or `none`!');
         }
 
-        const cacheCanvasSize = trueFillRadius[1] * 2;
-
         this.cachedStyle = {
             ...currentStyle,
             trueFillRadius,
-            cacheCanvasSize,
         };
 
         this.cachedFrameId = this.currentFrameId;
@@ -145,49 +143,44 @@ export class CanvasConfig {
     cacheRevealBitmaps = () => {
         if (!this.ctx) return;
 
-        const { width, height, color, opacity, trueFillRadius, cacheCanvasSize } = this.cachedStyle;
+        const { color, opacity, trueFillRadius } = this.cachedStyle;
+
+        const radius = trueFillRadius[1];
+        const size = radius * 2;
 
         const last = this.cachedRevealBitmap;
-        if (width === last.width && height == last.height && color == last.color && opacity == last.opacity) {
+        if (radius === last.radius && color == last.color && opacity == last.opacity) {
             return;
         }
 
-        this.width = width;
-        this.height = height;
-        this.canvas.width = width;
-        this.canvas.height = height;
         this.cachedRevealBitmap = {
-            width, height, color, opacity,
+            radius, color, opacity,
             bitmaps: [],
         };
 
+        this.revealCanvas.width = size;
+        this.revealCanvas.height = size;
+
         for (const i of [0, 1]) {
             // 0 means border, 1 means fill.
-            const revealCanvas = document.createElement('canvas');
-            revealCanvas.width = cacheCanvasSize;
-            revealCanvas.height = cacheCanvasSize;
-
-            const revealCtx = revealCanvas.getContext('2d');
+            const revealCtx = this.revealCanvas.getContext('2d');
             if (!revealCtx) return;
 
             const fillAlpha = i === 0 ? opacity : (opacity * 0.5);
 
             const grd = revealCtx.createRadialGradient(
-                cacheCanvasSize / 2,
-                cacheCanvasSize / 2,
-                0,
-                cacheCanvasSize / 2,
-                cacheCanvasSize / 2,
-                trueFillRadius[i],
+                radius, radius, 0,
+                radius, radius, trueFillRadius[i],
             );
 
             grd.addColorStop(0, 'rgba(' + color + ', ' + fillAlpha + ')');
             grd.addColorStop(1, 'rgba(' + color + ', 0.0)');
 
             revealCtx.fillStyle = grd;
-            revealCtx.fillRect(0, 0, cacheCanvasSize, cacheCanvasSize);
+            revealCtx.clearRect(0, 0, size, size);
+            revealCtx.fillRect(0, 0, size, size);
 
-            const bitmap = revealCtx.getImageData(0, 0, cacheCanvasSize, cacheCanvasSize);
+            const bitmap = revealCtx.getImageData(0, 0, size, size);
 
             this.cachedRevealBitmap.bitmaps.push(bitmap);
         }
@@ -224,5 +217,137 @@ export class CanvasConfig {
         grd.addColorStop(0, `rgba(${color},${innerAlpha})`);
         grd.addColorStop(outerBorder * 0.55, `rgba(${color},${outerAlpha})`);
         grd.addColorStop(outerBorder, `rgba(${color}, 0)`);
+    };
+
+    paint = (force?: boolean, debug?: boolean) => {
+        const store = this._store;
+
+        const animationPlaying = store.animationQueue.has(this);
+        const samePosition = store.clientX === store.paintedClientX && store.clientY === store.paintedClientY;
+
+        if (samePosition && !animationPlaying && !force) {
+            return;
+        }
+
+        if (!this.ctx) {
+            return;
+        }
+
+        this.ctx.clearRect(0, 0, this.paintedWidth, this.paintedHeight);
+
+        store.dirty = false;
+
+        if (!store.mouseInBoundary && !animationPlaying) {
+            return;
+        }
+
+        if (this.cachedRevealBitmap.bitmaps.length < 2) {
+            return;
+        }
+
+        this.cacheCanvasPaintingStyle();
+        this.cacheRevealBitmaps();
+
+        const { top, left, width, height, trueFillRadius, borderStyle, borderWidth, fillMode } = this.cachedStyle;
+
+        this.canvas.width = width;
+        this.canvas.height = height;
+
+        this.paintedWidth = width;
+        this.paintedHeight = height;
+
+        const relativeX = store.clientX - left;
+        const relativeY = store.clientY - top;
+
+        const mouseInCanvas = (relativeX > 0 && relativeX < width) && (relativeY > 0 && relativeY < height);
+
+        if (!mouseInCanvas && !this.cachedStyle.diffuse && !animationPlaying) {
+            return;
+        }
+
+        let fillX = 0,
+            fillY = 0,
+            fillW = 0,
+            fillH = 0;
+
+        switch (borderStyle) {
+            case 'full':
+                fillX = borderWidth;
+                fillY = borderWidth;
+                fillW = width - 2 * borderWidth;
+                fillH = height - 2 * borderWidth;
+                break;
+
+            case 'half':
+                fillX = 0;
+                fillY = borderWidth;
+                fillW = width;
+                fillH = height - 2 * borderWidth;
+                break;
+
+            case 'none':
+                fillX = 0;
+                fillY = 0;
+                fillW = width;
+                fillH = height;
+                break;
+
+            default:
+                throw new SyntaxError('The value of `--reveal-border-style` must be `full`, `half` or `none`!');
+        }
+
+        const fillRadius = this.cachedRevealBitmap.radius;
+        const putX = relativeX - fillRadius;
+        const putY = relativeY - fillRadius;
+
+        if (isNaN(relativeX) || isNaN(relativeY)) {
+            return;
+        }
+
+        if (store.mouseInBoundary) {
+            if (borderStyle !== 'none') {
+                this.ctx.putImageData(this.cachedRevealBitmap.bitmaps[0], putX, putY);
+                this.ctx.clearRect(fillX, fillY, fillW, fillH);
+            }
+
+            if (fillMode !== 'none' && mouseInCanvas) {
+                this.ctx.putImageData(
+                    this.cachedRevealBitmap.bitmaps[1],
+                    putX, putY,
+                    fillX - putX, fillY - putY, fillW, fillH,
+                );
+            }
+        }
+
+        if (!this.mousePressed || !this.mouseDownAnimateLogicFrame) {
+            return;
+        }
+
+        let animateGrd;
+
+        if (this.mouseReleased && this.mouseUpClientX && this.mouseUpClientY) {
+            animateGrd = this.ctx.createRadialGradient(
+                this.mouseUpClientX - left,
+                this.mouseUpClientY - top,
+                0,
+                this.mouseUpClientX - left,
+                this.mouseUpClientY - top,
+                trueFillRadius[1],
+            );
+        } else {
+            animateGrd = this.ctx.createRadialGradient(
+                relativeX,
+                relativeY,
+                0,
+                relativeX,
+                relativeY,
+                trueFillRadius[1],
+            );
+        }
+
+        this.getAnimateGrd(this.mouseDownAnimateLogicFrame, animateGrd);
+
+        this.ctx.fillStyle = animateGrd;
+        this.ctx.fillRect(fillX, fillY, fillW * 1.5, fillH * 1.5);
     };
 }
