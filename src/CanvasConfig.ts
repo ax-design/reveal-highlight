@@ -1,4 +1,4 @@
-import { createStorage } from './ComputedStyleStorage.js';
+import { ComputedStyleStorage, createStorage } from './ComputedStyleStorage.js';
 import { RevealBoundaryStore } from './RevealBoundryStore.js';
 
 export interface CachedStyle {
@@ -32,6 +32,8 @@ export class CanvasConfig {
 
     canvas: HTMLCanvasElement;
     ctx: CanvasRenderingContext2D | null;
+
+    computedStyle: ComputedStyleStorage;
 
     paintedWidth = 0;
     paintedHeight = 0;
@@ -82,6 +84,9 @@ export class CanvasConfig {
         this.ctx = $el.getContext('2d');
 
         this.revealCanvas = document.createElement('canvas');
+
+        const compat = !!document.documentElement.dataset.revealCompat;
+        this.computedStyle = createStorage(this.canvas, compat);
     }
 
     cacheCanvasPaintingStyle = () => {
@@ -89,16 +94,13 @@ export class CanvasConfig {
             return;
         }
 
-        const compat = !!document.documentElement.dataset.revealCompat;
-        const computedStyle = createStorage(this.canvas, compat);
-
-        if (computedStyle.size() === 0) {
+        if (this.computedStyle.size() === 0) {
             return;
         }
 
         const boundingRect = this.canvas.getBoundingClientRect();
 
-        const colorString = computedStyle.getColor('--reveal-color');
+        const colorString = this.computedStyle.getColor('--reveal-color');
         const colorStringMatch = colorString.match(/\((\d+,\s*\d+,\s*\d+)[\s\S]*?\)/);
 
         const currentStyle = {
@@ -107,14 +109,14 @@ export class CanvasConfig {
             width: Math.round(boundingRect.width),
             height: Math.round(boundingRect.height),
             color: colorStringMatch && colorStringMatch.length > 1 ? colorStringMatch[1] : '0, 0, 0',
-            opacity: computedStyle.getNumber('--reveal-opacity'),
-            borderStyle: computedStyle.get('--reveal-border-style'),
-            borderWidth: computedStyle.getNumber('--reveal-border-width'),
-            fillMode: computedStyle.get('--reveal-fill-mode'),
-            fillRadius: computedStyle.getNumber('--reveal-fill-radius'),
-            diffuse: computedStyle.get('--reveal-diffuse') === 'true',
-            revealAnimateSpeed: computedStyle.getNumber('--reveal-animate-speed'),
-            revealReleasedAccelerateRate: computedStyle.getNumber('--reveal-released-accelerate-rate'),
+            opacity: this.computedStyle.getNumber('--reveal-opacity'),
+            borderStyle: this.computedStyle.get('--reveal-border-style'),
+            borderWidth: this.computedStyle.getNumber('--reveal-border-width'),
+            fillMode: this.computedStyle.get('--reveal-fill-mode'),
+            fillRadius: this.computedStyle.getNumber('--reveal-fill-radius'),
+            diffuse: this.computedStyle.get('--reveal-diffuse') === 'true',
+            revealAnimateSpeed: this.computedStyle.getNumber('--reveal-animate-speed'),
+            revealReleasedAccelerateRate: this.computedStyle.getNumber('--reveal-released-accelerate-rate'),
         };
 
         const { width, height, fillMode, fillRadius } = currentStyle;

@@ -1,4 +1,4 @@
-interface ComputedStyleStorage {
+export interface ComputedStyleStorage {
     size(): number;
     get(propertyName: string): string;
     getColor(propertyName: string): string;
