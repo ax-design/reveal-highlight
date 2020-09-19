@@ -178,7 +178,6 @@ export class CanvasConfig {
                 radius, radius, 0,
                 radius, radius, trueFillRadius[i],
             );
-            console.log(radius, trueFillRadius[i]);
 
             grd.addColorStop(0, `rgba(${color}, ${fillAlpha})`);
             grd.addColorStop(1, `rgba(${color}, 0.0)`);
