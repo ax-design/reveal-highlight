@@ -141,7 +141,8 @@ export class CanvasConfig {
     };
 
     cacheRevealBitmaps = () => {
-        if (!this.ctx) return;
+        if (!this.ctx)
+            return;
 
         const { color, opacity, trueFillRadius } = this.cachedStyle;
 
@@ -164,7 +165,8 @@ export class CanvasConfig {
         for (const i of [0, 1]) {
             // 0 means border, 1 means fill.
             const revealCtx = this.revealCanvas.getContext('2d');
-            if (!revealCtx) return;
+            if (!revealCtx)
+                return;
 
             const fillAlpha = i === 0 ? opacity : (opacity * 0.5);
 
@@ -173,8 +175,8 @@ export class CanvasConfig {
                 radius, radius, trueFillRadius[i],
             );
 
-            grd.addColorStop(0, 'rgba(' + color + ', ' + fillAlpha + ')');
-            grd.addColorStop(1, 'rgba(' + color + ', 0.0)');
+            grd.addColorStop(0, `rgba(${color}, ${fillAlpha})`);
+            grd.addColorStop(1, `rgba(${color}, 0.0)`);
 
             revealCtx.fillStyle = grd;
             revealCtx.clearRect(0, 0, size, size);
@@ -193,16 +195,15 @@ export class CanvasConfig {
         const relativeX = this._store.clientX - left;
         const relativeY = this._store.clientY - top;
 
-        if (relativeX < 0 || relativeX > width) return false;
-        if (relativeY < 0 || relativeY > height) return false;
-
-        return true;
+        return relativeX > 0
+            && relativeY > 0
+            && relativeX < width
+            && relativeY < height;
     };
 
     getAnimateGrd = (frame: number, grd: CanvasGradient) => {
-        if (!this.ctx) {
+        if (!this.ctx)
             return;
-        }
 
         const { color, opacity } = this.cachedStyle;
 
@@ -229,9 +230,8 @@ export class CanvasConfig {
             return;
         }
 
-        if (!this.ctx) {
+        if (!this.ctx)
             return;
-        }
 
         this.ctx.clearRect(0, 0, this.paintedWidth, this.paintedHeight);
 
@@ -256,10 +256,7 @@ export class CanvasConfig {
         this.paintedWidth = width;
         this.paintedHeight = height;
 
-        const relativeX = store.clientX - left;
-        const relativeY = store.clientY - top;
-
-        const mouseInCanvas = (relativeX > 0 && relativeX < width) && (relativeY > 0 && relativeY < height);
+        const mouseInCanvas = this.mouseInCanvas();
 
         if (!mouseInCanvas && !this.cachedStyle.diffuse && !animationPlaying) {
             return;
@@ -296,6 +293,8 @@ export class CanvasConfig {
                 throw new SyntaxError('The value of `--reveal-border-style` must be `full`, `half` or `none`!');
         }
 
+        const relativeX = store.clientX - left;
+        const relativeY = store.clientY - top;
         const fillRadius = this.cachedRevealBitmap.radius;
         const putX = relativeX - fillRadius;
         const putY = relativeY - fillRadius;
