@@ -28,6 +28,8 @@ export interface CachedRevealBitmap {
 export class CanvasConfig {
     protected _store: RevealBoundaryStore;
 
+    pxRatio = window.devicePixelRatio || 1;
+
     canvas: HTMLCanvasElement;
     ctx: CanvasRenderingContext2D | null;
 
@@ -159,8 +161,8 @@ export class CanvasConfig {
             bitmaps: [],
         };
 
-        this.revealCanvas.width = size;
-        this.revealCanvas.height = size;
+        this.revealCanvas.width = size * this.pxRatio;
+        this.revealCanvas.height = size * this.pxRatio;
 
         for (const i of [0, 1]) {
             // 0 means border, 1 means fill.
@@ -168,12 +170,15 @@ export class CanvasConfig {
             if (!revealCtx)
                 return;
 
+            revealCtx.setTransform(this.pxRatio, 0, 0, this.pxRatio, 0, 0)
+
             const fillAlpha = i === 0 ? opacity : (opacity * 0.5);
 
             const grd = revealCtx.createRadialGradient(
                 radius, radius, 0,
                 radius, radius, trueFillRadius[i],
             );
+            console.log(radius, trueFillRadius[i]);
 
             grd.addColorStop(0, `rgba(${color}, ${fillAlpha})`);
             grd.addColorStop(1, `rgba(${color}, 0.0)`);
@@ -182,7 +187,7 @@ export class CanvasConfig {
             revealCtx.clearRect(0, 0, size, size);
             revealCtx.fillRect(0, 0, size, size);
 
-            const bitmap = revealCtx.getImageData(0, 0, size, size);
+            const bitmap = revealCtx.getImageData(0, 0, size * this.pxRatio, size * this.pxRatio);
 
             this.cachedRevealBitmap.bitmaps.push(bitmap);
         }
@@ -250,8 +255,11 @@ export class CanvasConfig {
 
         const { top, left, width, height, trueFillRadius, borderStyle, borderWidth, fillMode } = this.cachedStyle;
 
-        this.canvas.width = width;
-        this.canvas.height = height;
+        this.canvas.width = width * this.pxRatio;
+        this.canvas.height = height * this.pxRatio;
+
+        this.canvas.style.width = `${width}px`;
+        this.canvas.style.height = `${height}px`;
 
         this.paintedWidth = width;
         this.paintedHeight = height;
@@ -303,17 +311,23 @@ export class CanvasConfig {
             return;
         }
 
+        this.ctx.setTransform(this.pxRatio, 0, 0, this.pxRatio, 0, 0);
+
         if (store.mouseInBoundary) {
             if (borderStyle !== 'none') {
-                this.ctx.putImageData(this.cachedRevealBitmap.bitmaps[0], putX, putY);
+                this.ctx.putImageData(
+                    this.cachedRevealBitmap.bitmaps[0],
+                    putX * this.pxRatio, putY * this.pxRatio,
+                );
                 this.ctx.clearRect(fillX, fillY, fillW, fillH);
             }
 
             if (fillMode !== 'none' && mouseInCanvas) {
                 this.ctx.putImageData(
                     this.cachedRevealBitmap.bitmaps[1],
-                    putX, putY,
-                    fillX - putX, fillY - putY, fillW, fillH,
+                    putX * this.pxRatio, putY * this.pxRatio,
+                    (fillX - putX) * this.pxRatio, (fillY - putY) * this.pxRatio,
+                    fillW * this.pxRatio, fillH * this.pxRatio,
                 );
             }
         }
