@@ -1,6 +1,6 @@
 {
     "name": "@ax-design/reveal-highlight",
-    "version": "0.1.9",
+    "version": "0.1.10",
     "description": "Web component that implement Reveal Highlight of Axiom Design System.",
     "main": "build/main.js",
     "module": "es/index.js",
