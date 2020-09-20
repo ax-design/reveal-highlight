@@ -35,6 +35,10 @@
       user-select: none;
     }
 
+    .with-opacity {
+      --reveal-opacity: 1.0;
+    }
+
     .colored-button {
       --reveal-color: red;
     }
@@ -121,6 +125,35 @@
     &lt;/div&gt;
   &lt;/ax-reveal-bound&gt;
 &lt;/ax-reveal-provider&gt;</pre>
+      </div>
+    </section>
+
+    <section class="demo-block">
+      <div class="demo">
+        <ax-reveal-bound class="with-opacity">
+          <div class="ax-reveal-container">
+            <ax-reveal>
+              <button class="ax-reveal-button">Welcome</button>
+            </ax-reveal>
+            <ax-reveal>
+              <button class="ax-reveal-button">To</button>
+            </ax-reveal>
+          </div>
+          <div class="ax-reveal-container">
+            <ax-reveal>
+              <button class="ax-reveal-button">Project</button>
+            </ax-reveal>
+            <ax-reveal>
+              <button class="ax-reveal-button">Axiom!</button>
+            </ax-reveal>
+          </div>
+        </ax-reveal-bound>
+      </div>
+      <div class="code">
+        <h2>Opacity</h2>
+        <pre>.my-reveal-container{
+  --reveal-opacity: 1.0;
+}</pre>
       </div>
     </section>
 
