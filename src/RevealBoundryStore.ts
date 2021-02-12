@@ -35,7 +35,7 @@ export class RevealBoundaryStore {
         const canvasConfig = new CanvasConfig(this, $el);
 
         canvasConfig.cacheCanvasPaintingStyle();
-        canvasConfig.cacheRevealBitmaps();
+        canvasConfig.updateCachedBitmap();
 
         this.canvasList.push(canvasConfig);
     };
