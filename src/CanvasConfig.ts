@@ -243,7 +243,8 @@ export class CanvasConfig {
          * http://jsfiddle.net/robhawkes/gHCJt/
          */
 
-        const { borderDecorationType, borderDecorationSize, borderWidth, width, height } = this.cachedStyle;
+        const { borderStyle, borderDecorationType, borderDecorationSize, width, height } = this.cachedStyle;
+        const borderWidth = borderStyle === 'none' ? 0 : this.cachedStyle.borderWidth;
 
         const last = this.cachedImg.cachedMask;
         if (
@@ -261,11 +262,8 @@ export class CanvasConfig {
         // Draw masks.
 
         // Some variables will be used frequently
-        const beginCoord = borderDecorationSize / 2;
         const ctxWidth = width * this.pxRatio;
         const ctxHeight = height * this.pxRatio;
-        const decWidth = ctxWidth - borderDecorationSize;
-        const decHeight = ctxHeight - borderDecorationSize;
 
         // Get context
         const { borderMask: borderCtx, fillMask: fillCtx } = this.cachedImg.cachedCtx;
@@ -275,47 +273,51 @@ export class CanvasConfig {
         for (let i of [borderCtx, fillCtx]) {
             i.clearRect(0, 0, ctxWidth, ctxHeight);
             i.lineJoin = borderDecorationType;
-            i.lineWidth = borderDecorationSize;
             i.fillStyle = 'black';
         }
 
         borderCtx.globalCompositeOperation = 'source-over';
 
-        switch (this.cachedStyle.borderStyle) {
+        switch (borderStyle) {
+            // I HATE MATH!
             case 'full':
-                // Draw the border mask
-                borderCtx.fillRect(beginCoord, beginCoord, decWidth, decHeight);
-                borderCtx.strokeRect(beginCoord, beginCoord, decWidth, decHeight);
+            case 'none':
+                // Drawing the border mask:
+                // Drawing the outer edge of the shape.
+                borderCtx.lineWidth = borderDecorationSize;
+
+                const geoParams1 = [
+                    borderDecorationSize / 2,
+                    borderDecorationSize / 2,
+                    ctxWidth - borderDecorationSize,
+                    ctxHeight - borderDecorationSize,
+                ] as const;
+                borderCtx.fillRect(...geoParams1);
+                borderCtx.strokeRect(...geoParams1);
+
+                // Draw the inner part of the shape by remove unnecessary parts.
                 borderCtx.globalCompositeOperation = 'destination-out';
-                borderCtx.fillRect(
-                    beginCoord + borderWidth,
-                    beginCoord + borderWidth,
-                    decWidth - borderWidth * 2,
-                    decHeight - borderWidth * 2
-                );
-                borderCtx.strokeRect(
-                    beginCoord + borderWidth,
-                    beginCoord + borderWidth,
-                    decWidth - borderWidth * 2,
-                    decHeight - borderWidth * 2
-                );
+                const clippingShapeLineWidth = borderDecorationSize - borderWidth;
+                borderCtx.lineWidth = clippingShapeLineWidth;
+
+                const geoParams2 = [
+                    borderWidth + clippingShapeLineWidth / 2,
+                    borderWidth + clippingShapeLineWidth / 2,
+                    ctxWidth - (borderWidth * 2) - clippingShapeLineWidth,
+                    ctxHeight - (borderWidth * 2) - clippingShapeLineWidth,
+                ] as const;
+                borderCtx.fillRect(...geoParams2);
+                borderCtx.strokeRect(...geoParams2);
 
                 // draw fill mask
-                fillCtx.fillRect(
-                    beginCoord + borderWidth,
-                    beginCoord + borderWidth,
-                    decWidth - borderWidth,
-                    decHeight - borderWidth
-                );
-                fillCtx.strokeRect(
-                    beginCoord + borderWidth,
-                    beginCoord + borderWidth,
-                    decWidth - borderWidth,
-                    decHeight - borderWidth
-                );
+                fillCtx.lineWidth = clippingShapeLineWidth;
+                fillCtx.fillRect(...geoParams2);
+                fillCtx.strokeRect(...geoParams2);
                 break;
             case 'half':
                 // Draw the border mask
+                const beginCoord = borderDecorationSize / 2;
+
                 borderCtx.lineWidth = borderWidth;
                 borderCtx.beginPath();
                 borderCtx.moveTo(0, beginCoord);
@@ -325,10 +327,7 @@ export class CanvasConfig {
                 borderCtx.stroke();
 
                 // draw the fill mask
-                fillCtx.rect(0, borderWidth, decWidth, decHeight - borderWidth);
-                break;
-            case 'none':
-                fillCtx.rect(0, 0, decWidth, decHeight);
+                fillCtx.rect(0, borderWidth, ctxWidth, ctxHeight - (borderWidth * 2));
                 break;
 
             default:
