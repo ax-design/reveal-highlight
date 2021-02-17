@@ -85,6 +85,8 @@ export function register(compat: boolean = false) {
         root.style.setProperty('--reveal-opacity', '0.26');
         root.style.setProperty('--reveal-border-style', 'full');
         root.style.setProperty('--reveal-border-width', '1px');
+        root.style.setProperty('--reveal-border-decoration-type', 'miter');
+        root.style.setProperty('--reveal-border-decoration-size', '4');
         root.style.setProperty('--reveal-fill-mode', 'relative');
         root.style.setProperty('--reveal-fill-radius', '1.5');
         root.style.setProperty('--reveal-diffuse', 'true');
