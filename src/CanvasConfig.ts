@@ -238,7 +238,8 @@ export class CanvasConfig {
             color: colorStringMatch || '0, 0, 0',
             opacity: this.computedStyle.getNumber('--reveal-opacity'),
             borderStyle: this.computedStyle.get('--reveal-border-style'),
-            borderDecorationType: this.computedStyle.get('--reveal-border-decoration-type') as BorderDecoration || 'miter',
+            borderDecorationType:
+                (this.computedStyle.get('--reveal-border-decoration-type') as BorderDecoration) || 'miter',
             borderDecorationSize: this.computedStyle.getNumber('--reveal-border-decoration-size'),
             borderWidth: this.computedStyle.getNumber('--reveal-border-width'),
             fillMode: this.computedStyle.get('--reveal-fill-mode'),
@@ -249,7 +250,9 @@ export class CanvasConfig {
         };
 
         if (!isValidateBorderDecorationType(currentStyle.borderDecorationType)) {
-            throw new SyntaxError('The value of `--reveal-border-decoration-type` must be `round`, `bevel` or `miter`!');
+            throw new SyntaxError(
+                'The value of `--reveal-border-decoration-type` must be `round`, `bevel` or `miter`!'
+            );
         }
 
         const { width, height, fillMode, fillRadius } = currentStyle;
@@ -292,7 +295,7 @@ export class CanvasConfig {
          */
 
         const c = this.cachedStyle;
-        const borderWidth = c.borderStyle === 'none' ? 0 : this.cachedStyle.borderWidth;
+        const borderWidth = c.borderStyle === 'none' ? 0 : this.cachedStyle.borderWidth * this.pxRatio;
 
         const last = this.cachedImg.cachedMask;
         if (
@@ -332,20 +335,20 @@ export class CanvasConfig {
             case 'none':
                 // Drawing the border mask:
                 // Drawing the outer edge of the shape.
-                borderCtx.lineWidth = c.borderDecorationSize;
+                borderCtx.lineWidth = c.borderDecorationSize * this.pxRatio;
 
                 const geoParams1 = [
-                    c.borderDecorationSize / 2,
-                    c.borderDecorationSize / 2,
-                    ctxWidth - c.borderDecorationSize,
-                    ctxHeight - c.borderDecorationSize,
+                    (c.borderDecorationSize / 2) * this.pxRatio,
+                    (c.borderDecorationSize / 2) * this.pxRatio,
+                    ctxWidth - c.borderDecorationSize * this.pxRatio,
+                    ctxHeight - c.borderDecorationSize * this.pxRatio,
                 ] as const;
                 borderCtx.fillRect(...geoParams1);
                 borderCtx.strokeRect(...geoParams1);
 
                 // Draw the inner part of the shape by remove unnecessary parts.
                 borderCtx.globalCompositeOperation = 'destination-out';
-                const clippingShapeLineWidth = c.borderDecorationSize - borderWidth;
+                const clippingShapeLineWidth = c.borderDecorationSize * this.pxRatio - borderWidth;
                 borderCtx.lineWidth = clippingShapeLineWidth;
 
                 const geoParams2 = [
@@ -364,7 +367,7 @@ export class CanvasConfig {
                 break;
             case 'half':
                 // Draw the border mask
-                const beginCoord = c.borderDecorationSize / 2;
+                const beginCoord = (c.borderDecorationSize / 2) * this.pxRatio;
 
                 borderCtx.lineWidth = borderWidth;
                 borderCtx.beginPath();
@@ -392,7 +395,7 @@ export class CanvasConfig {
 
     updateCachedReveal = () => {
         const c = this.cachedStyle;
-        const radius = c.trueFillRadius[1];
+        const radius = c.trueFillRadius[1] * this.pxRatio;
         const size = radius * 2;
 
         const last = this.cachedImg.cachedReveal;
@@ -476,12 +479,11 @@ export class CanvasConfig {
         const { trueFillRadius } = this.cachedStyle;
 
         const radius = trueFillRadius[1];
-        const size = radius * 2;
-        const fixedSize = size * this.pxRatio;
+        const size = radius * 2 * this.pxRatio;
 
-        if (x.width !== fixedSize || x.height !== fixedSize) {
-            x.width = size * this.pxRatio;
-            x.height = size * this.pxRatio;
+        if (x.width !== size || x.height !== size) {
+            x.width = size;
+            x.height = size;
         }
     };
 
@@ -533,10 +535,14 @@ export class CanvasConfig {
         const relativeX = store.clientX - c.left;
         const relativeY = store.clientY - c.top;
 
+        if (Number.isNaN(relativeX) || Number.isNaN(relativeY)) {
+            return false;
+        }
+
         this.syncSizeToElement(this.canvas);
 
-        this.paintedWidth = c.width;
-        this.paintedHeight = c.height;
+        this.paintedWidth = c.width * this.pxRatio;
+        this.paintedHeight = c.height * this.pxRatio;
 
         const maxRadius = Math.max(c.trueFillRadius[0], c.trueFillRadius[1]);
 
@@ -552,14 +558,8 @@ export class CanvasConfig {
         }
 
         const fillRadius = this.cachedImg.cachedReveal.radius;
-        const putX = relativeX - fillRadius;
-        const putY = relativeY - fillRadius;
-        const fixedPutX = Math.floor(putX * this.pxRatio);
-        const fixedPutY = Math.floor(putY * this.pxRatio);
-
-        if (Number.isNaN(relativeX) || Number.isNaN(relativeY)) {
-            return false;
-        }
+        const putX = Math.floor(relativeX * this.pxRatio - fillRadius);
+        const putY = Math.floor(relativeY * this.pxRatio - fillRadius);
 
         // this.ctx.setTransform(this.pxRatio, 0, 0, this.pxRatio, 0, 0);
         // this.bufferCtx.setTransform(this.pxRatio, 0, 0, this.pxRatio, 0, 0);
@@ -579,16 +579,16 @@ export class CanvasConfig {
 
         this.syncSizeToRevealRadius(this.bufferCanvas);
 
-        this.ctx.clearRect(0, 0, c.width, c.height);
+        this.ctx.clearRect(0, 0, c.width * this.pxRatio, c.height * this.pxRatio);
 
         if (store.mouseInBoundary) {
             if (c.borderStyle !== 'none') {
                 // Draw border.
-                this.bufferCtx.clearRect(0, 0, c.width, c.height);
+                this.bufferCtx.clearRect(0, 0, c.width * this.pxRatio, c.height * this.pxRatio);
                 this.bufferCtx.globalCompositeOperation = 'source-over';
                 this.bufferCtx.drawImage(this.cachedImg.cachedCanvas.borderMask, 0, 0);
                 this.bufferCtx.globalCompositeOperation = 'source-in';
-                this.bufferCtx.drawImage(this.cachedImg.cachedCanvas.borderReveal, fixedPutX, fixedPutY);
+                this.bufferCtx.drawImage(this.cachedImg.cachedCanvas.borderReveal, putX, putY);
 
                 this.ctx.drawImage(this.bufferCanvas, 0, 0);
             }
@@ -597,11 +597,11 @@ export class CanvasConfig {
 
             if (c.fillMode !== 'none' && mouseInCanvas) {
                 // draw fill.
-                this.bufferCtx.clearRect(0, 0, c.width, c.height);
+                this.bufferCtx.clearRect(0, 0, c.width * this.pxRatio, c.height * this.pxRatio);
                 this.bufferCtx.globalCompositeOperation = 'source-over';
                 this.bufferCtx.drawImage(this.cachedImg.cachedCanvas.fillMask, 0, 0);
                 this.bufferCtx.globalCompositeOperation = 'source-in';
-                this.bufferCtx.drawImage(this.cachedImg.cachedCanvas.fillReveal, fixedPutX, fixedPutY);
+                this.bufferCtx.drawImage(this.cachedImg.cachedCanvas.fillReveal, putX, putY);
 
                 this.ctx.drawImage(this.bufferCanvas, 0, 0);
             }
@@ -611,7 +611,7 @@ export class CanvasConfig {
             return true;
         }
 
-        this.bufferCtx.clearRect(0, 0, c.width, c.height);
+        this.bufferCtx.clearRect(0, 0, c.width * this.pxRatio, c.height * this.pxRatio);
         this.bufferCtx.globalCompositeOperation = 'source-over';
         this.bufferCtx.drawImage(this.cachedImg.cachedCanvas.fillMask, 0, 0);
         this.bufferCtx.globalCompositeOperation = 'source-in';
