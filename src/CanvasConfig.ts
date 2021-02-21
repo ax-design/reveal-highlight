@@ -240,7 +240,7 @@ export class CanvasConfig {
             borderStyle: this.computedStyle.get('--reveal-border-style'),
             borderDecorationType:
                 (this.computedStyle.get('--reveal-border-decoration-type') as BorderDecoration) || 'miter',
-            borderDecorationSize: this.computedStyle.getNumber('--reveal-border-decoration-size'),
+            borderDecorationSize: this.computedStyle.getNumber('--reveal-border-decoration-size') * 2,
             borderWidth: this.computedStyle.getNumber('--reveal-border-width'),
             fillMode: this.computedStyle.get('--reveal-fill-mode'),
             fillRadius: this.computedStyle.getNumber('--reveal-fill-radius'),
@@ -368,7 +368,7 @@ export class CanvasConfig {
                 break;
             case 'half':
                 // Draw the border mask
-                const beginCoord = (c.borderDecorationSize / 2) * this.pxRatio;
+                const beginCoord = (c.borderWidth / 2) * this.pxRatio;
 
                 borderCtx.lineWidth = borderWidth;
                 borderCtx.beginPath();
