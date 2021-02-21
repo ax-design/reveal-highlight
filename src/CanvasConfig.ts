@@ -230,11 +230,11 @@ export class CanvasConfig {
         const colorString = this.computedStyle.getColor('--reveal-color');
         const colorStringMatch = extractRGBValue(colorString);
 
-        const currentStyle = {
-            top: Math.round(boundingRect.top),
-            left: Math.round(boundingRect.left),
-            width: Math.round(boundingRect.width),
-            height: Math.round(boundingRect.height),
+        const currentStyle: CachedStyle = {
+            top: Math.floor(boundingRect.top),
+            left: Math.floor(boundingRect.left),
+            width: Math.floor(boundingRect.width),
+            height: Math.floor(boundingRect.height),
             color: colorStringMatch || '0, 0, 0',
             opacity: this.computedStyle.getNumber('--reveal-opacity'),
             borderStyle: this.computedStyle.get('--reveal-border-style'),
@@ -247,6 +247,7 @@ export class CanvasConfig {
             diffuse: this.computedStyle.get('--reveal-diffuse') === 'true',
             revealAnimateSpeed: this.computedStyle.getNumber('--reveal-animate-speed'),
             revealReleasedAccelerateRate: this.computedStyle.getNumber('--reveal-released-accelerate-rate'),
+            trueFillRadius: [0, 0],
         };
 
         if (!isValidateBorderDecorationType(currentStyle.borderDecorationType)) {
@@ -257,25 +258,22 @@ export class CanvasConfig {
 
         const { width, height, fillMode, fillRadius } = currentStyle;
 
-        let trueFillRadius = [0, 0];
-
         switch (fillMode) {
             case 'none':
                 break;
             case 'relative':
-                trueFillRadius = [Math.min(width, height) * fillRadius, Math.max(width, height) * fillRadius];
+                currentStyle.trueFillRadius[0] = Math.min(width, height) * fillRadius;
+                currentStyle.trueFillRadius[1] = Math.max(width, height) * fillRadius;
                 break;
             case 'absolute':
-                trueFillRadius = [fillRadius, fillRadius];
+                currentStyle.trueFillRadius[0] = fillRadius;
+                currentStyle.trueFillRadius[1] = fillRadius;
                 break;
             default:
                 throw new SyntaxError('The value of `--reveal-border-style` must be `relative`, `absolute` or `none`!');
         }
 
-        this.cachedStyle = {
-            ...currentStyle,
-            trueFillRadius,
-        };
+        this.cachedStyle = currentStyle;
 
         this.cachedFrameId = this.currentFrameId;
     };
@@ -298,11 +296,14 @@ export class CanvasConfig {
         const borderWidth = c.borderStyle === 'none' ? 0 : this.cachedStyle.borderWidth * this.pxRatio;
 
         const last = this.cachedImg.cachedMask;
-        if (
-            c.borderDecorationSize === last?.borderDecorationSize &&
-            c.borderDecorationType === last?.borderDecorationType
-        ) {
-            return;
+
+        if (last) {
+            if (
+                c.borderDecorationSize === last.borderDecorationSize &&
+                c.borderDecorationType === last.borderDecorationType
+            ) {
+                return;
+            }
         }
 
         const $canvas = this.cachedImg.cachedCanvas;
@@ -399,8 +400,10 @@ export class CanvasConfig {
         const size = radius * 2;
 
         const last = this.cachedImg.cachedReveal;
-        if (radius === last?.radius && c.color == last?.color && c.opacity == last?.opacity) {
-            return;
+        if (last) {
+            if (radius === last.radius && c.color == last.color && c.opacity == last.opacity) {
+                return;
+            }
         }
 
         const { borderReveal, fillReveal } = this.cachedImg.cachedCanvas;
