@@ -13,6 +13,8 @@ export class AxRevealBoundary extends HTMLElement {
     static readonly attachStorageEvent = 'attachStorage';
     static readonly replaceStorageEvent = 'replaceStorage';
 
+    private root = this.attachShadow({ mode: 'open' });
+
     static readonly stateManager = new RevealStateManager();
 
     private _storage!: RevealBoundaryStore | undefined;
@@ -87,6 +89,14 @@ export class AxRevealBoundary extends HTMLElement {
 
     disconnectedCallback() {
         this.storage = undefined;
+    }
+
+    constructor() {
+        super();
+        this.root.innerHTML = `
+<div>
+    <slot></slot>
+</div>`
     }
 }
 

@@ -35,6 +35,16 @@
       user-select: none;
     }
 
+    .round-corner {
+      --reveal-border-decoration-type: round;
+      --reveal-border-decoration-size: 8px;
+    }
+
+    .bevel-corner {
+      --reveal-border-decoration-type: bevel;
+      --reveal-border-decoration-size: 16px;
+    }
+
     .with-opacity {
       --reveal-opacity: 1.0;
     }
@@ -79,6 +89,20 @@
       --reveal-diffuse: false;
       overflow-y: auto;
       height: auto;
+    }
+
+    .benchmark {
+      font-size: 0;
+    }
+    .benchmark ax-reveal {
+      width: 40px;
+      height: 40px;
+      margin: 4px;
+      padding: 8px;
+      font-size: 24px;
+      text-align: center;
+      line-height: 40px;
+      cursor: default;
     }
   </style>
 </head>
@@ -125,6 +149,66 @@
     &lt;/div&gt;
   &lt;/ax-reveal-bound&gt;
 &lt;/ax-reveal-provider&gt;</pre>
+      </div>
+    </section>
+
+    <section class="demo-block">
+      <div class="demo">
+        <ax-reveal-bound class="round-corner">
+          <div class="ax-reveal-container">
+            <ax-reveal>
+              <button class="ax-reveal-button">Welcome</button>
+            </ax-reveal>
+            <ax-reveal>
+              <button class="ax-reveal-button">To</button>
+            </ax-reveal>
+          </div>
+          <div class="ax-reveal-container">
+            <ax-reveal>
+              <button class="ax-reveal-button">Project</button>
+            </ax-reveal>
+            <ax-reveal>
+              <button class="ax-reveal-button">Axiom!</button>
+            </ax-reveal>
+          </div>
+        </ax-reveal-bound>
+      </div>
+      <div class="code">
+        <h2>Round Corner</h2>
+        <pre>.my-reveal-container{
+  --reveal-border-decoration-type: round;
+  --reveal-border-decoration-size: 4px;
+}</pre>
+      </div>
+    </section>
+
+    <section class="demo-block">
+      <div class="demo">
+        <ax-reveal-bound class="bevel-corner">
+          <div class="ax-reveal-container">
+            <ax-reveal>
+              <button class="ax-reveal-button">Welcome</button>
+            </ax-reveal>
+            <ax-reveal>
+              <button class="ax-reveal-button">To</button>
+            </ax-reveal>
+          </div>
+          <div class="ax-reveal-container">
+            <ax-reveal>
+              <button class="ax-reveal-button">Project</button>
+            </ax-reveal>
+            <ax-reveal>
+              <button class="ax-reveal-button">Axiom!</button>
+            </ax-reveal>
+          </div>
+        </ax-reveal-bound>
+      </div>
+      <div class="code">
+        <h2>Even more fancy</h2>
+        <pre>.my-reveal-container{
+  --reveal-border-decoration-type: bevel;
+  --reveal-border-decoration-size: 16px;
+}</pre>
       </div>
     </section>
 
@@ -432,9 +516,36 @@
 }</pre>
       </div>
     </section>
+    <section class="round-corner benchmark">
+      <h2>Benchmark (100 Items)</h2>
+      <ax-reveal-bound>
+        <ax-reveal>🥩</ax-reveal><ax-reveal>🥚</ax-reveal><ax-reveal>🥛</ax-reveal><ax-reveal>👀</ax-reveal><ax-reveal>📎</ax-reveal>
+        <ax-reveal>🥩</ax-reveal><ax-reveal>🥚</ax-reveal><ax-reveal>🥛</ax-reveal><ax-reveal>👀</ax-reveal><ax-reveal>📎</ax-reveal>
+        <ax-reveal>🥩</ax-reveal><ax-reveal>🥚</ax-reveal><ax-reveal>🥛</ax-reveal><ax-reveal>👀</ax-reveal><ax-reveal>📎</ax-reveal>
+        <ax-reveal>🥩</ax-reveal><ax-reveal>🥚</ax-reveal><ax-reveal>🥛</ax-reveal><ax-reveal>👀</ax-reveal><ax-reveal>📎</ax-reveal>
+        <ax-reveal>🥩</ax-reveal><ax-reveal>🥚</ax-reveal><ax-reveal>🥛</ax-reveal><ax-reveal>👀</ax-reveal><ax-reveal>📎</ax-reveal>
+        <ax-reveal>🥩</ax-reveal><ax-reveal>🥚</ax-reveal><ax-reveal>🥛</ax-reveal><ax-reveal>👀</ax-reveal><ax-reveal>📎</ax-reveal>
+        <ax-reveal>🥩</ax-reveal><ax-reveal>🥚</ax-reveal><ax-reveal>🥛</ax-reveal><ax-reveal>👀</ax-reveal><ax-reveal>📎</ax-reveal>
+        <ax-reveal>🥩</ax-reveal><ax-reveal>🥚</ax-reveal><ax-reveal>🥛</ax-reveal><ax-reveal>👀</ax-reveal><ax-reveal>📎</ax-reveal>
+        <ax-reveal>🥩</ax-reveal><ax-reveal>🥚</ax-reveal><ax-reveal>🥛</ax-reveal><ax-reveal>👀</ax-reveal><ax-reveal>📎</ax-reveal>
+        <ax-reveal>🥩</ax-reveal><ax-reveal>🥚</ax-reveal><ax-reveal>🥛</ax-reveal><ax-reveal>👀</ax-reveal><ax-reveal>📎</ax-reveal>
+        <ax-reveal>🥩</ax-reveal><ax-reveal>🥚</ax-reveal><ax-reveal>🥛</ax-reveal><ax-reveal>👀</ax-reveal><ax-reveal>📎</ax-reveal>
+        <ax-reveal>🥩</ax-reveal><ax-reveal>🥚</ax-reveal><ax-reveal>🥛</ax-reveal><ax-reveal>👀</ax-reveal><ax-reveal>📎</ax-reveal>
+        <ax-reveal>🥩</ax-reveal><ax-reveal>🥚</ax-reveal><ax-reveal>🥛</ax-reveal><ax-reveal>👀</ax-reveal><ax-reveal>📎</ax-reveal>
+        <ax-reveal>🥩</ax-reveal><ax-reveal>🥚</ax-reveal><ax-reveal>🥛</ax-reveal><ax-reveal>👀</ax-reveal><ax-reveal>📎</ax-reveal>
+        <ax-reveal>🥩</ax-reveal><ax-reveal>🥚</ax-reveal><ax-reveal>🥛</ax-reveal><ax-reveal>👀</ax-reveal><ax-reveal>📎</ax-reveal>
+        <ax-reveal>🥩</ax-reveal><ax-reveal>🥚</ax-reveal><ax-reveal>🥛</ax-reveal><ax-reveal>👀</ax-reveal><ax-reveal>📎</ax-reveal>
+        <ax-reveal>🥩</ax-reveal><ax-reveal>🥚</ax-reveal><ax-reveal>🥛</ax-reveal><ax-reveal>👀</ax-reveal><ax-reveal>📎</ax-reveal>
+        <ax-reveal>🥩</ax-reveal><ax-reveal>🥚</ax-reveal><ax-reveal>🥛</ax-reveal><ax-reveal>👀</ax-reveal><ax-reveal>📎</ax-reveal>
+        <ax-reveal>🥩</ax-reveal><ax-reveal>🥚</ax-reveal><ax-reveal>🥛</ax-reveal><ax-reveal>👀</ax-reveal><ax-reveal>📎</ax-reveal>
+        <ax-reveal>🥩</ax-reveal><ax-reveal>🥚</ax-reveal><ax-reveal>🥛</ax-reveal><ax-reveal>👀</ax-reveal><ax-reveal>📎</ax-reveal>
+      </ax-reveal-bound>
+    </section>
   </ax-reveal-provider>
   <script type="module">
-    import { register } from 'https://unpkg.com/@ax-design/reveal-highlight/es/index.js';
+    // For package developer.
+    import { register } from '../../../es/index.js';
+    // import { register } from 'https://unpkg.com/@ax-design/reveal-highlight/es/index.js';
     register(true);
   </script>
 </body>

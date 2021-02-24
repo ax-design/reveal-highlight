@@ -35,7 +35,7 @@ export class RevealBoundaryStore {
         const canvasConfig = new CanvasConfig(this, $el);
 
         canvasConfig.cacheCanvasPaintingStyle();
-        canvasConfig.cacheRevealBitmaps();
+        canvasConfig.updateCachedBitmap();
 
         this.canvasList.push(canvasConfig);
     };
@@ -92,10 +92,11 @@ export class RevealBoundaryStore {
             }
         });
 
-        this.canvasList.forEach((config) => {
+        for (let i = 0; i < this.canvasList.length; i++) {
+            const config = this.canvasList[i];
             config.currentFrameId = frame;
             config.paint(force);
-        });
+        }
 
         this.dirty = true;
         this.paintedClientX = this.clientX;
@@ -109,9 +110,10 @@ export class RevealBoundaryStore {
     };
 
     resetAll = () => {
-        this.canvasList.forEach(config => {
+        for (let i = 0; i < this.canvasList.length; i++) {
+            const config = this.canvasList[i];
             config.paint();
-        });
+        }
     };
 
     initializeAnimation = () => {
