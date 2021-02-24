@@ -53,14 +53,17 @@ const extractRGBValue = (x: string) => {
     return result;
 };
 
-export interface CachedStyle {
+export interface CachedBoundingRect {
     top: number;
     left: number;
     width: number;
     height: number;
+}
+
+export interface CachedStyle {
     color: string;
     opacity: number;
-    trueFillRadius: number[];
+    trueFillRadius: [number, number];
     borderStyle: string;
     borderDecorationType: BorderDecoration;
     borderDecorationSize: number;
@@ -151,11 +154,20 @@ export class CanvasConfig {
 
     cachedImg: CachedRevealBitmap;
 
-    cachedStyle: CachedStyle = {
+    currentFrameId: number = -1;
+
+    cachedBoundingRectFrameId: number = -2;
+
+    cachedBoundingRect: CachedBoundingRect = {
         top: -1,
         left: -1,
         width: -1,
         height: -1,
+    };
+
+    cachedStyleFrameId: number = -2;
+
+    cachedStyle: CachedStyle = {
         trueFillRadius: [0, 0],
         color: '',
         opacity: 1,
@@ -179,9 +191,6 @@ export class CanvasConfig {
     mousePressed = false;
 
     mouseReleased = false;
-
-    currentFrameId: any = -1;
-    cachedFrameId: any = -2;
 
     constructor(store: RevealBoundaryStore, $el: HTMLCanvasElement) {
         this._store = store;
@@ -216,8 +225,48 @@ export class CanvasConfig {
         this.computedStyle = createStorage(this.canvas, compat);
     }
 
+    cacheBoundingRect = () => {
+        if (this.currentFrameId === this.cachedBoundingRectFrameId) {
+            return;
+        }
+
+        const boundingRect = this.canvas.getBoundingClientRect();
+
+        this.cachedBoundingRect.top = Math.floor(boundingRect.top);
+        this.cachedBoundingRect.left = Math.floor(boundingRect.left);
+        this.cachedBoundingRect.width = Math.floor(boundingRect.width);
+        this.cachedBoundingRect.height = Math.floor(boundingRect.height);
+        
+        this.cachedBoundingRectFrameId = this.currentFrameId;
+    };
+
+    getTrueFillRadius = (
+        trueFillRadius = [0, 0] as [number, number],
+        fillMode = this.computedStyle.get('--reveal-fill-mode'), 
+        fillRadius = this.computedStyle.getNumber('--reveal-fill-radius'),
+    ) => {
+        const b = this.cachedBoundingRect;
+        
+        switch (fillMode) {
+            case 'none':
+                break;
+            case 'relative':
+                trueFillRadius[0] = Math.min(b.width, b.height) * fillRadius;
+                trueFillRadius[1] = Math.max(b.width, b.height) * fillRadius;
+                break;
+            case 'absolute':
+                trueFillRadius[0] = fillRadius;
+                trueFillRadius[1] = fillRadius;
+                break;
+            default:
+                throw new SyntaxError('The value of `--reveal-border-style` must be `relative`, `absolute` or `none`!');
+        }
+
+        return trueFillRadius;
+    }
+
     cacheCanvasPaintingStyle = () => {
-        if (this.currentFrameId === this.cachedFrameId) {
+        if (this.currentFrameId === this.cachedStyleFrameId) {
             return;
         }
 
@@ -225,16 +274,10 @@ export class CanvasConfig {
             return;
         }
 
-        const boundingRect = this.canvas.getBoundingClientRect();
-
         const colorString = this.computedStyle.getColor('--reveal-color');
         const colorStringMatch = extractRGBValue(colorString);
 
-        const currentStyle: CachedStyle = {
-            top: Math.floor(boundingRect.top),
-            left: Math.floor(boundingRect.left),
-            width: Math.floor(boundingRect.width),
-            height: Math.floor(boundingRect.height),
+        const c: CachedStyle = {
             color: colorStringMatch || '0, 0, 0',
             opacity: this.computedStyle.getNumber('--reveal-opacity'),
             borderStyle: this.computedStyle.get('--reveal-border-style'),
@@ -247,35 +290,21 @@ export class CanvasConfig {
             diffuse: this.computedStyle.get('--reveal-diffuse') === 'true',
             revealAnimateSpeed: this.computedStyle.getNumber('--reveal-animate-speed'),
             revealReleasedAccelerateRate: this.computedStyle.getNumber('--reveal-released-accelerate-rate'),
-            trueFillRadius: [0, 0],
+            trueFillRadius: [0, 0] as [number, number],
         };
 
-        if (!isValidateBorderDecorationType(currentStyle.borderDecorationType)) {
+        this.getTrueFillRadius(c.trueFillRadius, c.fillMode, c.fillRadius);
+
+        if (!isValidateBorderDecorationType(c.borderDecorationType)) {
             throw new SyntaxError(
                 'The value of `--reveal-border-decoration-type` must be `round`, `bevel` or `miter`!'
             );
         }
 
-        const { width, height, fillMode, fillRadius } = currentStyle;
 
-        switch (fillMode) {
-            case 'none':
-                break;
-            case 'relative':
-                currentStyle.trueFillRadius[0] = Math.min(width, height) * fillRadius;
-                currentStyle.trueFillRadius[1] = Math.max(width, height) * fillRadius;
-                break;
-            case 'absolute':
-                currentStyle.trueFillRadius[0] = fillRadius;
-                currentStyle.trueFillRadius[1] = fillRadius;
-                break;
-            default:
-                throw new SyntaxError('The value of `--reveal-border-style` must be `relative`, `absolute` or `none`!');
-        }
 
-        this.cachedStyle = currentStyle;
-
-        this.cachedFrameId = this.currentFrameId;
+        this.cachedStyle = c;
+        this.cachedStyleFrameId = this.currentFrameId;
     };
 
     updateCachedMask = () => {
@@ -293,6 +322,7 @@ export class CanvasConfig {
          */
 
         const c = this.cachedStyle;
+        const b = this.cachedBoundingRect;
         const borderWidth = c.borderStyle === 'none' ? 0 : this.cachedStyle.borderWidth * this.pxRatio;
 
         const last = this.cachedImg.cachedMask;
@@ -314,8 +344,8 @@ export class CanvasConfig {
         // Draw masks.
 
         // Some variables will be used frequently
-        const ctxWidth = c.width * this.pxRatio;
-        const ctxHeight = c.height * this.pxRatio;
+        const ctxWidth = b.width * this.pxRatio;
+        const ctxHeight = b.height * this.pxRatio;
 
         // Get context
         const { borderMask: borderCtx, fillMask: fillCtx } = this.cachedImg.cachedCtx;
@@ -387,8 +417,8 @@ export class CanvasConfig {
         }
 
         return {
-            width: c.width,
-            height: c.height,
+            width: b.width,
+            height: b.height,
             borderDecorationSize: c.borderDecorationSize,
             borderDecorationType: c.borderDecorationType,
         };
@@ -398,6 +428,7 @@ export class CanvasConfig {
         const c = this.cachedStyle;
         const radius = c.trueFillRadius[1] * this.pxRatio;
         const size = radius * 2;
+        console.log(c);
 
         const last = this.cachedImg.cachedReveal;
         if (last) {
@@ -459,22 +490,22 @@ export class CanvasConfig {
     };
 
     mouseInCanvas = () => {
-        const c = this.cachedStyle;
+        const b = this.cachedBoundingRect;
 
-        const relativeX = this._store.clientX - c.left;
-        const relativeY = this._store.clientY - c.top;
+        const relativeX = this._store.clientX - b.left;
+        const relativeY = this._store.clientY - b.top;
 
-        return relativeX > 0 && relativeY > 0 && relativeX < c.width && relativeY < c.height;
+        return relativeX > 0 && relativeY > 0 && relativeX < b.width && relativeY < b.height;
     };
 
     syncSizeToElement = (x: HTMLCanvasElement) => {
-        const c = this.cachedStyle;
+        const b = this.cachedBoundingRect;
 
-        if (x.width !== c.width || x.height !== c.height) {
-            x.width = c.width * this.pxRatio;
-            x.height = c.height * this.pxRatio;
-            x.style.width = `${c.width}px`;
-            x.style.height = `${c.height}px`;
+        if (x.width !== b.width || x.height !== b.height) {
+            x.width = b.width * this.pxRatio;
+            x.height = b.height * this.pxRatio;
+            x.style.width = `${b.width}px`;
+            x.style.height = `${b.height}px`;
         }
     };
 
@@ -509,7 +540,7 @@ export class CanvasConfig {
     paint = (force?: boolean, debug?: boolean): boolean => {
         const store = this._store;
 
-        const animationPlaying = store.animationQueue.has(this);
+        const animationPlaying = store.animationQueue.includes(this);
         const samePosition = store.clientX === store.paintedClientX && store.clientY === store.paintedClientY;
 
         if (samePosition && !animationPlaying && !force) {
@@ -531,28 +562,30 @@ export class CanvasConfig {
             return false;
         }
 
-        this.cacheCanvasPaintingStyle();
-        this.updateCachedBitmap();
+        this.syncSizeToElement(this.canvas);
+        this.cacheBoundingRect();
 
-        const c = this.cachedStyle;
-        const relativeX = store.clientX - c.left;
-        const relativeY = store.clientY - c.top;
+        const b = this.cachedBoundingRect;
+
+        const relativeX = store.clientX - b.left;
+        const relativeY = store.clientY - b.top;
 
         if (Number.isNaN(relativeX) || Number.isNaN(relativeY)) {
             return false;
         }
+       
+        const c = this.cachedStyle;
+        this.getTrueFillRadius(c.trueFillRadius);
 
-        this.syncSizeToElement(this.canvas);
-
-        this.paintedWidth = c.width * this.pxRatio;
-        this.paintedHeight = c.height * this.pxRatio;
+        this.paintedWidth = b.width * this.pxRatio;
+        this.paintedHeight = b.height * this.pxRatio;
 
         const maxRadius = Math.max(c.trueFillRadius[0], c.trueFillRadius[1]);
 
         const exceedLeftBound = relativeX + maxRadius > 0;
-        const exceedRightBound = relativeX - maxRadius < c.width;
+        const exceedRightBound = relativeX - maxRadius < b.width;
         const exceedTopBound = relativeY + maxRadius > 0;
-        const exceedBottomBound = relativeY - maxRadius < c.height;
+        const exceedBottomBound = relativeY - maxRadius < b.height;
 
         const mouseInRenderArea = exceedLeftBound && exceedRightBound && exceedTopBound && exceedBottomBound;
 
@@ -560,12 +593,12 @@ export class CanvasConfig {
             return false;
         }
 
+        this.cacheCanvasPaintingStyle();
+        this.updateCachedBitmap();
+
         const fillRadius = this.cachedImg.cachedReveal.radius;
         const putX = Math.floor(relativeX * this.pxRatio - fillRadius);
         const putY = Math.floor(relativeY * this.pxRatio - fillRadius);
-
-        // this.ctx.setTransform(this.pxRatio, 0, 0, this.pxRatio, 0, 0);
-        // this.bufferCtx.setTransform(this.pxRatio, 0, 0, this.pxRatio, 0, 0);
 
         /**
          * We have to refactor the code here, use `drawImage`, it's much faster:
@@ -582,12 +615,10 @@ export class CanvasConfig {
 
         this.syncSizeToRevealRadius(this.bufferCanvas);
 
-        this.ctx.clearRect(0, 0, c.width * this.pxRatio, c.height * this.pxRatio);
-
         if (store.mouseInBoundary) {
             if (c.borderStyle !== 'none') {
                 // Draw border.
-                this.bufferCtx.clearRect(0, 0, c.width * this.pxRatio, c.height * this.pxRatio);
+                this.bufferCtx.clearRect(0, 0, b.width * this.pxRatio, b.height * this.pxRatio);
                 this.bufferCtx.globalCompositeOperation = 'source-over';
                 this.bufferCtx.drawImage(this.cachedImg.cachedCanvas.borderMask, 0, 0);
                 this.bufferCtx.globalCompositeOperation = 'source-in';
@@ -596,11 +627,11 @@ export class CanvasConfig {
                 this.ctx.drawImage(this.bufferCanvas, 0, 0);
             }
 
-            const mouseInCanvas = relativeX > 0 && relativeY > 0 && relativeX < c.width && relativeY < c.height;
+            const mouseInCanvas = relativeX > 0 && relativeY > 0 && relativeX < b.width && relativeY < b.height;
 
             if (c.fillMode !== 'none' && mouseInCanvas) {
                 // draw fill.
-                this.bufferCtx.clearRect(0, 0, c.width * this.pxRatio, c.height * this.pxRatio);
+                this.bufferCtx.clearRect(0, 0, b.width * this.pxRatio, b.height * this.pxRatio);
                 this.bufferCtx.globalCompositeOperation = 'source-over';
                 this.bufferCtx.drawImage(this.cachedImg.cachedCanvas.fillMask, 0, 0);
                 this.bufferCtx.globalCompositeOperation = 'source-in';
@@ -614,18 +645,18 @@ export class CanvasConfig {
             return true;
         }
 
-        this.bufferCtx.clearRect(0, 0, c.width * this.pxRatio, c.height * this.pxRatio);
+        this.bufferCtx.clearRect(0, 0, b.width * this.pxRatio, b.height * this.pxRatio);
         this.bufferCtx.globalCompositeOperation = 'source-over';
         this.bufferCtx.drawImage(this.cachedImg.cachedCanvas.fillMask, 0, 0);
         this.bufferCtx.globalCompositeOperation = 'source-in';
         const animateGrd =
             this.mouseReleased && this.mouseUpClientX && this.mouseUpClientY
                 ? this.bufferCtx.createRadialGradient(
-                      this.mouseUpClientX - c.left,
-                      this.mouseUpClientY - c.top,
+                      this.mouseUpClientX - b.left,
+                      this.mouseUpClientY - b.top,
                       0,
-                      this.mouseUpClientX - c.left,
-                      this.mouseUpClientY - c.top,
+                      this.mouseUpClientX - b.left,
+                      this.mouseUpClientY - b.top,
                       c.trueFillRadius[1]
                   )
                 : this.bufferCtx.createRadialGradient(
@@ -639,7 +670,7 @@ export class CanvasConfig {
 
         this.getAnimateGrd(this.mouseDownAnimateLogicFrame, animateGrd);
         this.bufferCtx.fillStyle = animateGrd;
-        this.bufferCtx.fillRect(0, 0, c.width, c.height);
+        this.bufferCtx.fillRect(0, 0, b.width, b.height);
 
         this.ctx.drawImage(this.bufferCanvas, 0, 0);
         return true;
