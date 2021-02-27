@@ -277,21 +277,19 @@ export class CanvasConfig {
         const colorString = this.computedStyle.getColor('--reveal-color');
         const colorStringMatch = extractRGBValue(colorString);
 
-        const c: CachedStyle = {
-            color: colorStringMatch || '0, 0, 0',
-            opacity: this.computedStyle.getNumber('--reveal-opacity'),
-            borderStyle: this.computedStyle.get('--reveal-border-style'),
-            borderDecorationType:
-                (this.computedStyle.get('--reveal-border-decoration-type') as BorderDecoration) || 'miter',
-            borderDecorationSize: this.computedStyle.getNumber('--reveal-border-decoration-size') * 2,
-            borderWidth: this.computedStyle.getNumber('--reveal-border-width'),
-            fillMode: this.computedStyle.get('--reveal-fill-mode'),
-            fillRadius: this.computedStyle.getNumber('--reveal-fill-radius'),
-            diffuse: this.computedStyle.get('--reveal-diffuse') === 'true',
-            revealAnimateSpeed: this.computedStyle.getNumber('--reveal-animate-speed'),
-            revealReleasedAccelerateRate: this.computedStyle.getNumber('--reveal-released-accelerate-rate'),
-            trueFillRadius: [0, 0] as [number, number],
-        };
+        const c = this.cachedStyle;
+
+        c.color = colorStringMatch || '0, 0, 0';
+        c.opacity = this.computedStyle.getNumber('--reveal-opacity');
+        c.borderStyle = this.computedStyle.get('--reveal-border-style');
+        c.borderDecorationType = (this.computedStyle.get('--reveal-border-decoration-type') as BorderDecoration) || 'miter';
+        c.borderDecorationSize = this.computedStyle.getNumber('--reveal-border-decoration-size') * 2;
+        c.borderWidth = this.computedStyle.getNumber('--reveal-border-width');
+        c.fillMode = this.computedStyle.get('--reveal-fill-mode');
+        c.fillRadius = this.computedStyle.getNumber('--reveal-fill-radius');
+        c.diffuse = this.computedStyle.get('--reveal-diffuse') === 'true';
+        c.revealAnimateSpeed = this.computedStyle.getNumber('--reveal-animate-speed');
+        c.revealReleasedAccelerateRate = this.computedStyle.getNumber('--reveal-released-accelerate-rate');
 
         this.getTrueFillRadius(c.trueFillRadius, c.fillMode, c.fillRadius);
 
@@ -301,9 +299,6 @@ export class CanvasConfig {
             );
         }
 
-
-
-        this.cachedStyle = c;
         this.cachedStyleFrameId = this.currentFrameId;
     };
 
