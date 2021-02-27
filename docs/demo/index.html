@@ -40,6 +40,13 @@
       --reveal-border-decoration-size: 8px;
     }
 
+    .custom-radius ax-reveal {
+      --reveal-border-decoration-top-left-radius: 0;
+      --reveal-border-decoration-top-right-radius: 10px;
+      --reveal-border-decoration-bottom-left-radius: 20px;
+      --reveal-border-decoration-bottom-right-radius: 0;
+    }
+
     .bevel-corner {
       --reveal-border-decoration-type: bevel;
       --reveal-border-decoration-size: 16px;
@@ -178,6 +185,39 @@
         <pre>.my-reveal-container{
   --reveal-border-decoration-type: round;
   --reveal-border-decoration-size: 4px;
+}</pre>
+      </div>
+    </section>
+
+    <section class="demo-block">
+      <div class="demo">
+        <ax-reveal-bound class="round-corner custom-radius">
+          <div class="ax-reveal-container">
+            <ax-reveal>
+              <button class="ax-reveal-button">Welcome</button>
+            </ax-reveal>
+            <ax-reveal>
+              <button class="ax-reveal-button">To</button>
+            </ax-reveal>
+          </div>
+          <div class="ax-reveal-container">
+            <ax-reveal>
+              <button class="ax-reveal-button">Project</button>
+            </ax-reveal>
+            <ax-reveal>
+              <button class="ax-reveal-button">Axiom!</button>
+            </ax-reveal>
+          </div>
+        </ax-reveal-bound>
+      </div>
+      <div class="code">
+        <h2>Custom border radius</h2>
+        <pre>.my-reveal-container{
+  --reveal-border-decoration-type: round;
+  --reveal-border-decoration-top-left-radius: 0;
+  --reveal-border-decoration-top-right-radius: 10px;
+  --reveal-border-decoration-bottom-left-radius: 20px;
+  --reveal-border-decoration-bottom-right-radius: 0;
 }</pre>
       </div>
     </section>
