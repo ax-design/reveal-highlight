@@ -591,9 +591,7 @@ export class CanvasConfig {
                       );
             this.updateAnimateGrd(this.mouseDownAnimateLogicFrame, animateGrd);
 
-            this.ctx.setTransform(1, 0, 0, 1, 0, 0);
             this.drawShape(false);
-            this.ctx.translate(putX, putY);
             this.ctx.fillStyle = animateGrd;
             this.ctx.fill();
         }
