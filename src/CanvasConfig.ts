@@ -66,7 +66,11 @@ export interface CachedStyle {
     trueFillRadius: [number, number];
     borderStyle: string;
     borderDecorationType: BorderDecoration;
-    borderDecorationSize: number;
+    borderDecorationRadius: number;
+    topLeftBorderDecorationRadius: number;
+    topRightBorderDecorationRadius: number;
+    bottomLeftBorderDecorationRadius: number;
+    bottomRightBorderDecorationRadius: number;
     borderWidth: number;
     fillMode: string;
     fillRadius: number;
@@ -119,7 +123,7 @@ interface CachedReveal {
  */
 export interface CachedRevealBitmap {
     cachedMask: CachedMask | null;
-    cachedReveal: CachedReveal | null;
+    cachedReveal: CachedReveal;
     cachedCanvas: {
         borderReveal: HTMLCanvasElement;
         fillReveal: HTMLCanvasElement;
@@ -131,6 +135,10 @@ export interface CachedRevealBitmap {
         fillReveal: CanvasRenderingContext2D | null;
         borderMask: CanvasRenderingContext2D | null;
         fillMask: CanvasRenderingContext2D | null;
+    };
+    cachedPattern: {
+        borderReveal: CanvasPattern | null;
+        fillReveal: CanvasPattern | null;
     };
 }
 
@@ -173,7 +181,11 @@ export class CanvasConfig {
         opacity: 1,
         borderStyle: '',
         borderDecorationType: 'miter',
-        borderDecorationSize: 0,
+        borderDecorationRadius: 0,
+        topLeftBorderDecorationRadius: 0,
+        topRightBorderDecorationRadius: 0,
+        bottomLeftBorderDecorationRadius: 0,
+        bottomRightBorderDecorationRadius: 0,
         borderWidth: 1,
         fillMode: '',
         fillRadius: 0,
@@ -213,10 +225,18 @@ export class CanvasConfig {
         };
 
         this.cachedImg = {
-            cachedReveal: null,
+            cachedReveal: {
+                radius: -1,
+                color: 'INVALID',
+                opacity: 0,
+            },
             cachedMask: null,
             cachedCanvas,
             cachedCtx,
+            cachedPattern: {
+                borderReveal: null,
+                fillReveal: null,
+            }
         };
 
         this.bufferCtx = this.bufferCanvas.getContext('2d');
@@ -236,17 +256,17 @@ export class CanvasConfig {
         this.cachedBoundingRect.left = Math.floor(boundingRect.left);
         this.cachedBoundingRect.width = Math.floor(boundingRect.width);
         this.cachedBoundingRect.height = Math.floor(boundingRect.height);
-        
+
         this.cachedBoundingRectFrameId = this.currentFrameId;
     };
 
     getTrueFillRadius = (
         trueFillRadius = [0, 0] as [number, number],
-        fillMode = this.computedStyle.get('--reveal-fill-mode'), 
-        fillRadius = this.computedStyle.getNumber('--reveal-fill-radius'),
+        fillMode = this.computedStyle.get('--reveal-fill-mode'),
+        fillRadius = this.computedStyle.getNumber('--reveal-fill-radius')
     ) => {
         const b = this.cachedBoundingRect;
-        
+
         switch (fillMode) {
             case 'none':
                 break;
@@ -263,7 +283,7 @@ export class CanvasConfig {
         }
 
         return trueFillRadius;
-    }
+    };
 
     cacheCanvasPaintingStyle = () => {
         if (this.currentFrameId === this.cachedStyleFrameId) {
@@ -282,14 +302,25 @@ export class CanvasConfig {
         c.color = colorStringMatch || '0, 0, 0';
         c.opacity = this.computedStyle.getNumber('--reveal-opacity');
         c.borderStyle = this.computedStyle.get('--reveal-border-style');
-        c.borderDecorationType = (this.computedStyle.get('--reveal-border-decoration-type') as BorderDecoration) || 'miter';
-        c.borderDecorationSize = this.computedStyle.getNumber('--reveal-border-decoration-size') * 2;
+        c.borderDecorationType =
+            (this.computedStyle.get('--reveal-border-decoration-type') as BorderDecoration) || 'miter';
         c.borderWidth = this.computedStyle.getNumber('--reveal-border-width');
         c.fillMode = this.computedStyle.get('--reveal-fill-mode');
         c.fillRadius = this.computedStyle.getNumber('--reveal-fill-radius');
         c.diffuse = this.computedStyle.get('--reveal-diffuse') === 'true';
         c.revealAnimateSpeed = this.computedStyle.getNumber('--reveal-animate-speed');
         c.revealReleasedAccelerateRate = this.computedStyle.getNumber('--reveal-released-accelerate-rate');
+
+        const r = this.computedStyle.getNumber('--reveal-border-decoration-size');
+        const tl = this.computedStyle.getNumber('--reveal-border-decoration-top-left-radius');
+        const tr = this.computedStyle.getNumber('--reveal-border-decoration-top-right-radius');
+        const bl = this.computedStyle.getNumber('--reveal-border-decoration-bottom-left-radius');
+        const br = this.computedStyle.getNumber('--reveal-border-decoration-bottom-right-radius');
+
+        c.topLeftBorderDecorationRadius = tl >= 0 ? tl : r;
+        c.topRightBorderDecorationRadius = tr >= 0 ? tr : r;
+        c.bottomLeftBorderDecorationRadius = bl >= 0 ? bl : r;
+        c.bottomRightBorderDecorationRadius = br >= 0 ? br : r;
 
         this.getTrueFillRadius(c.trueFillRadius, c.fillMode, c.fillRadius);
 
@@ -324,7 +355,7 @@ export class CanvasConfig {
 
         if (last) {
             if (
-                c.borderDecorationSize === last.borderDecorationSize &&
+                c.borderDecorationRadius === last.borderDecorationSize &&
                 c.borderDecorationType === last.borderDecorationType
             ) {
                 return;
@@ -361,20 +392,20 @@ export class CanvasConfig {
             case 'none':
                 // Drawing the border mask:
                 // Drawing the outer edge of the shape.
-                borderCtx.lineWidth = c.borderDecorationSize * this.pxRatio;
+                borderCtx.lineWidth = c.borderDecorationRadius * this.pxRatio;
 
                 const geoParams1 = [
-                    (c.borderDecorationSize / 2) * this.pxRatio,
-                    (c.borderDecorationSize / 2) * this.pxRatio,
-                    ctxWidth - c.borderDecorationSize * this.pxRatio,
-                    ctxHeight - c.borderDecorationSize * this.pxRatio,
+                    (c.borderDecorationRadius / 2) * this.pxRatio,
+                    (c.borderDecorationRadius / 2) * this.pxRatio,
+                    ctxWidth - c.borderDecorationRadius * this.pxRatio,
+                    ctxHeight - c.borderDecorationRadius * this.pxRatio,
                 ] as const;
                 borderCtx.fillRect(...geoParams1);
                 borderCtx.strokeRect(...geoParams1);
 
                 // Draw the inner part of the shape by remove unnecessary parts.
                 borderCtx.globalCompositeOperation = 'destination-out';
-                const clippingShapeLineWidth = c.borderDecorationSize * this.pxRatio - borderWidth;
+                const clippingShapeLineWidth = c.borderDecorationRadius * this.pxRatio - borderWidth;
                 borderCtx.lineWidth = clippingShapeLineWidth;
 
                 const geoParams2 = [
@@ -414,7 +445,7 @@ export class CanvasConfig {
         return {
             width: b.width,
             height: b.height,
-            borderDecorationSize: c.borderDecorationSize,
+            borderDecorationSize: c.borderDecorationRadius,
             borderDecorationType: c.borderDecorationType,
         };
     };
@@ -423,7 +454,6 @@ export class CanvasConfig {
         const c = this.cachedStyle;
         const radius = c.trueFillRadius[1] * this.pxRatio;
         const size = radius * 2;
-        console.log(c);
 
         const last = this.cachedImg.cachedReveal;
         if (last) {
@@ -433,6 +463,10 @@ export class CanvasConfig {
         }
 
         const { borderReveal, fillReveal } = this.cachedImg.cachedCanvas;
+        const { 
+            borderReveal: borderRevealCtx, 
+            fillReveal: fillRevealCtx 
+        } = this.cachedImg.cachedCtx;
 
         this.syncSizeToRevealRadius(borderReveal);
         this.syncSizeToRevealRadius(fillReveal);
@@ -440,48 +474,41 @@ export class CanvasConfig {
         for (const i of [0, 1]) {
             // 0 means border, 1 means fill.
             const canvas = i === 0 ? borderReveal : fillReveal;
-            const revealCtx = canvas.getContext('2d');
-            if (!revealCtx) return;
+            const ctx = i === 0 ? borderRevealCtx: fillRevealCtx;
+            if (!ctx) return;
 
-            revealCtx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
 
             const fillAlpha = i === 0 ? c.opacity : c.opacity * 0.5;
 
-            const grd = revealCtx.createRadialGradient(radius, radius, 0, radius, radius, c.trueFillRadius[i]);
+            const grd = ctx.createRadialGradient(radius, radius, 0, radius, radius, c.trueFillRadius[i]);
 
             grd.addColorStop(0, `rgba(${c.color}, ${fillAlpha})`);
             grd.addColorStop(1, `rgba(${c.color}, 0.0)`);
 
-            revealCtx.fillStyle = grd;
-            revealCtx.clearRect(0, 0, size, size);
-            revealCtx.fillRect(0, 0, size, size);
+            ctx.fillStyle = grd;
+            ctx.clearRect(0, 0, size, size);
+            ctx.fillRect(0, 0, size, size);
         }
 
-        return {
-            radius,
-            color: c.color,
-            opacity: c.opacity,
-            borderReveal,
-            fillReveal,
-        };
+        this.cachedImg.cachedReveal.radius = radius;
+        this.cachedImg.cachedReveal.color = c.color;
+        this.cachedImg.cachedReveal.opacity = c.opacity;
+        
+        if (!this.ctx) return;
+        this.cachedImg.cachedPattern.borderReveal = this.ctx.createPattern(borderReveal, 'no-repeat');
+        this.cachedImg.cachedPattern.fillReveal = this.ctx.createPattern(fillReveal, 'no-repeat');
     };
 
     updateCachedBitmap = () => {
         if (!this.ctx) return;
 
         const cachedMask = this.updateCachedMask();
-        const cachedReveal = this.updateCachedReveal();
+        this.updateCachedReveal();
 
         if (cachedMask) {
             this.cachedImg.cachedMask = cachedMask;
         }
-        if (cachedReveal) {
-            this.cachedImg.cachedReveal = cachedReveal;
-        }
-
-        // TODO:
-        // WHAT DOES THIS LINE OF CODE MEANS?
-        // revealCtx.setTransform(this.pxRatio, 0, 0, this.pxRatio, 0, 0);
     };
 
     mouseInCanvas = () => {
@@ -532,6 +559,118 @@ export class CanvasConfig {
         grd.addColorStop(outerBorder, `rgba(${color}, 0)`);
     };
 
+    private drawShape = (fill: CanvasPattern, hollow: boolean) => {
+        if (!this.ctx) return;
+
+        const b = this.cachedBoundingRect;
+        const w = b.width;
+        const h = b.height;
+        const c = this.cachedStyle;
+        const tl = c.topLeftBorderDecorationRadius;
+        const tr = c.topRightBorderDecorationRadius;
+        const bl = c.bottomLeftBorderDecorationRadius;
+        const br = c.bottomRightBorderDecorationRadius;
+        const bw = c.borderWidth;
+
+        this.ctx.beginPath();
+
+        switch (c.borderDecorationType) {
+            // Oh... Fuck... It's painful...
+            case 'round':
+                // outer
+                this.ctx.moveTo(tl, 0);
+                this.ctx.arcTo(w, 0, w, h, tr);
+                this.ctx.lineTo(w, h - bl);
+                this.ctx.arcTo(w, h, br, h, bl);
+                this.ctx.lineTo(br, h);
+                this.ctx.arcTo(0, h, 0, br, br);
+                this.ctx.lineTo(0, tl);
+                this.ctx.arcTo(0, 0, tl, 0, tl);
+
+                if (hollow) {
+                    // inner
+                    const tl2 = tl - bw;
+                    const tr2 = tr - bw;
+                    const bl2 = bl - bw;
+                    const br2 = br - bw;
+
+                    this.ctx.moveTo(tl2, bw);
+                    this.ctx.arcTo(bw, bw, bw, tl2 + bw, tl2);
+                    this.ctx.lineTo(bw, h - bw - br2);
+                    this.ctx.arcTo(bw, h - bw, bw + br2, h - bw, br2);
+                    this.ctx.lineTo(w - bw - bl2, h - bw);
+                    this.ctx.arcTo(w - bw, h - bw, w - bw, h - bw - bl2, bl2);
+                    this.ctx.lineTo(w - bw, bw + tr2);
+                    this.ctx.arcTo(w - bw, bw, w - bw - tr2, bw, tr2);
+                    this.ctx.lineTo(tl2, bw);
+                }
+                break;
+            case 'bevel':
+                const sq2 = 1;
+                const ttl = tl * sq2;
+                const ttr = tr * sq2;
+                const tbl = bl * sq2;
+                const tbr = br * sq2;
+
+                const ttl2 = ttl - bw;
+                const ttr2 = ttr - bw;
+                const tbl2 = tbl - bw;
+                const tbr2 = tbr - bw;
+
+                // outer
+                this.ctx.moveTo(ttl, 0);
+                this.ctx.lineTo(w - ttr, 0);
+                this.ctx.lineTo(w, ttr);
+                this.ctx.lineTo(w, h - tbr);
+                this.ctx.lineTo(w - tbr, h);
+                this.ctx.lineTo(tbl, h);
+                this.ctx.lineTo(0, h - tbl);
+                this.ctx.lineTo(0, ttl);
+                this.ctx.lineTo(ttl, 0);
+                this.ctx.lineTo(w - ttr, 0);
+
+                if (hollow) {
+                    // inner
+                    this.ctx.moveTo(ttl2 + bw, bw);
+                    this.ctx.lineTo(bw, ttl2 + bw);
+                    this.ctx.lineTo(bw, h - tbl2 - bw);
+                    this.ctx.lineTo(bw + tbl2, h - bw);
+                    this.ctx.lineTo(w - tbr2 - bw, h - bw);
+                    this.ctx.lineTo(w - bw, h - tbr2 - bw);
+                    this.ctx.lineTo(w - bw, ttr2 + bw);
+                    this.ctx.lineTo(w - ttr2 - bw, bw);
+                    this.ctx.lineTo(ttl2 + bw, bw);
+                }
+                break;
+            case 'miter':
+                // outer
+                this.ctx.moveTo(0, 0);
+                this.ctx.lineTo(w, 0);
+                this.ctx.lineTo(w, h);
+                this.ctx.lineTo(0, h);
+                this.ctx.lineTo(0, 0);
+
+                if (hollow) {
+                    // inner
+                    this.ctx.moveTo(bw, bw);
+                    this.ctx.lineTo(bw, h - bw);
+                    this.ctx.lineTo(w - bw, h - bw);
+                    this.ctx.lineTo(w - bw, bw);
+                    this.ctx.lineTo(bw, bw);
+                }
+                break;
+            default:
+        }
+
+        this.ctx.closePath();
+        
+        if (this.ctx.fillStyle !== fill) {
+            this.ctx.fillStyle = fill;
+        }
+
+        this.ctx.fill();
+    };
+
     paint = (force?: boolean, debug?: boolean): boolean => {
         const store = this._store;
 
@@ -568,7 +707,7 @@ export class CanvasConfig {
         if (Number.isNaN(relativeX) || Number.isNaN(relativeY)) {
             return false;
         }
-       
+
         const c = this.cachedStyle;
         this.getTrueFillRadius(c.trueFillRadius);
 
