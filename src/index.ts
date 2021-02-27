@@ -33,10 +33,34 @@ export function register(compat: boolean = false) {
             inherits: true
         });
         window.CSS.registerProperty({
-            name: '--reveal-border-decoration-size',
+            name: '--reveal-border-decoration-radius',
             syntax: '<length>',
             initialValue: '4px',
-            inherits: true
+            inherits: false
+        });
+        window.CSS.registerProperty({
+            name: '--reveal-border-decoration-top-left-radius',
+            syntax: '<length>',
+            initialValue: '-1px',
+            inherits: false
+        });
+        window.CSS.registerProperty({
+            name: '--reveal-border-decoration-top-right-radius',
+            syntax: '<length>',
+            initialValue: '-1px',
+            inherits: false
+        });
+        window.CSS.registerProperty({
+            name: '--reveal-border-decoration-bottom-left-radius',
+            syntax: '<length>',
+            initialValue: '-1px',
+            inherits: false
+        });
+        window.CSS.registerProperty({
+            name: '--reveal-border-decoration-bottom-right-radius',
+            syntax: '<length>',
+            initialValue: '-1px',
+            inherits: false
         });
         window.CSS.registerProperty({
             name: '--reveal-border-width',
@@ -86,7 +110,11 @@ export function register(compat: boolean = false) {
         root.style.setProperty('--reveal-border-style', 'full');
         root.style.setProperty('--reveal-border-width', '1px');
         root.style.setProperty('--reveal-border-decoration-type', 'miter');
-        root.style.setProperty('--reveal-border-decoration-size', '4');
+        root.style.setProperty('--reveal-border-decoration-radius', '4');
+        root.style.setProperty('--reveal-border-decoration-top-left-radius', '-1');
+        root.style.setProperty('--reveal-border-decoration-top-right-radius', '-1');
+        root.style.setProperty('--reveal-border-decoration-bottom-left-radius', '-1');
+        root.style.setProperty('--reveal-border-decoration-bottom-right-radius', '-1');
         root.style.setProperty('--reveal-fill-mode', 'relative');
         root.style.setProperty('--reveal-fill-radius', '1.5');
         root.style.setProperty('--reveal-diffuse', 'true');
