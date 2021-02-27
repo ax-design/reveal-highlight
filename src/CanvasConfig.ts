@@ -400,10 +400,10 @@ export class CanvasConfig {
         const bl = c.bottomLeftBorderDecorationRadius;
         const br = c.bottomRightBorderDecorationRadius;
 
-        const tl2 = tl - bw;
-        const tr2 = tr - bw;
-        const bl2 = bl - bw;
-        const br2 = br - bw;
+        const tl2 = bw < tl ? tl - bw : 0;
+        const tr2 = bw < tr ? tr - bw : 0;
+        const bl2 = bw < bl ? bl - bw : 0;
+        const br2 = bw < br ? br - bw : 0;
 
         this.ctx.beginPath();
 
@@ -413,10 +413,10 @@ export class CanvasConfig {
                 // outer
                 this.ctx.moveTo(tl, 0);
                 this.ctx.arcTo(w, 0, w, h, tr);
-                this.ctx.lineTo(w, h - bl);
-                this.ctx.arcTo(w, h, br, h, bl);
-                this.ctx.lineTo(br, h);
-                this.ctx.arcTo(0, h, 0, br, br);
+                this.ctx.lineTo(w, h - br);
+                this.ctx.arcTo(w, h, br, h, br);
+                this.ctx.lineTo(bl, h);
+                this.ctx.arcTo(0, h, 0, br, bl);
                 this.ctx.lineTo(0, tl);
                 this.ctx.arcTo(0, 0, tl, 0, tl);
 
@@ -424,10 +424,10 @@ export class CanvasConfig {
                     // inner
                     this.ctx.moveTo(tl2, bw);
                     this.ctx.arcTo(bw, bw, bw, tl2 + bw, tl2);
-                    this.ctx.lineTo(bw, h - bw - br2);
-                    this.ctx.arcTo(bw, h - bw, bw + br2, h - bw, br2);
-                    this.ctx.lineTo(w - bw - bl2, h - bw);
-                    this.ctx.arcTo(w - bw, h - bw, w - bw, h - bw - bl2, bl2);
+                    this.ctx.lineTo(bw, h - bw - bl2);
+                    this.ctx.arcTo(bw, h - bw, bw + bl2, h - bw, bl2);
+                    this.ctx.lineTo(w - bw - br2, h - bw);
+                    this.ctx.arcTo(w - bw, h - bw, w - bw, h - bw - br2, br2);
                     this.ctx.lineTo(w - bw, bw + tr2);
                     this.ctx.arcTo(w - bw, bw, w - bw - tr2, bw, tr2);
                     this.ctx.lineTo(tl2, bw);

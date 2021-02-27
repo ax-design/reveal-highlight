@@ -36,31 +36,31 @@ export function register(compat: boolean = false) {
             name: '--reveal-border-decoration-radius',
             syntax: '<length>',
             initialValue: '4px',
-            inherits: false
+            inherits: true
         });
         window.CSS.registerProperty({
             name: '--reveal-border-decoration-top-left-radius',
             syntax: '<length>',
             initialValue: '-1px',
-            inherits: false
+            inherits: true
         });
         window.CSS.registerProperty({
             name: '--reveal-border-decoration-top-right-radius',
             syntax: '<length>',
             initialValue: '-1px',
-            inherits: false
+            inherits: true
         });
         window.CSS.registerProperty({
             name: '--reveal-border-decoration-bottom-left-radius',
             syntax: '<length>',
             initialValue: '-1px',
-            inherits: false
+            inherits: true
         });
         window.CSS.registerProperty({
             name: '--reveal-border-decoration-bottom-right-radius',
             syntax: '<length>',
             initialValue: '-1px',
-            inherits: false
+            inherits: true
         });
         window.CSS.registerProperty({
             name: '--reveal-border-width',
