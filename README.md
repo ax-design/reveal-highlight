@@ -106,7 +106,7 @@ reveal-highlight use custom properties to manage the style of highlights
 If `absolute` provided, gradient will be:
 
 -   `r(border) = fillRadius`
--   `r(fill) = illRadius`
+-   `r(fill) = fillRadius`
 
 the unit is pixel.
 

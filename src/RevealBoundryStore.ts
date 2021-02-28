@@ -81,8 +81,8 @@ export class RevealBoundaryStore {
             const relativeFrame = frame - config.mouseDownAnimateStartFrame;
             config.mouseDownAnimateCurrentFrame = relativeFrame;
 
-            const speed = config.cachedStyle.revealAnimateSpeed;
-            const accelerateRate = config.cachedStyle.revealReleasedAccelerateRate;
+            const speed = config.cachedStyle.pressAnimationSpeed;
+            const accelerateRate = config.cachedStyle.releaseAnimationAccelerateRate;
 
             let unitLogicFrame = relativeFrame;
             if (config.mouseReleased && config.mouseDownAnimateReleasedFrame) {

@@ -72,11 +72,13 @@ export interface CachedStyle {
     bottomLeftBorderDecorationRadius: number;
     bottomRightBorderDecorationRadius: number;
     borderWidth: number;
-    fillMode: string;
-    fillRadius: number;
+    hoverLight: boolean;
+    hoverLightFillMode: string;
+    hoverLightFillRadius: number;
     diffuse: boolean;
-    revealAnimateSpeed: number;
-    revealReleasedAccelerateRate: number;
+    pressAnimation: boolean;
+    pressAnimationSpeed: number;
+    releaseAnimationAccelerateRate: number;
 }
 
 interface CachedReveal {
@@ -147,11 +149,13 @@ export class CanvasConfig {
         bottomLeftBorderDecorationRadius: 0,
         bottomRightBorderDecorationRadius: 0,
         borderWidth: 1,
-        fillMode: '',
-        fillRadius: 0,
+        hoverLight: true,
+        hoverLightFillMode: '',
+        hoverLightFillRadius: 0,
         diffuse: true,
-        revealAnimateSpeed: 0,
-        revealReleasedAccelerateRate: 0,
+        pressAnimation: true,
+        pressAnimationSpeed: 0,
+        releaseAnimationAccelerateRate: 0,
     };
 
     mouseUpClientX: number | null = null;
@@ -215,8 +219,8 @@ export class CanvasConfig {
 
     getTrueFillRadius = (
         trueFillRadius = [0, 0] as [number, number],
-        fillMode = this.computedStyle.get('--reveal-fill-mode'),
-        fillRadius = this.computedStyle.getNumber('--reveal-fill-radius')
+        fillMode = this.computedStyle.get('--reveal-hover-light-radius-mode'),
+        fillRadius = this.computedStyle.getNumber('--reveal-hover-light-radius')
     ) => {
         const b = this.cachedBoundingRect;
 
@@ -258,11 +262,13 @@ export class CanvasConfig {
         c.borderDecorationType =
             (this.computedStyle.get('--reveal-border-decoration-type') as BorderDecoration) || 'miter';
         c.borderWidth = this.computedStyle.getNumber('--reveal-border-width');
-        c.fillMode = this.computedStyle.get('--reveal-fill-mode');
-        c.fillRadius = this.computedStyle.getNumber('--reveal-fill-radius');
+        c.hoverLight = this.computedStyle.get('--reveal-hover-light') === 'true';
+        c.hoverLightFillRadius = this.computedStyle.getNumber('--reveal-hover-light-radius');
+        c.hoverLightFillMode = this.computedStyle.get('--reveal-hover-light-radius-mode');
         c.diffuse = this.computedStyle.get('--reveal-diffuse') === 'true';
-        c.revealAnimateSpeed = this.computedStyle.getNumber('--reveal-animate-speed');
-        c.revealReleasedAccelerateRate = this.computedStyle.getNumber('--reveal-released-accelerate-rate');
+        c.pressAnimation = this.computedStyle.get('--reveal-press-animation') === 'true';
+        c.pressAnimationSpeed = this.computedStyle.getNumber('--reveal-press-animation-speed');
+        c.releaseAnimationAccelerateRate = this.computedStyle.getNumber('--reveal-release-animation-accelerate-rate');
 
         const r = this.computedStyle.getNumber('--reveal-border-decoration-radius');
         const tl = this.computedStyle.getNumber('--reveal-border-decoration-top-left-radius');
@@ -275,7 +281,7 @@ export class CanvasConfig {
         c.bottomLeftBorderDecorationRadius = bl >= 0 ? bl : r;
         c.bottomRightBorderDecorationRadius = br >= 0 ? br : r;
 
-        this.getTrueFillRadius(c.trueFillRadius, c.fillMode, c.fillRadius);
+        this.getTrueFillRadius(c.trueFillRadius, c.hoverLightFillMode, c.hoverLightFillRadius);
 
         if (!isValidateBorderDecorationType(c.borderDecorationType)) {
             throw new SyntaxError(
@@ -468,12 +474,22 @@ export class CanvasConfig {
                 this.ctx.lineTo(0, 0);
 
                 if (hollow) {
-                    // inner
-                    this.ctx.moveTo(bw, bw);
-                    this.ctx.lineTo(bw, h - bw);
-                    this.ctx.lineTo(w - bw, h - bw);
-                    this.ctx.lineTo(w - bw, bw);
-                    this.ctx.lineTo(bw, bw);
+                    if (c.borderStyle === 'full') {
+                        // inner
+                        this.ctx.moveTo(bw, bw);
+                        this.ctx.lineTo(bw, h - bw);
+                        this.ctx.lineTo(w - bw, h - bw);
+                        this.ctx.lineTo(w - bw, bw);
+                        this.ctx.lineTo(bw, bw);
+                    }
+
+                    if (c.borderStyle === 'half') {
+                        this.ctx.moveTo(0, bw);
+                        this.ctx.lineTo(0, h - bw);
+                        this.ctx.lineTo(w, h - bw);
+                        this.ctx.lineTo(w, bw);
+                        this.ctx.lineTo(0, bw);
+                    }
                 }
                 break;
             default:
@@ -549,7 +565,7 @@ export class CanvasConfig {
             const mouseInCanvas = relativeX > 0 && relativeY > 0 && relativeX < b.width && relativeY < b.height;
 
             const fillPattern = this.cachedImg.cachedPattern.fillReveal;
-            if (c.fillMode !== 'none' && mouseInCanvas && fillPattern) {
+            if (c.hoverLight && mouseInCanvas && fillPattern) {
                 // draw fill.
                 this.ctx.setTransform(1, 0, 0, 1, 0, 0);
                 this.drawShape(false);
@@ -558,9 +574,9 @@ export class CanvasConfig {
                 this.ctx.fill();
             }
 
-
+            const diffuse = c.diffuse && mouseInRenderArea;
             const borderPattern = this.cachedImg.cachedPattern.borderReveal;
-            if (c.borderStyle !== 'none' && borderPattern) {
+            if (c.borderWidth !== 0 && borderPattern && diffuse) {
                 // Draw border.
                 this.ctx.setTransform(1, 0, 0, 1, 0, 0);
                 this.drawShape(true);
@@ -570,7 +586,9 @@ export class CanvasConfig {
             }
         }
 
-        if (this.mousePressed && this.mouseDownAnimateLogicFrame) {
+        if (c.pressAnimation && this.mousePressed && this.mouseDownAnimateLogicFrame) {
+            this.ctx.setTransform(1, 0, 0, 1, 0, 0);
+            // prettier-ignore
             const animateGrd =
                 this.mouseReleased && this.mouseUpClientX && this.mouseUpClientY
                     ? this.ctx.createRadialGradient(
@@ -595,8 +613,7 @@ export class CanvasConfig {
             this.ctx.fillStyle = animateGrd;
             this.ctx.fill();
         }
-        
-        this.ctx.setTransform(1, 0, 0, 1, 0, 0);
+
         return true;
     };
 }

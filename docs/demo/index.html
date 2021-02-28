@@ -64,16 +64,28 @@
       --reveal-border-width: 3px;
     }
 
+    .no-border {
+      --reveal-border-width: 0;
+    }
+
     .fill-radius {
-      --reveal-fill-radius: 0.2;
+      --reveal-hover-light-radius: 0.2;
+    }
+
+    .no-fill {
+      --reveal-hover-light: false;
     }
 
     .hold-animation {
-      --reveal-animate-speed: 8000;
+      --reveal-press-animation-speed: 8000;
     }
 
     .release-animation {
-      --reveal-released-accelerate-rate: 20;
+      --reveal-release-animation-accelerate-rate: 20;
+    }
+
+    .no-animation {
+      --reveal-press-animation: false;
     }
 
     .long-list {
@@ -341,6 +353,35 @@
 
     <section class="demo-block">
       <div class="demo">
+        <ax-reveal-bound class="no-border">
+          <div class="ax-reveal-container">
+            <ax-reveal>
+              <button class="ax-reveal-button">Welcome</button>
+            </ax-reveal>
+            <ax-reveal>
+              <button class="ax-reveal-button">To</button>
+            </ax-reveal>
+          </div>
+          <div class="ax-reveal-container">
+            <ax-reveal>
+              <button class="ax-reveal-button">Project</button>
+            </ax-reveal>
+            <ax-reveal>
+              <button class="ax-reveal-button">Axiom!</button>
+            </ax-reveal>
+          </div>
+        </ax-reveal-bound>
+      </div>
+      <div class="code">
+        <h2>No border</h2>
+        <pre>.my-reveal-container{
+  --reveal-border-width: 0;
+}</pre>
+      </div>
+    </section>
+
+    <section class="demo-block">
+      <div class="demo">
         <ax-reveal-bound class="fill-radius">
           <div class="ax-reveal-container">
             <ax-reveal>
@@ -363,7 +404,36 @@
       <div class="code">
         <h2>Fill Radius</h2>
         <pre>.my-reveal-container{
-  --reveal-fill-radius: 0.2;
+  --reveal-hover-light-radius: 0.2;
+}</pre>
+      </div>
+    </section>
+
+    <section class="demo-block">
+      <div class="demo">
+        <ax-reveal-bound class="no-fill">
+          <div class="ax-reveal-container">
+            <ax-reveal>
+              <button class="ax-reveal-button">Welcome</button>
+            </ax-reveal>
+            <ax-reveal>
+              <button class="ax-reveal-button">To</button>
+            </ax-reveal>
+          </div>
+          <div class="ax-reveal-container">
+            <ax-reveal>
+              <button class="ax-reveal-button">Project</button>
+            </ax-reveal>
+            <ax-reveal>
+              <button class="ax-reveal-button">Axiom!</button>
+            </ax-reveal>
+          </div>
+        </ax-reveal-bound>
+      </div>
+      <div class="code">
+        <h2>No Fill</h2>
+        <pre>.my-reveal-container{
+  --reveal-hover-light: false;
 }</pre>
       </div>
     </section>
@@ -422,6 +492,35 @@
         <h2>Release animation</h2>
         <pre>.my-reveal-container{
   --reveal-released-accelerate-rate: 20;
+}</pre>
+      </div>
+    </section>
+
+    <section class="demo-block">
+      <div class="demo">
+        <ax-reveal-bound class="no-animation">
+          <div class="ax-reveal-container">
+            <ax-reveal>
+              <button class="ax-reveal-button">Welcome</button>
+            </ax-reveal>
+            <ax-reveal>
+              <button class="ax-reveal-button">To</button>
+            </ax-reveal>
+          </div>
+          <div class="ax-reveal-container">
+            <ax-reveal>
+              <button class="ax-reveal-button">Project</button>
+            </ax-reveal>
+            <ax-reveal>
+              <button class="ax-reveal-button">Axiom!</button>
+            </ax-reveal>
+          </div>
+        </ax-reveal-bound>
+      </div>
+      <div class="code">
+        <h2>No animation</h2>
+        <pre>.my-reveal-container{
+  --reveal-press-animation: false;
 }</pre>
       </div>
     </section>
