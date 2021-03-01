@@ -332,7 +332,7 @@ export class CanvasConfig {
 
             const fillAlpha = i === 0 ? c.opacity : c.opacity * 0.5;
 
-            const grd = ctx.createRadialGradient(radius, radius, 0, radius, radius, c.trueFillRadius[i]);
+            const grd = ctx.createRadialGradient(radius, radius, 0, radius, radius, c.trueFillRadius[i] * this.pxRatio);
 
             grd.addColorStop(0, `rgba(${c.color}, ${fillAlpha})`);
             grd.addColorStop(1, `rgba(${c.color}, 0.0)`);
@@ -413,10 +413,10 @@ export class CanvasConfig {
         const c = this.cachedStyle;
         const bw = c.borderWidth * this.pxRatio;
 
-        const tl = c.topLeftBorderDecorationRadius;
-        const tr = c.topRightBorderDecorationRadius;
-        const bl = c.bottomLeftBorderDecorationRadius;
-        const br = c.bottomRightBorderDecorationRadius;
+        const tl = c.topLeftBorderDecorationRadius * this.pxRatio;
+        const tr = c.topRightBorderDecorationRadius * this.pxRatio;
+        const bl = c.bottomLeftBorderDecorationRadius * this.pxRatio;
+        const br = c.bottomRightBorderDecorationRadius * this.pxRatio;
 
         const tl2 = bw < tl ? tl - bw : 0;
         const tr2 = bw < tr ? tr - bw : 0;
@@ -604,20 +604,20 @@ export class CanvasConfig {
             const animateGrd =
                 this.mouseReleased && this.mouseUpClientX && this.mouseUpClientY
                     ? this.ctx.createRadialGradient(
-                          this.mouseUpClientX - b.left,
-                          this.mouseUpClientY - b.top,
+                          (this.mouseUpClientX - b.left) * this.pxRatio,
+                          (this.mouseUpClientY - b.top) * this.pxRatio,
                           0,
-                          this.mouseUpClientX - b.left,
-                          this.mouseUpClientY - b.top,
-                          c.trueFillRadius[1]
+                          (this.mouseUpClientX - b.left) * this.pxRatio,
+                          (this.mouseUpClientY - b.top) * this.pxRatio,
+                          c.trueFillRadius[1] * this.pxRatio
                       )
                     : this.ctx.createRadialGradient(
-                          relativeX,
-                          relativeY,
+                          relativeX * this.pxRatio,
+                          relativeY * this.pxRatio,
                           0,
-                          relativeX,
-                          relativeY,
-                          c.trueFillRadius[1]
+                          relativeX * this.pxRatio,
+                          relativeY * this.pxRatio,
+                          c.trueFillRadius[1] * this.pxRatio
                       );
             this.updateAnimateGrd(this.mouseDownAnimateLogicFrame, animateGrd);
 
