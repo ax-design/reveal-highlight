@@ -286,6 +286,44 @@
 
     <section class="demo-block">
       <div class="demo">
+        <ax-reveal-bound class="detailed-color-adjustment">
+          <div class="ax-reveal-container">
+            <ax-reveal>
+              <button class="ax-reveal-button">Welcome</button>
+            </ax-reveal>
+            <ax-reveal>
+              <button class="ax-reveal-button">To</button>
+            </ax-reveal>
+          </div>
+          <div class="ax-reveal-container">
+            <ax-reveal>
+              <button class="ax-reveal-button">Project</button>
+            </ax-reveal>
+            <ax-reveal>
+              <button class="ax-reveal-button">Axiom!</button>
+            </ax-reveal>
+          </div>
+        </ax-reveal-bound>
+      </div>
+      <style>
+        .detailed-color-adjustment {
+          --reveal-border-color: #FF00C1;
+          --reveal-hover-light-color: #00B8FF;
+          --reveal-press-animation-color: #4900FF;
+        }
+      </style>
+      <div class="code">
+        <h2>Customize Every Parts</h2>
+        <pre>.my-reveal-container{
+  --reveal-border-color: #FF00C1;
+  --reveal-hover-light-color: #00B8FF;
+  --reveal-press-animation-color: #4900FF;
+}</pre>
+      </div>
+    </section>
+
+    <section class="demo-block">
+      <div class="demo">
         <ax-reveal-bound class="border-width">
           <div class="ax-reveal-container">
             <ax-reveal>

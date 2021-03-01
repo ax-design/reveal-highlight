@@ -1,5 +1,6 @@
 import { ComputedStyleStorage, createStorage } from './ComputedStyleStorage.js';
 import { RevealBoundaryStore } from './RevealBoundryStore.js';
+import { MAGIC_DEFAULT_COLOR } from './variables.js';
 
 type BorderDecoration = 'round' | 'bevel' | 'miter';
 
@@ -19,8 +20,8 @@ const extractRGBValue = (x: string) => {
         var r = (hexVal >> 16) & 255;
         var g = (hexVal >> 8) & 255;
         var b = hexVal & 255;
-    
-        return r + "," + g + "," + b;
+
+        return r + ',' + g + ',' + b;
     } else {
         let result = '';
         let beginSearch = false;
@@ -77,6 +78,7 @@ export interface CachedStyle {
     opacity: number;
     trueFillRadius: [number, number];
     borderStyle: string;
+    borderColor: string;
     borderDecorationType: BorderDecoration;
     borderDecorationRadius: number;
     topLeftBorderDecorationRadius: number;
@@ -85,17 +87,20 @@ export interface CachedStyle {
     bottomRightBorderDecorationRadius: number;
     borderWidth: number;
     hoverLight: boolean;
+    hoverLightColor: string;
     hoverLightFillMode: string;
     hoverLightFillRadius: number;
     diffuse: boolean;
     pressAnimation: boolean;
+    pressAnimationColor: string;
     pressAnimationSpeed: number;
     releaseAnimationAccelerateRate: number;
 }
 
 interface CachedReveal {
     radius: number;
-    color: string;
+    borderColor: string;
+    hoverLightColor: string;
     opacity: number;
 }
 
@@ -154,6 +159,7 @@ export class CanvasConfig {
         color: '',
         opacity: 1,
         borderStyle: '',
+        borderColor: '',
         borderDecorationType: 'miter',
         borderDecorationRadius: 0,
         topLeftBorderDecorationRadius: 0,
@@ -162,10 +168,12 @@ export class CanvasConfig {
         bottomRightBorderDecorationRadius: 0,
         borderWidth: 1,
         hoverLight: true,
+        hoverLightColor: '',
         hoverLightFillMode: '',
         hoverLightFillRadius: 0,
         diffuse: true,
         pressAnimation: true,
+        pressAnimationColor: '',
         pressAnimationSpeed: 0,
         releaseAnimationAccelerateRate: 0,
     };
@@ -199,7 +207,8 @@ export class CanvasConfig {
         this.cachedImg = {
             cachedReveal: {
                 radius: -1,
-                color: 'INVALID',
+                borderColor: 'INVALID',
+                hoverLightColor: 'INVALID',
                 opacity: 0,
             },
             cachedCanvas,
@@ -263,22 +272,30 @@ export class CanvasConfig {
             return;
         }
 
-        const colorString = this.computedStyle.getColor('--reveal-color');
-        const colorStringMatch = extractRGBValue(colorString);
+        const parsedBaseColor = extractRGBValue(this.computedStyle.getColor('--reveal-color')) || '0, 0, 0';
+        const parsedBorderColor = extractRGBValue(this.computedStyle.getColor('--reveal-border-color'));
+        const parsedHoverLightColor = extractRGBValue(this.computedStyle.getColor('--reveal-hover-light-color'));
+        const parsedPressAnimationColor = extractRGBValue(
+            this.computedStyle.getColor('--reveal-press-animation-color')
+        );
 
         const c = this.cachedStyle;
 
-        c.color = colorStringMatch || '0, 0, 0';
+        c.color = parsedBaseColor;
         c.opacity = this.computedStyle.getNumber('--reveal-opacity');
         c.borderStyle = this.computedStyle.get('--reveal-border-style');
+        c.borderColor = parsedBorderColor !== MAGIC_DEFAULT_COLOR ? parsedBorderColor : parsedBaseColor;
         c.borderDecorationType =
             (this.computedStyle.get('--reveal-border-decoration-type') as BorderDecoration) || 'miter';
         c.borderWidth = this.computedStyle.getNumber('--reveal-border-width');
         c.hoverLight = this.computedStyle.get('--reveal-hover-light') === 'true';
+        c.hoverLightColor = parsedHoverLightColor !== MAGIC_DEFAULT_COLOR ? parsedHoverLightColor : parsedBaseColor;
         c.hoverLightFillRadius = this.computedStyle.getNumber('--reveal-hover-light-radius');
         c.hoverLightFillMode = this.computedStyle.get('--reveal-hover-light-radius-mode');
         c.diffuse = this.computedStyle.get('--reveal-diffuse') === 'true';
         c.pressAnimation = this.computedStyle.get('--reveal-press-animation') === 'true';
+        c.pressAnimationColor =
+            parsedPressAnimationColor !== MAGIC_DEFAULT_COLOR ? parsedPressAnimationColor : parsedBaseColor;
         c.pressAnimationSpeed = this.computedStyle.getNumber('--reveal-press-animation-speed');
         c.releaseAnimationAccelerateRate = this.computedStyle.getNumber('--reveal-release-animation-accelerate-rate');
 
@@ -310,11 +327,11 @@ export class CanvasConfig {
         const size = radius * 2;
 
         const last = this.cachedImg.cachedReveal;
-        if (last) {
-            if (radius === last.radius && c.color == last.color && c.opacity == last.opacity) {
-                return;
-            }
-        }
+        const compareBase = radius === last.radius && c.opacity === last.opacity;
+        const doNotNeedUpdateBorderReveal = compareBase && c.borderColor === last.borderColor;
+        const doNotNeedUpdateHoverLightReveal = compareBase && c.hoverLightColor === last.hoverLightColor;
+
+        if (doNotNeedUpdateBorderReveal && doNotNeedUpdateHoverLightReveal) return;
 
         const { borderReveal, fillReveal } = this.cachedImg.cachedCanvas;
         const { borderReveal: borderRevealCtx, fillReveal: fillRevealCtx } = this.cachedImg.cachedCtx;
@@ -322,20 +339,25 @@ export class CanvasConfig {
         this.syncSizeToRevealRadius(borderReveal);
         this.syncSizeToRevealRadius(fillReveal);
 
-        for (const i of [0, 1]) {
-            // 0 means border, 1 means fill.
+        for (let i = 0; i <= 1; i++) {
+            // 0 means border, 1 means hover light.
+            if (i === 0 && doNotNeedUpdateBorderReveal) continue;
+            if (i === 1 && doNotNeedUpdateHoverLightReveal) continue;
+
             const canvas = i === 0 ? borderReveal : fillReveal;
             const ctx = i === 0 ? borderRevealCtx : fillRevealCtx;
-            if (!ctx) return;
+            if (!ctx) continue;
+
+            const color = i === 0 ? c.borderColor : c.hoverLightColor;
 
             ctx.clearRect(0, 0, canvas.width, canvas.height);
 
             const fillAlpha = i === 0 ? c.opacity : c.opacity * 0.5;
 
-            const grd = ctx.createRadialGradient(radius, radius, 0, radius, radius, c.trueFillRadius[i] * this.pxRatio);
+            const grd = ctx.createRadialGradient(radius, radius, 0, radius, radius, radius);
 
-            grd.addColorStop(0, `rgba(${c.color}, ${fillAlpha})`);
-            grd.addColorStop(1, `rgba(${c.color}, 0.0)`);
+            grd.addColorStop(0, `rgba(${color}, ${fillAlpha})`);
+            grd.addColorStop(1, `rgba(${color}, 0.0)`);
 
             ctx.fillStyle = grd;
             ctx.clearRect(0, 0, size, size);
@@ -343,7 +365,8 @@ export class CanvasConfig {
         }
 
         this.cachedImg.cachedReveal.radius = radius;
-        this.cachedImg.cachedReveal.color = c.color;
+        this.cachedImg.cachedReveal.borderColor = c.borderColor;
+        this.cachedImg.cachedReveal.hoverLightColor = c.hoverLightColor;
         this.cachedImg.cachedReveal.opacity = c.opacity;
 
         if (!this.ctx) return;
@@ -389,7 +412,7 @@ export class CanvasConfig {
     };
 
     updateAnimateGrd = (frame: number, grd: CanvasGradient) => {
-        const { color, opacity } = this.cachedStyle;
+        const { pressAnimationColor, opacity } = this.cachedStyle;
 
         const _innerAlpha = opacity * (0.2 - frame);
         const _outerAlpha = opacity * (0.1 - frame * 0.07);
@@ -399,9 +422,9 @@ export class CanvasConfig {
         const outerAlpha = _outerAlpha < 0 ? 0 : _outerAlpha;
         const outerBorder = _outerBorder > 1 ? 1 : _outerBorder;
 
-        grd.addColorStop(0, `rgba(${color},${innerAlpha})`);
-        grd.addColorStop(outerBorder * 0.55, `rgba(${color},${outerAlpha})`);
-        grd.addColorStop(outerBorder, `rgba(${color}, 0)`);
+        grd.addColorStop(0, `rgba(${pressAnimationColor},${innerAlpha})`);
+        grd.addColorStop(outerBorder * 0.55, `rgba(${pressAnimationColor},${outerAlpha})`);
+        grd.addColorStop(outerBorder, `rgba(${pressAnimationColor}, 0)`);
     };
 
     private drawShape = (hollow: boolean) => {
@@ -410,6 +433,7 @@ export class CanvasConfig {
         const b = this.cachedBoundingRect;
         const w = b.width * this.pxRatio;
         const h = b.height * this.pxRatio;
+
         const c = this.cachedStyle;
         const bw = c.borderWidth * this.pxRatio;
 
@@ -492,7 +516,8 @@ export class CanvasConfig {
                         this.ctx.lineTo(bw, h - bw);
                         this.ctx.lineTo(w - bw, h - bw);
                         this.ctx.lineTo(w - bw, bw);
-                        this.ctx.lineTo(bw, bw);
+                        // I don't know by change this to 'bw, bw' caused rendering bug...
+                        this.ctx.lineTo(0, bw);
                     }
 
                     if (c.borderStyle === 'half') {

@@ -1,4 +1,5 @@
 import { AxRevealProvider, AxRevealBoundary, AxReveal } from './CustomElements.js';
+import { MAGIC_DEFAULT_COLOR } from './variables.js';
 
 function registerCustomElements() {
     customElements.define(AxRevealProvider.ElementName, AxRevealProvider);
@@ -24,6 +25,12 @@ export function register(compat: boolean = false) {
             name: '--reveal-border-style',
             syntax: '<custom-ident>',
             initialValue: 'full',
+            inherits: true,
+        });
+        window.CSS.registerProperty({
+            name: '--reveal-border-color',
+            syntax: '<color>',
+            initialValue: MAGIC_DEFAULT_COLOR,
             inherits: true,
         });
         window.CSS.registerProperty({
@@ -75,6 +82,12 @@ export function register(compat: boolean = false) {
             inherits: true,
         });
         window.CSS.registerProperty({
+            name: '--reveal-hover-light-color',
+            syntax: '<color>',
+            initialValue: MAGIC_DEFAULT_COLOR,
+            inherits: true,
+        });
+        window.CSS.registerProperty({
             name: '--reveal-hover-light-radius',
             syntax: '<number>',
             initialValue: '1.5',
@@ -99,6 +112,12 @@ export function register(compat: boolean = false) {
             inherits: true,
         });
         window.CSS.registerProperty({
+            name: '--reveal-press-animation-color',
+            syntax: '<color>',
+            initialValue: MAGIC_DEFAULT_COLOR,
+            inherits: true,
+        });
+        window.CSS.registerProperty({
             name: '--reveal-press-animation-speed',
             syntax: '<number>',
             initialValue: '2000',
@@ -120,6 +139,7 @@ export function register(compat: boolean = false) {
         root.style.setProperty('--reveal-color', 'rgb(0, 0, 0)');
         root.style.setProperty('--reveal-opacity', '0.26');
         root.style.setProperty('--reveal-border-style', 'full');
+        root.style.setProperty('--reveal-border-color', MAGIC_DEFAULT_COLOR);
         root.style.setProperty('--reveal-border-width', '1px');
         root.style.setProperty('--reveal-border-decoration-type', 'miter');
         root.style.setProperty('--reveal-border-decoration-radius', '4');
@@ -128,10 +148,12 @@ export function register(compat: boolean = false) {
         root.style.setProperty('--reveal-border-decoration-bottom-left-radius', '-1');
         root.style.setProperty('--reveal-border-decoration-bottom-right-radius', '-1');
         root.style.setProperty('--reveal-hover-light', 'true');
+        root.style.setProperty('--reveal-hover-light-color', MAGIC_DEFAULT_COLOR);
         root.style.setProperty('--reveal-hover-light-radius', '1.5');
         root.style.setProperty('--reveal-hover-light-radius-mode', 'relative');
         root.style.setProperty('--reveal-diffuse', 'true');
         root.style.setProperty('--reveal-press-animation', 'true');
+        root.style.setProperty('--reveal-press-animation-color', MAGIC_DEFAULT_COLOR);
         root.style.setProperty('--reveal-press-animation-speed', '2000');
         root.style.setProperty('--reveal-release-animation-accelerate-rate', '6');
 
