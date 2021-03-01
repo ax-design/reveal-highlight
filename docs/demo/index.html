@@ -34,95 +34,6 @@
       background: none;
       user-select: none;
     }
-
-    .round-corner {
-      --reveal-border-decoration-type: round;
-      --reveal-border-decoration-size: 8px;
-    }
-
-    .custom-radius ax-reveal {
-      --reveal-border-decoration-top-left-radius: 0;
-      --reveal-border-decoration-top-right-radius: 10px;
-      --reveal-border-decoration-bottom-left-radius: 20px;
-      --reveal-border-decoration-bottom-right-radius: 0;
-    }
-
-    .bevel-corner {
-      --reveal-border-decoration-type: bevel;
-      --reveal-border-decoration-size: 16px;
-    }
-
-    .with-opacity {
-      --reveal-opacity: 1.0;
-    }
-
-    .colored-button {
-      --reveal-color: red;
-    }
-
-    .border-width {
-      --reveal-border-width: 3px;
-    }
-
-    .no-border {
-      --reveal-border-width: 0;
-    }
-
-    .fill-radius {
-      --reveal-hover-light-radius: 0.2;
-    }
-
-    .no-fill {
-      --reveal-hover-light: false;
-    }
-
-    .hold-animation {
-      --reveal-press-animation-speed: 8000;
-    }
-
-    .release-animation {
-      --reveal-release-animation-accelerate-rate: 20;
-    }
-
-    .no-animation {
-      --reveal-press-animation: false;
-    }
-
-    .long-list {
-      --reveal-border-style: half;
-      height: 300px;
-      width: 250px;
-      margin-bottom: 15px;
-      overflow-y: scroll;
-    }
-
-    .long-list .ax-reveal-container {
-      flex-direction: column;
-    }
-
-    .long-list .ax-reveal-container>ax-reveal {
-      margin: 0;
-    }
-
-    .no-diffuse {
-      --reveal-diffuse: false;
-      overflow-y: auto;
-      height: auto;
-    }
-
-    .benchmark {
-      font-size: 0;
-    }
-    .benchmark ax-reveal {
-      width: 40px;
-      height: 40px;
-      margin: 4px;
-      padding: 8px;
-      font-size: 24px;
-      text-align: center;
-      line-height: 40px;
-      cursor: default;
-    }
   </style>
 </head>
 
@@ -192,6 +103,12 @@
           </div>
         </ax-reveal-bound>
       </div>
+      <style>
+        .round-corner {
+          --reveal-border-decoration-type: round;
+          --reveal-border-decoration-size: 8px;
+        }
+      </style>
       <div class="code">
         <h2>Round Corner</h2>
         <pre>.my-reveal-container{
@@ -222,6 +139,14 @@
           </div>
         </ax-reveal-bound>
       </div>
+      <style>
+        .custom-radius ax-reveal {
+          --reveal-border-decoration-top-left-radius: 0;
+          --reveal-border-decoration-top-right-radius: 10px;
+          --reveal-border-decoration-bottom-left-radius: 20px;
+          --reveal-border-decoration-bottom-right-radius: 0;
+        }
+      </style>
       <div class="code">
         <h2>Custom border radius</h2>
         <pre>.my-reveal-container{
@@ -255,6 +180,12 @@
           </div>
         </ax-reveal-bound>
       </div>
+      <style>
+        .bevel-corner {
+          --reveal-border-decoration-type: bevel;
+          --reveal-border-decoration-size: 16px;
+        }
+      </style>
       <div class="code">
         <h2>Even more fancy</h2>
         <pre>.my-reveal-container{
@@ -285,6 +216,11 @@
           </div>
         </ax-reveal-bound>
       </div>
+      <style>
+        .with-opacity {
+          --reveal-opacity: 1.0;
+        }
+      </style>
       <div class="code">
         <h2>Opacity</h2>
         <pre>.my-reveal-container{
@@ -295,29 +231,55 @@
 
     <section class="demo-block">
       <div class="demo">
-        <ax-reveal-bound class="colored-button">
+        <ax-reveal-bound>
           <div class="ax-reveal-container">
-            <ax-reveal>
+            <ax-reveal class="colored-button1">
               <button class="ax-reveal-button">Welcome</button>
             </ax-reveal>
-            <ax-reveal>
+            <ax-reveal class="colored-button2">
               <button class="ax-reveal-button">To</button>
             </ax-reveal>
           </div>
           <div class="ax-reveal-container">
-            <ax-reveal>
+            <ax-reveal class="colored-button3">
               <button class="ax-reveal-button">Project</button>
             </ax-reveal>
-            <ax-reveal>
+            <ax-reveal class="colored-button4">
               <button class="ax-reveal-button">Axiom!</button>
             </ax-reveal>
           </div>
         </ax-reveal-bound>
       </div>
+      <style>
+        .colored-button1 {
+          --reveal-color: red;
+        }
+        .colored-button2 {
+          --reveal-color: #7cbb00;
+        }
+        .colored-button3 {
+          --reveal-color: rgb(255, 187, 0);
+        }
+        .colored-button4 {
+          --reveal-color: #00A1F1;
+        }
+      </style>
       <div class="code">
         <h2>Colored Button</h2>
-        <pre>.my-reveal-container{
+        <pre>.colored-button1 {
   --reveal-color: red;
+}
+
+.colored-button2 {
+  --reveal-color: #7cbb00;
+}
+
+.colored-button3 {
+  --reveal-color: rgb(255, 187, 0);
+}
+
+.colored-button4 {
+  --reveal-color: #00A1F1;
 }</pre>
       </div>
     </section>
@@ -343,6 +305,11 @@
           </div>
         </ax-reveal-bound>
       </div>
+      <style>
+        .border-width {
+          --reveal-border-width: 3px;
+        }
+      </style>
       <div class="code">
         <h2>Border Width</h2>
         <pre>.my-reveal-container{
@@ -372,6 +339,11 @@
           </div>
         </ax-reveal-bound>
       </div>
+      <style>
+        .no-border {
+          --reveal-border-width: 0;
+        }
+      </style>
       <div class="code">
         <h2>No border</h2>
         <pre>.my-reveal-container{
@@ -401,6 +373,11 @@
           </div>
         </ax-reveal-bound>
       </div>
+      <style>
+        .fill-radius {
+          --reveal-hover-light-radius: 0.2;
+        }
+      </style>
       <div class="code">
         <h2>Fill Radius</h2>
         <pre>.my-reveal-container{
@@ -430,6 +407,11 @@
           </div>
         </ax-reveal-bound>
       </div>
+      <style>
+        .no-fill {
+          --reveal-hover-light: false;
+        }
+      </style>
       <div class="code">
         <h2>No Fill</h2>
         <pre>.my-reveal-container{
@@ -459,6 +441,11 @@
           </div>
         </ax-reveal-bound>
       </div>
+      <style>
+        .hold-animation {
+          --reveal-press-animation-speed: 8000;
+        }
+      </style>
       <div class="code">
         <h2>Hold animation</h2>
         <pre>.my-reveal-container{
@@ -488,6 +475,11 @@
           </div>
         </ax-reveal-bound>
       </div>
+      <style>
+        .release-animation {
+          --reveal-release-animation-accelerate-rate: 20;
+        }
+      </style>
       <div class="code">
         <h2>Release animation</h2>
         <pre>.my-reveal-container{
@@ -517,6 +509,11 @@
           </div>
         </ax-reveal-bound>
       </div>
+      <style>
+        .no-animation {
+          --reveal-press-animation: false;
+        }
+      </style>
       <div class="code">
         <h2>No animation</h2>
         <pre>.my-reveal-container{
@@ -615,6 +612,23 @@
         </div>
         </ax-reveal-bound>
       </div>
+      <style>
+        .long-list {
+          --reveal-border-style: half;
+          height: 300px;
+          width: 250px;
+          margin-bottom: 15px;
+          overflow-y: scroll;
+        }
+
+        .long-list .ax-reveal-container {
+          flex-direction: column;
+        }
+
+        .long-list .ax-reveal-container>ax-reveal {
+          margin: 0;
+        }
+      </style>
       <div class="code">
         <h2>List style</h2>
         <pre>.my-reveal-container{
@@ -647,6 +661,13 @@
         </div>
         </ax-reveal-bound>
       </div>
+      <style>
+        .no-diffuse {
+          --reveal-diffuse: false;
+          overflow-y: auto;
+          height: auto;
+        }
+      </style>
       <div class="code">
         <h2>No diffuse</h2>
         <pre>.my-reveal-container{
@@ -679,6 +700,23 @@
         <ax-reveal>🥩</ax-reveal><ax-reveal>🥚</ax-reveal><ax-reveal>🥛</ax-reveal><ax-reveal>👀</ax-reveal><ax-reveal>📎</ax-reveal>
         <ax-reveal>🥩</ax-reveal><ax-reveal>🥚</ax-reveal><ax-reveal>🥛</ax-reveal><ax-reveal>👀</ax-reveal><ax-reveal>📎</ax-reveal>
       </ax-reveal-bound>
+
+      <style>
+        .benchmark {
+          font-size: 0;
+        }
+
+        .benchmark ax-reveal {
+          width: 40px;
+          height: 40px;
+          margin: 4px;
+          padding: 8px;
+          font-size: 24px;
+          text-align: center;
+          line-height: 40px;
+          cursor: default;
+        }
+      </style>
     </section>
   </ax-reveal-provider>
   <script type="module">
