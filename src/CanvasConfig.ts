@@ -580,12 +580,12 @@ export class CanvasConfig {
 
         const maxRadius = Math.max(c.trueFillRadius[0], c.trueFillRadius[1]);
 
-        const exceedLeftBound = relativeX + maxRadius > 0;
-        const exceedRightBound = relativeX - maxRadius < b.width;
-        const exceedTopBound = relativeY + maxRadius > 0;
-        const exceedBottomBound = relativeY - maxRadius < b.height;
+        const inLeftBound = relativeX + maxRadius > 0;
+        const inRightBound = relativeX - maxRadius < b.width;
+        const inTopBound = relativeY + maxRadius > 0;
+        const inBottomBound = relativeY - maxRadius < b.height;
 
-        const mouseInRenderArea = exceedLeftBound && exceedRightBound && exceedTopBound && exceedBottomBound;
+        const mouseInRenderArea = inLeftBound && inRightBound && inTopBound && inBottomBound;
 
         if (!mouseInRenderArea && !animationPlaying) {
             return false;
@@ -611,7 +611,7 @@ export class CanvasConfig {
                 this.ctx.fill();
             }
 
-            const diffuse = c.diffuse && mouseInRenderArea;
+            const diffuse = (c.diffuse && mouseInRenderArea) || mouseInCanvas;
             const borderPattern = this.cachedImg.cachedPattern.borderReveal;
             if (c.borderWidth !== 0 && borderPattern && diffuse) {
                 // Draw border.
