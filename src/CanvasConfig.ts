@@ -92,6 +92,7 @@ export interface CachedStyle {
     hoverLightFillRadius: number;
     diffuse: boolean;
     pressAnimation: boolean;
+    pressAnimationFillMode: string;
     pressAnimationColor: string;
     pressAnimationSpeed: number;
     releaseAnimationAccelerateRate: number;
@@ -173,6 +174,7 @@ export class CanvasConfig {
         hoverLightFillRadius: 0,
         diffuse: true,
         pressAnimation: true,
+        pressAnimationFillMode: '',
         pressAnimationColor: '',
         pressAnimationSpeed: 0,
         releaseAnimationAccelerateRate: 0,
@@ -292,6 +294,7 @@ export class CanvasConfig {
         c.hoverLightFillMode = this.computedStyle.get('--reveal-hover-light-radius-mode');
         c.diffuse = this.computedStyle.get('--reveal-diffuse') === 'true';
         c.pressAnimation = this.computedStyle.get('--reveal-press-animation') === 'true';
+        c.pressAnimationFillMode = this.computedStyle.get('--reveal-press-animation-radius-mode');
         c.pressAnimationColor =
             parsedPressAnimationColor !== MAGIC_DEFAULT_COLOR ? parsedPressAnimationColor : parsedBaseColor;
         c.pressAnimationSpeed = this.computedStyle.getNumber('--reveal-press-animation-speed');
@@ -623,6 +626,8 @@ export class CanvasConfig {
 
         if (c.pressAnimation && this.mousePressed && this.mouseDownAnimateLogicFrame) {
             this.ctx.setTransform(1, 0, 0, 1, 0, 0);
+            const grdRadius =
+                c.pressAnimationFillMode === 'constrained' ? c.trueFillRadius[1] : Math.max(b.width, b.height);
             // prettier-ignore
             const animateGrd =
                 this.mouseReleased && this.mouseUpClientX && this.mouseUpClientY
@@ -632,7 +637,7 @@ export class CanvasConfig {
                           0,
                           (this.mouseUpClientX - b.left) * this.pxRatio,
                           (this.mouseUpClientY - b.top) * this.pxRatio,
-                          c.trueFillRadius[1] * this.pxRatio
+                          grdRadius * this.pxRatio
                       )
                     : this.ctx.createRadialGradient(
                           relativeX * this.pxRatio,
@@ -640,7 +645,7 @@ export class CanvasConfig {
                           0,
                           relativeX * this.pxRatio,
                           relativeY * this.pxRatio,
-                          c.trueFillRadius[1] * this.pxRatio
+                          grdRadius * this.pxRatio
                       );
             this.updateAnimateGrd(this.mouseDownAnimateLogicFrame, animateGrd);
 

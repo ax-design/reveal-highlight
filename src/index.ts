@@ -118,6 +118,12 @@ export function register(compat: boolean = false) {
             inherits: true,
         });
         window.CSS.registerProperty({
+            name: '--reveal-press-animation-radius-mode',
+            syntax: '<custom-ident>',
+            initialValue: 'cover',
+            inherits: true,
+        });
+        window.CSS.registerProperty({
             name: '--reveal-press-animation-speed',
             syntax: '<number>',
             initialValue: '2000',
@@ -153,6 +159,7 @@ export function register(compat: boolean = false) {
         root.style.setProperty('--reveal-hover-light-radius-mode', 'relative');
         root.style.setProperty('--reveal-diffuse', 'true');
         root.style.setProperty('--reveal-press-animation', 'true');
+        root.style.setProperty('--reveal-press-animation-radius-mode', 'cover');
         root.style.setProperty('--reveal-press-animation-color', MAGIC_DEFAULT_COLOR);
         root.style.setProperty('--reveal-press-animation-speed', '2000');
         root.style.setProperty('--reveal-release-animation-accelerate-rate', '6');
