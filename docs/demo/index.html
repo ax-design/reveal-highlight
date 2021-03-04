@@ -528,6 +528,42 @@
 
     <section class="demo-block">
       <div class="demo">
+        <ax-reveal-bound class="fill-mode">
+          <div class="ax-reveal-container">
+            <ax-reveal>
+              <button class="ax-reveal-button">Welcome</button>
+            </ax-reveal>
+            <ax-reveal>
+              <button class="ax-reveal-button">To</button>
+            </ax-reveal>
+          </div>
+          <div class="ax-reveal-container">
+            <ax-reveal>
+              <button class="ax-reveal-button">Project</button>
+            </ax-reveal>
+            <ax-reveal>
+              <button class="ax-reveal-button">Axiom!</button>
+            </ax-reveal>
+          </div>
+        </ax-reveal-bound>
+      </div>
+      <style>
+        .fill-mode {
+          --reveal-hover-light-radius: 0.1;
+          --reveal-press-animation-radius-mode: constrained;
+        }
+      </style>
+      <div class="code">
+        <h2>Animation Fill Mode</h2>
+        <pre>.my-reveal-container{
+  --reveal-hover-light-radius: 0.1;
+  --reveal-press-animation-radius-mode: constrained;
+}</pre>
+      </div>
+    </section>
+
+    <section class="demo-block">
+      <div class="demo">
         <ax-reveal-bound class="no-animation">
           <div class="ax-reveal-container">
             <ax-reveal>

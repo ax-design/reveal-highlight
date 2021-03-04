@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+
+<head>
+    <style>
+        .single-unit {
+            font-size: 0;
+        }
+        .single-unit ax-reveal {
+            width: 100px;
+            height: 100px;
+            margin: 4px;
+            padding: 8px;
+            font-size: 24px;
+            text-align: center;
+            line-height: 40px;
+            cursor: default;
+            --reveal-opacity: 1;
+            --reveal-hover-light-radius: 0.3;
+            --reveal-hover-light: false;
+        }
+    </style>
+</head>
+
+<body>
+    <ax-reveal-provider>
+        <section class="round-corner single-unit">
+            <h2>Single Unit</h2>
+            <ax-reveal-bound>
+                <ax-reveal>🥩🥚🥛</ax-reveal>
+            </ax-reveal-bound>
+        </section>
+    </ax-reveal-provider>
+
+    <script type="module">
+        // For package developer.
+        import { register } from '../../../es/index.js';
+        register(true);
+    </script>
+</body>

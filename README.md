@@ -68,23 +68,37 @@ Here's an example:
 
 reveal-highlight use custom properties to manage the style of highlights
 
-### --reveal-color
+### Overall control
+
+#### --reveal-color
 
 **Type:** `<color>`
 
 **Default:** `rgb(0, 0, 0)`
 
-**Description:** The color of the reveal highlight.
+**Description:** The color of the reveal highlight, could RGB value or hex value.
 
-### --reveal-border-style
+#### --reveal-diffuse
 
-**Type:** `'full' | 'half' | 'none'`
+**Type:** `<boolean>`
 
-**Default:** `'full'`
+**Default:** `true`
 
-**Description:** If `full` provided, there'll be four sides of the element will have a light effect, if `half` provided, only the top and bottom side will have a light effect, `none` literally no border.
+**Description:** Control the behavior while pointer not in the reveal highlight element, if setted to `false`, nothing will be rendered; if setted to `true`, border will be rendered.
 
-### --reveal-border-width
+### Border
+
+#### --reveal-border-color
+
+**Type:** `<color>`
+
+**Default:** `rgb(-1, -1, -1)`
+
+**Description:** The color of the hover light.
+
+**Magic Number:** If the value equals to `rgb(-1, -1, -1)`, the value of `--reveal-color`. It looks weired, but it is constrained by the CSS Typed OM specification.
+
+#### --reveal-border-width
 
 **Type:** `<number>`
 
@@ -92,9 +106,65 @@ reveal-highlight use custom properties to manage the style of highlights
 
 **Description:** Border width in `px`.
 
-### --reveal-fill-mode
+#### --reveal-border-decoration-type
 
-**Type:** `'relative' | 'absolute' | 'none'`
+**Type:** `'miter' | 'round' | bevel`
+
+**Default:** `miter`
+
+**Description:** The shape of border radius, the same as possible values of `lineJoin`, checkout [this document](https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/lineJoin).
+
+#### --reveal-border-decoration-radius
+
+**Type:** `<length>`
+
+**Default:** `4px`
+
+**Description:** The radius of border radius, if `--reveal-border-decoration-type` is `miter`, nothing would happen.
+
+**Note:** To control each corner, use `--reveal-border-decoration-top-left-radius`, `--reveal-border-decoration-top-right-radius`, `--reveal-border-decoration-bottom-left-radius`, `--reveal-border-decoration-bottom-right-radius`, if the value of these values are negative, `--reveal-border-decoration-radius` would be used.
+
+#### --reveal-border-style
+
+**Type:** `'full' | 'half'`
+
+**Default:** `'full'`
+
+**Description:** If `full` provided, there'll be four sides of the element will have a light effect, if `half` provided, only the top and bottom side will have a light effect.
+
+### Hover light
+
+Hover light is the light effect shown up when you hover on the reveal element, it will fill the whole element.
+
+#### --reveal-hover-light
+
+**Type:** `<boolean>`
+
+**Default:** `true`
+
+**Description:** Enable the hover light or not.
+
+#### --reveal-hover-light-color
+
+**Type:** `<color>`
+
+**Default:** `rgb(-1, -1, -1)`
+
+**Description:** The color of the hover light.
+
+**Magic Number:** If the value equals to `rgb(-1, -1, -1)`, the value of `--reveal-color`.
+
+#### --reveal-hover-light-radius
+
+**Type:** `<number>`
+
+**Default:** `1.5`
+
+**Description:** Radius of the highlight gradient, please notice that this value is a number but not length.
+
+#### --reveal-hover-light-radius-mode
+
+**Type:** `'relative' | 'absolute'`
 
 **Default:** `relative`
 
@@ -110,25 +180,37 @@ If `absolute` provided, gradient will be:
 
 the unit is pixel.
 
-If `none` provided, nothing will happen, you won't need this option.
+### Animation
 
-### --reveal-fill-radius
+When you pressed on the reveal highlight element, a ripple will show up.
 
-**Type:** `<number>`
-
-**Default:** `1.5`
-
-**Description:** Radius of the highlight gradient.
-
-### --reveal-diffuse
+#### --reveal-press-animation
 
 **Type:** `<boolean>`
 
 **Default:** `true`
 
-**Description:** Control the behavior while pointer not in the reveal highlight element, if setted to `false`, nothing will be rendered; if setted to `true`, border will be rendered.
+**Description:** Enable the pressed animation or not.
 
-### --reveal-animate-speed
+#### --reveal-press-animation-color
+
+**Type:** `<color>`
+
+**Default:** `rgb(-1, -1, -1)`
+
+**Description:** The color of the hover light, could be rgb value or hex.
+
+**Magic Number:** If the value equals to `rgb(-1, -1, -1)`, the value of `--reveal-color`.
+
+#### --reveal-press-animation-fill-mode
+
+**Type:** `'cover' | 'constrained'`
+
+**Default:** `cover`
+
+**Description:** The filling mode of pressed animation, when using `cover`, the radius of pressed animation would be `max(width, height)`, when using `constrained`, it would be the radius of the hover light.
+
+#### --reveal-press-animation-speed
 
 **Type:** `<number>`
 
@@ -136,7 +218,7 @@ If `none` provided, nothing will happen, you won't need this option.
 
 **Description:** The duration of the animation being played when the mouse is held down by the element.
 
-### --reveal-animate-speed
+#### --reveal-release-animation-accelerate-rate
 
 **Type:** `<number>`
 
