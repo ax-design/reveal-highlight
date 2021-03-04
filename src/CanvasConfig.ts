@@ -246,8 +246,6 @@ export class CanvasConfig {
         const b = this.cachedBoundingRect;
 
         switch (fillMode) {
-            case 'none':
-                break;
             case 'relative':
                 trueFillRadius[0] = Math.min(b.width, b.height) * fillRadius;
                 trueFillRadius[1] = Math.max(b.width, b.height) * fillRadius;
@@ -257,7 +255,7 @@ export class CanvasConfig {
                 trueFillRadius[1] = fillRadius;
                 break;
             default:
-                throw new SyntaxError('The value of `--reveal-border-style` must be `relative`, `absolute` or `none`!');
+                throw new SyntaxError('The value of `--reveal-border-style` must be `relative`, `absolute`!');
         }
 
         return trueFillRadius;
