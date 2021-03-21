@@ -25,6 +25,5 @@
         "build-rollup": "rollup -c",
         "clean": "rimraf ./es ./build",
         "prepublishOnly": "npm run build"
-    },
-    "dependencies": {}
+    }
 }
