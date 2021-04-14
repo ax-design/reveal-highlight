@@ -1,12 +1,26 @@
 import { RevealStateManager } from './RevealStateManager.js';
 import { RevealBoundaryStore } from './RevealBoundryStore.js';
 
-export class AxRevealProvider extends HTMLElement {
+class ServerSideHTMLElement {
+    root = {
+        innerHTML: '',
+        querySelector: (_x: string) => null,
+    }
+    
+    attachShadow = () => null;
+}
+
+const PatchedHTMLElement = 
+    typeof globalThis.Window === 'undefined' 
+    ? ServerSideHTMLElement as unknown as typeof HTMLElement
+    : HTMLElement;
+
+export class AxRevealProvider extends PatchedHTMLElement {
     static readonly ElementName = 'ax-reveal-provider';
     readonly stateManager = new RevealStateManager();
 }
 
-export class AxRevealBoundary extends HTMLElement {
+export class AxRevealBoundary extends PatchedHTMLElement {
     static readonly ElementName = 'ax-reveal-bound';
 
     static readonly removeStorageEvent = 'removeStorage';
@@ -100,7 +114,7 @@ export class AxRevealBoundary extends HTMLElement {
     }
 }
 
-export class AxReveal extends HTMLElement {
+export class AxReveal extends PatchedHTMLElement {
     static readonly ElementName = 'ax-reveal';
     private root = this.attachShadow({ mode: 'open' });
     private canvas: HTMLCanvasElement;
