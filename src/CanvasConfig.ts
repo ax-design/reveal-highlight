@@ -405,7 +405,8 @@ export class CanvasConfig {
     syncSizeToRevealRadius = (x: HTMLCanvasElement) => {
         const { trueFillRadius } = this.cachedStyle;
 
-        const radius = trueFillRadius[1];
+        console.log(trueFillRadius)
+        const radius = trueFillRadius[1] || 1;
         const size = radius * 2 * this.pxRatio;
 
         if (x.width !== size || x.height !== size) {

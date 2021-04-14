@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+
+<head>
+    <style>
+        .grid {
+            width: 240px;
+            display: grid;
+            grid-row-gap: 12px;
+            grid-column-gap: 12px;
+            grid-template-areas:
+                's1 s1 s2 s2 s3 s3'
+                's4 s4 s4 s5 s5 s5'
+                's4 s4 s4 s5 s5 s5'
+                's0 s0 s0 s7 s7 s7'
+                's6 s6 s6 s7 s7 s7'
+                's6 s6 s6 s7 s7 s7';
+        }
+
+        .shape-1, .shape-2, .shape-3, .shape-4 {
+            width: 60px;
+            height: 60px;
+            --reveal-border-decoration-radius: 30px;
+        }
+
+        .shape-1, .shape-3, .shape-4, .shape-5, .shape-7 {
+            --reveal-border-decoration-type: round;
+        }
+        
+        .shape-2, .shape-6 {
+            --reveal-border-decoration-type: bevel;
+        }
+
+        .shape-3, .shape-4 {
+            --reveal-border-decoration-top-right-radius: 0;
+            --reveal-border-decoration-bottom-left-radius: 0;
+            --reveal-border-decoration-bottom-right-radius: 0;
+        }
+
+        .shape-4, .shape-6 {
+            width: 120px;
+            height: 120px;
+            --reveal-border-decoration-radius: 52px;
+        }
+
+        .shape-5 {
+            width: 120px;
+            height: 60px;
+            --reveal-border-decoration-radius: 30px;
+        }
+
+        .shape-6 {
+            --reveal-border-decoration-radius: 30px;
+        }
+
+        .shape-7 {
+            width: 120px;
+            height: 160px;
+            --reveal-border-decoration-radius: 20px;
+        }
+
+        .shape-1 { grid-area: s1; }
+        .shape-2 { grid-area: s2; }
+        .shape-3 { grid-area: s3; }
+        .shape-4 { grid-area: s4; }
+        .shape-5 { grid-area: s5; }
+        .shape-6 { grid-area: s6; }
+        .shape-7 { grid-area: s7; }
+    </style>
+</head>
+
+<body>
+    <ax-reveal-provider>
+        <section>
+            <ax-reveal-bound>
+                <div class="grid">
+                    <ax-reveal class="shape-1"></ax-reveal>
+                    <ax-reveal class="shape-2"></ax-reveal>
+                    <ax-reveal class="shape-3"></ax-reveal>
+                    <ax-reveal class="shape-4"></ax-reveal>
+                    <ax-reveal class="shape-5"></ax-reveal>
+                    <ax-reveal class="shape-6"></ax-reveal>
+                    <ax-reveal class="shape-7"></ax-reveal>
+                </div>
+            </ax-reveal-bound>
+        </section>
+    </ax-reveal-provider>
+
+    <script type="module">
+        // For package developer.
+        import { register } from '../../../es/index.js';
+        register(true);
+    </script>
+</body>
