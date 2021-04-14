@@ -1,4 +1,5 @@
 import { AxRevealProvider, AxRevealBoundary, AxReveal } from './CustomElements.js';
+import { config } from './config.js';
 import { MAGIC_DEFAULT_COLOR } from './variables.js';
 
 function registerCustomElements() {
@@ -7,7 +8,25 @@ function registerCustomElements() {
     customElements.define(AxReveal.ElementName, AxReveal);
 }
 
-export function register(compat: boolean = false) {
+export interface AxRevealHighlightRegisterOptions {
+    compat: boolean;
+    borderDetectionMode: 'strictEdge' | 'experimentalAutoFit';
+}
+
+let registered = false;
+
+export function register({
+    compat = false,
+    borderDetectionMode = 'strictEdge',
+}: AxRevealHighlightRegisterOptions) {
+    if (registered) {
+        console.warn('You have already registered Ax RevealHighlight, please do not call this function repeatedly.');
+        return;
+    }
+
+    config.borderDetectionMode = borderDetectionMode;
+    registered = true;
+
     if (window.CSS && window.CSS.registerProperty) {
         window.CSS.registerProperty({
             name: '--reveal-color',

@@ -797,6 +797,9 @@
     // For package developer.
     import { register } from '../../../es/index.js';
     // import { register } from 'https://unpkg.com/@ax-design/reveal-highlight/es/index.js';
-    register(true);
+    register({
+      compat: true,
+      borderDetectionMode: 'experimentalAutoFit',
+    });
   </script>
 </body>

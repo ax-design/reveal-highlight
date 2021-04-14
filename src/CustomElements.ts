@@ -1,5 +1,6 @@
 import { RevealStateManager } from './RevealStateManager.js';
 import { RevealBoundaryStore } from './RevealBoundryStore.js';
+import { config } from './config.js';
 
 class ServerSideHTMLElement {
     root = {
@@ -73,7 +74,7 @@ export class AxRevealBoundary extends PatchedHTMLElement {
         const parent = this.closest(AxRevealProvider.ElementName) as AxRevealProvider;
         const stateManager = parent ? parent.stateManager : AxRevealBoundary.stateManager;
 
-        this.storage = stateManager.newBoundary();
+        this.storage = stateManager.newBoundary(this);
     }
 
     updatePointerPosition = (ev: MouseEvent) => {
@@ -94,9 +95,11 @@ export class AxRevealBoundary extends PatchedHTMLElement {
 
     connectedCallback() {
         this.appendStorage(true);
-        this.addEventListener('pointerenter', this.handlePointerEnter);
-        this.addEventListener('pointerleave', this.handlePointerLeave);
-        this.addEventListener('pointermove', this.handlePointerMove);
+        if (config.borderDetectionMode === 'strictEdge') {
+            this.addEventListener('pointerenter', this.handlePointerEnter);
+            this.addEventListener('pointerleave', this.handlePointerLeave);
+            this.addEventListener('pointermove', this.handlePointerMove);
+        }
         this.addEventListener('pointerdown', this.handlePointerDown);
         this.addEventListener('pointerup', this.handlePointerUp);
     }

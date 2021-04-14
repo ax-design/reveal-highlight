@@ -2,6 +2,7 @@ import { CanvasConfig } from './CanvasConfig.js';
 
 export class RevealBoundaryStore {
     id: number;
+    container: HTMLElement;
 
     // The current cursor position relative to window.
     clientX = -1000;
@@ -27,8 +28,11 @@ export class RevealBoundaryStore {
     mousePressed = false;
     mouseReleased = false;
 
-    constructor(id: number) {
+    maxRadius = -1;
+
+    constructor(id: number, $el: HTMLElement) {
         this.id = id;
+        this.container = $el;
     }
 
     addReveal = ($el: HTMLCanvasElement) => {
@@ -46,6 +50,26 @@ export class RevealBoundaryStore {
             return config && config.canvas === $el;
         });
     };
+
+    updateMaxRadius = (x: number) => {
+        this.maxRadius = Math.max(x, this.maxRadius);
+    }
+
+    onPointerMoveOnScreen = (x: number, y: number) => {
+        const boundingBox = this.container.getBoundingClientRect();
+
+        if (x < boundingBox.left - this.maxRadius) return false;
+        if (x > boundingBox.right + this.maxRadius) return false;
+        if (y < boundingBox.top - this.maxRadius) return false;
+        if (y > boundingBox.bottom + this.maxRadius) return false;
+        this.mouseInBoundary = true;
+
+        this.clientX = x;
+        this.clientY = y;
+
+        this.animationFrame = window.requestAnimationFrame(this.paintAll);
+        return true
+    }
 
     onPointerEnterBoundary = () => {
         this.mouseInBoundary = true;

@@ -260,6 +260,8 @@ export class CanvasConfig {
                 throw new SyntaxError('The value of `--reveal-border-style` must be `relative`, `absolute`!');
         }
 
+        this._store.updateMaxRadius(Math.max(trueFillRadius[0], trueFillRadius[1]));
+
         return trueFillRadius;
     };
 
