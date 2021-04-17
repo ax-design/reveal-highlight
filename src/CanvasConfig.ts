@@ -85,6 +85,10 @@ export interface CachedStyle {
     topRightBorderDecorationRadius: number;
     bottomLeftBorderDecorationRadius: number;
     bottomRightBorderDecorationRadius: number;
+    withLeftBorderFactor: number;
+    withRightBorderFactor: number;
+    withTopBorderFactor: number;
+    withBottomBorderFactor: number;
     borderWidth: number;
     hoverLight: boolean;
     hoverLightColor: string;
@@ -167,6 +171,10 @@ export class CanvasConfig {
         topRightBorderDecorationRadius: 0,
         bottomLeftBorderDecorationRadius: 0,
         bottomRightBorderDecorationRadius: 0,
+        withLeftBorderFactor: 1,
+        withRightBorderFactor: 1,
+        withTopBorderFactor: 1,
+        withBottomBorderFactor: 1,
         borderWidth: 1,
         hoverLight: true,
         hoverLightColor: '',
@@ -285,15 +293,25 @@ export class CanvasConfig {
 
         c.color = parsedBaseColor;
         c.opacity = this.computedStyle.getNumber('--reveal-opacity');
+        
+        // Border related configurations
         c.borderStyle = this.computedStyle.get('--reveal-border-style');
         c.borderColor = parsedBorderColor !== MAGIC_DEFAULT_COLOR ? parsedBorderColor : parsedBaseColor;
         c.borderDecorationType =
             (this.computedStyle.get('--reveal-border-decoration-type') as BorderDecoration) || 'miter';
         c.borderWidth = this.computedStyle.getNumber('--reveal-border-width');
+        c.withLeftBorderFactor = this.computedStyle.get('--reveal-border-left') === 'line' ? 1 : 0;
+        c.withRightBorderFactor = this.computedStyle.get('--reveal-border-right') === 'line' ? 1 : 0;
+        c.withTopBorderFactor = this.computedStyle.get('--reveal-border-top') === 'line' ? 1 : 0;
+        c.withBottomBorderFactor = this.computedStyle.get('--reveal-border-bottom') === 'line' ? 1 : 0;
+        
+        // Hover light related configurations
         c.hoverLight = this.computedStyle.get('--reveal-hover-light') === 'true';
         c.hoverLightColor = parsedHoverLightColor !== MAGIC_DEFAULT_COLOR ? parsedHoverLightColor : parsedBaseColor;
         c.hoverLightFillRadius = this.computedStyle.getNumber('--reveal-hover-light-radius');
         c.hoverLightFillMode = this.computedStyle.get('--reveal-hover-light-radius-mode');
+        
+        // Press animation related configurations
         c.diffuse = this.computedStyle.get('--reveal-diffuse') === 'true';
         c.pressAnimation = this.computedStyle.get('--reveal-press-animation') === 'true';
         c.pressAnimationFillMode = this.computedStyle.get('--reveal-press-animation-radius-mode');
@@ -302,6 +320,7 @@ export class CanvasConfig {
         c.pressAnimationSpeed = this.computedStyle.getNumber('--reveal-press-animation-speed');
         c.releaseAnimationAccelerateRate = this.computedStyle.getNumber('--reveal-release-animation-accelerate-rate');
 
+        // Border decoration related configurations
         const r = this.computedStyle.getNumber('--reveal-border-decoration-radius');
         const tl = this.computedStyle.getNumber('--reveal-border-decoration-top-left-radius');
         const tr = this.computedStyle.getNumber('--reveal-border-decoration-top-right-radius');
@@ -445,6 +464,11 @@ export class CanvasConfig {
         const bl = c.bottomLeftBorderDecorationRadius * this.pxRatio;
         const br = c.bottomRightBorderDecorationRadius * this.pxRatio;
 
+        const wlf = c.withLeftBorderFactor;
+        const wrf = c.withRightBorderFactor;
+        const wtf = c.withTopBorderFactor;
+        const wbf = c.withBottomBorderFactor;
+
         const tl2 = bw < tl ? tl - bw : 0;
         const tr2 = bw < tr ? tr - bw : 0;
         const bl2 = bw < bl ? bl - bw : 0;
@@ -466,16 +490,30 @@ export class CanvasConfig {
                 this.ctx.arcTo(0, 0, tl, 0, tl);
 
                 if (hollow) {
+                    /* prettier-ignore-start */
                     // inner
-                    this.ctx.moveTo(tl2, bw);
-                    this.ctx.arcTo(bw, bw, bw, tl2 + bw, tl2);
-                    this.ctx.lineTo(bw, h - bw - bl2);
-                    this.ctx.arcTo(bw, h - bw, bw + bl2, h - bw, bl2);
-                    this.ctx.lineTo(w - bw - br2, h - bw);
-                    this.ctx.arcTo(w - bw, h - bw, w - bw, h - bw - br2, br2);
-                    this.ctx.lineTo(w - bw, bw + tr2);
-                    this.ctx.arcTo(w - bw, bw, w - bw - tr2, bw, tr2);
-                    this.ctx.lineTo(tl2, bw);
+                    /**
+                     +-①----⑧-+
+                     ②        ⑦
+                     |        |
+                     ③        ⑥
+                     +-④----⑤-+
+                     */
+                    //              x                    y                   r         p
+                    this.ctx.moveTo(tl2                , bw * wtf                ); // ①
+                    this.ctx.arcTo (bw * wlf           , bw * wtf           ,
+                                    bw * wlf           , tl2 + bw * wtf     , tl2); // ②
+                    this.ctx.lineTo(bw * wlf           , h - bw * wbf - bl2      ); // ③
+                    this.ctx.arcTo (bw * wlf           , h - bw * wbf       ,
+                                    bw * wlf + bl2     , h - bw * wbf       , bl2); // ④
+                    this.ctx.lineTo(w - bw * wrf - br2 , h - bw * wbf            ); // ⑤
+                    this.ctx.arcTo (w - bw * wrf       , h - bw * wbf       ,
+                                    w - bw * wrf       , h - bw * wbf - br2 , br2); // ⑥
+                    this.ctx.lineTo(w - bw * wrf       , bw * wtf + tr2          ); // ⑦
+                    this.ctx.arcTo (w - bw * wrf       , bw * wtf           ,
+                                    w - bw * wrf - tr2 , bw * wtf           , tr2); // ⑧
+                    this.ctx.lineTo(tl2                , bw * wtf                ); // ①
+                    /* prettier-ignore-start */
                 }
                 break;
             case 'bevel':
@@ -493,15 +531,23 @@ export class CanvasConfig {
 
                 if (hollow) {
                     // inner
-                    this.ctx.moveTo(tl2 + bw, bw);
-                    this.ctx.lineTo(bw, tl2 + bw);
-                    this.ctx.lineTo(bw, h - bl2 - bw);
-                    this.ctx.lineTo(bw + bl2, h - bw);
-                    this.ctx.lineTo(w - br2 - bw, h - bw);
-                    this.ctx.lineTo(w - bw, h - br2 - bw);
-                    this.ctx.lineTo(w - bw, tr2 + bw);
-                    this.ctx.lineTo(w - tr2 - bw, bw);
-                    this.ctx.lineTo(tl2 + bw, bw);
+                    /**
+                     +-①----⑧-+
+                     ②        ⑦
+                     |        |
+                     ③        ⑥
+                     +-④----⑤-+
+                     */
+                    //              x                    y                       p
+                    this.ctx.moveTo(tl2 + bw * wlf     , bw * wtf          ); // ①
+                    this.ctx.lineTo(bw * wlf           , tl2 + bw * wtf    ); // ②
+                    this.ctx.lineTo(bw * wlf           , h - bl2 - bw * wbf); // ③
+                    this.ctx.lineTo(bw * wlf + bl2     , h - bw * wbf      ); // ④
+                    this.ctx.lineTo(w - br2 - bw * wrf , h - bw * wbf      ); // ⑤
+                    this.ctx.lineTo(w - bw * wrf       , h - br2 - bw * wbf); // ⑥
+                    this.ctx.lineTo(w - bw * wrf       , tr2 + bw * wtf    ); // ⑦
+                    this.ctx.lineTo(w - tr2 - bw * wrf , bw * wtf          ); // ⑧
+                    this.ctx.lineTo(tl2 + bw * wrf     , bw * wtf          ); // ①
                 }
                 break;
             case 'miter':
@@ -513,23 +559,20 @@ export class CanvasConfig {
                 this.ctx.lineTo(0, 0);
 
                 if (hollow) {
-                    if (c.borderStyle === 'full') {
-                        // inner
-                        this.ctx.moveTo(bw, bw);
-                        this.ctx.lineTo(bw, h - bw);
-                        this.ctx.lineTo(w - bw, h - bw);
-                        this.ctx.lineTo(w - bw, bw);
-                        // I don't know by change this to 'bw, bw' caused rendering bug...
-                        this.ctx.lineTo(0, bw);
-                    }
-
-                    if (c.borderStyle === 'half') {
-                        this.ctx.moveTo(0, bw);
-                        this.ctx.lineTo(0, h - bw);
-                        this.ctx.lineTo(w, h - bw);
-                        this.ctx.lineTo(w, bw);
-                        this.ctx.lineTo(0, bw);
-                    }
+                    // inner
+                    /**
+                     ①--------④
+                     |        |
+                     |        |
+                     |        |
+                     ②--------③
+                     */
+                    //              x              y                 p
+                    this.ctx.moveTo(bw * wlf     , bw * wtf    ); // ①
+                    this.ctx.lineTo(bw * wlf     , h - bw * wbf); // ②
+                    this.ctx.lineTo(w - bw * wrf , h - bw * wbf); // ③
+                    this.ctx.lineTo(w - bw * wrf , bw * wtf    ); // ④
+                    this.ctx.lineTo(bw * wlf     , bw * wtf    ); // ①
                 }
                 break;
             default:

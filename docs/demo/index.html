@@ -392,6 +392,230 @@
 
     <section class="demo-block">
       <div class="demo">
+        <ax-reveal-bound class="different-sides">
+          <div>No Border Radius</div>
+          <div class="ax-reveal-container">
+            <ax-reveal class="no-top">
+              <button class="ax-reveal-button">No Top</button>
+            </ax-reveal>
+            <ax-reveal class="no-bottom">
+              <button class="ax-reveal-button">No Bottom</button>
+            </ax-reveal>
+          </div>
+          <div class="ax-reveal-container">
+            <ax-reveal class="no-left">
+              <button class="ax-reveal-button">No Left</button>
+            </ax-reveal>
+            <ax-reveal class="no-right">
+              <button class="ax-reveal-button">No Right</button>
+            </ax-reveal>
+          </div>
+          <div class="ax-reveal-container">
+            <ax-reveal class="horizontal">
+              <button class="ax-reveal-button">Horizontal</button>
+            </ax-reveal>
+            <ax-reveal class="vertical">
+              <button class="ax-reveal-button">Vertical</button>
+            </ax-reveal>
+          </div>
+          <div class="ax-reveal-container">
+            <ax-reveal class="only-top">
+              <button class="ax-reveal-button">Only Top</button>
+            </ax-reveal>
+            <ax-reveal class="only-bottom">
+              <button class="ax-reveal-button">Only Bottom</button>
+            </ax-reveal>
+          </div>
+          <div class="ax-reveal-container">
+            <ax-reveal class="only-left">
+              <button class="ax-reveal-button">Only Left</button>
+            </ax-reveal>
+            <ax-reveal class="only-right">
+              <button class="ax-reveal-button">Only Right</button>
+            </ax-reveal>
+          </div>
+          <div>With Round Border Radius</div>
+          <div class="ax-reveal-container round-corner">
+            <ax-reveal class="no-top">
+              <button class="ax-reveal-button">No Top</button>
+            </ax-reveal>
+            <ax-reveal class="no-bottom">
+              <button class="ax-reveal-button">No Bottom</button>
+            </ax-reveal>
+          </div>
+          <div class="ax-reveal-container round-corner">
+            <ax-reveal class="no-left">
+              <button class="ax-reveal-button">No Left</button>
+            </ax-reveal>
+            <ax-reveal class="no-right">
+              <button class="ax-reveal-button">No Right</button>
+            </ax-reveal>
+          </div>
+          <div class="ax-reveal-container round-corner">
+            <ax-reveal class="horizontal">
+              <button class="ax-reveal-button">Horizontal</button>
+            </ax-reveal>
+            <ax-reveal class="vertical">
+              <button class="ax-reveal-button">Vertical</button>
+            </ax-reveal>
+          </div>
+          <div class="ax-reveal-container round-corner">
+            <ax-reveal class="only-top">
+              <button class="ax-reveal-button">Only Top</button>
+            </ax-reveal>
+            <ax-reveal class="only-bottom">
+              <button class="ax-reveal-button">Only Bottom</button>
+            </ax-reveal>
+          </div>
+          <div class="ax-reveal-container round-corner">
+            <ax-reveal class="only-left">
+              <button class="ax-reveal-button">Only Left</button>
+            </ax-reveal>
+            <ax-reveal class="only-right">
+              <button class="ax-reveal-button">Only Right</button>
+            </ax-reveal>
+          </div>
+          <div>With Bevel Border Radius</div>
+          <div class="ax-reveal-container bevel-corner">
+            <ax-reveal class="no-top">
+              <button class="ax-reveal-button">No Top</button>
+            </ax-reveal>
+            <ax-reveal class="no-bottom">
+              <button class="ax-reveal-button">No Bottom</button>
+            </ax-reveal>
+          </div>
+          <div class="ax-reveal-container bevel-corner">
+            <ax-reveal class="no-left">
+              <button class="ax-reveal-button">No Left</button>
+            </ax-reveal>
+            <ax-reveal class="no-right">
+              <button class="ax-reveal-button">No Right</button>
+            </ax-reveal>
+          </div>
+          <div class="ax-reveal-container bevel-corner">
+            <ax-reveal class="horizontal">
+              <button class="ax-reveal-button">Horizontal</button>
+            </ax-reveal>
+            <ax-reveal class="vertical">
+              <button class="ax-reveal-button">Vertical</button>
+            </ax-reveal>
+          </div>
+          <div class="ax-reveal-container bevel-corner">
+            <ax-reveal class="only-top">
+              <button class="ax-reveal-button">Only Top</button>
+            </ax-reveal>
+            <ax-reveal class="only-bottom">
+              <button class="ax-reveal-button">Only Bottom</button>
+            </ax-reveal>
+          </div>
+          <div class="ax-reveal-container bevel-corner">
+            <ax-reveal class="only-left">
+              <button class="ax-reveal-button">Only Left</button>
+            </ax-reveal>
+            <ax-reveal class="only-right">
+              <button class="ax-reveal-button">Only Right</button>
+            </ax-reveal>
+          </div>
+        </ax-reveal-bound>
+      </div>
+      <style>
+        .no-top {
+          --reveal-border-top: none;
+        }
+        .no-bottom {
+          --reveal-border-bottom: none;
+        }
+        .no-left {
+          --reveal-border-left: none;
+        }
+        .no-right {
+          --reveal-border-right: none;
+        }
+        .horizontal {
+          --reveal-border-left: none;
+          --reveal-border-right: none;
+        }
+        .vertical {
+          --reveal-border-top: none;
+          --reveal-border-bottom: none;
+        }
+        .only-top {
+          --reveal-border-bottom: none;
+          --reveal-border-left: none;
+          --reveal-border-right: none;
+        }
+        .only-bottom {
+          --reveal-border-top: none;
+          --reveal-border-left: none;
+          --reveal-border-right: none;
+        }
+        .only-left {
+          --reveal-border-top: none;
+          --reveal-border-bottom: none;
+          --reveal-border-right: none;
+        }
+        .only-right {
+          --reveal-border-top: none;
+          --reveal-border-bottom: none;
+          --reveal-border-left: none;
+        }
+      </style>
+      <div class="code">
+        <h2>No border</h2>
+        <pre>.no-top {
+  --reveal-border-top: none;
+}
+
+.no-bottom {
+  --reveal-border-bottom: none;
+}
+
+.no-left {
+  --reveal-border-left: none;
+}
+
+.no-right {
+  --reveal-border-right: none;
+}
+
+.horizontal {
+  --reveal-border-left: none;
+  --reveal-border-right: none;
+}
+
+.vertical {
+  --reveal-border-top: none;
+  --reveal-border-bottom: none;
+}
+
+.only-top {
+  --reveal-border-bottom: none;
+  --reveal-border-left: none;
+  --reveal-border-right: none;
+}
+
+.only-bottom {
+  --reveal-border-top: none;
+  --reveal-border-left: none;
+  --reveal-border-right: none;
+}
+
+.only-left {
+  --reveal-border-top: none;
+  --reveal-border-bottom: none;
+  --reveal-border-right: none;
+}
+
+.only-right {
+  --reveal-border-top: none;
+  --reveal-border-bottom: none;
+  --reveal-border-right: none;
+}</pre>
+      </div>
+    </section>
+
+    <section class="demo-block">
+      <div class="demo">
         <ax-reveal-bound class="fill-radius">
           <div class="ax-reveal-container">
             <ax-reveal>

@@ -53,6 +53,12 @@ export function register({
             inherits: true,
         });
         window.CSS.registerProperty({
+            name: '--reveal-border-width',
+            syntax: '<length>',
+            initialValue: '1px',
+            inherits: true,
+        });
+        window.CSS.registerProperty({
             name: '--reveal-border-decoration-type',
             syntax: '<custom-ident>',
             initialValue: 'miter',
@@ -89,9 +95,27 @@ export function register({
             inherits: true,
         });
         window.CSS.registerProperty({
-            name: '--reveal-border-width',
-            syntax: '<length>',
-            initialValue: '1px',
+            name: '--reveal-border-left',
+            syntax: '<custom-ident>',
+            initialValue: 'line',
+            inherits: true,
+        });
+        window.CSS.registerProperty({
+            name: '--reveal-border-right',
+            syntax: '<custom-ident>',
+            initialValue: 'line',
+            inherits: true,
+        });
+        window.CSS.registerProperty({
+            name: '--reveal-border-top',
+            syntax: '<custom-ident>',
+            initialValue: 'line',
+            inherits: true,
+        });
+        window.CSS.registerProperty({
+            name: '--reveal-border-bottom',
+            syntax: '<custom-ident>',
+            initialValue: 'line',
             inherits: true,
         });
         window.CSS.registerProperty({
@@ -172,6 +196,10 @@ export function register({
         root.style.setProperty('--reveal-border-decoration-top-right-radius', '-1');
         root.style.setProperty('--reveal-border-decoration-bottom-left-radius', '-1');
         root.style.setProperty('--reveal-border-decoration-bottom-right-radius', '-1');
+        root.style.setProperty('--reveal-border-left', 'line');
+        root.style.setProperty('--reveal-border-right', 'line');
+        root.style.setProperty('--reveal-border-top', 'line');
+        root.style.setProperty('--reveal-border-bottom', 'line');
         root.style.setProperty('--reveal-hover-light', 'true');
         root.style.setProperty('--reveal-hover-light-color', MAGIC_DEFAULT_COLOR);
         root.style.setProperty('--reveal-hover-light-radius', '1.5');
