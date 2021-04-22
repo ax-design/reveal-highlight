@@ -25,6 +25,7 @@ export function register({
     }
 
     config.borderDetectionMode = borderDetectionMode;
+    config.compat = compat;
     registered = true;
 
     if (window.CSS && window.CSS.registerProperty) {
@@ -182,8 +183,6 @@ export function register({
         registerCustomElements();
     } else if (compat) {
         const root = document.documentElement;
-
-        root.dataset.revealCompat = 'true';
 
         root.style.setProperty('--reveal-color', 'rgb(0, 0, 0)');
         root.style.setProperty('--reveal-opacity', '0.26');

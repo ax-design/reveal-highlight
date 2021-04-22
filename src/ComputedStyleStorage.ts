@@ -1,4 +1,7 @@
+import { config } from './config.js';
+
 export interface ComputedStyleStorage {
+    el: HTMLElement;
     size(): number;
     get(propertyName: string): string;
     getColor(propertyName: string): string;
@@ -79,8 +82,8 @@ class ComputedStyleExperimental implements ComputedStyleStorage {
     }
 }
 
-export function createStorage(el: HTMLElement, compat: boolean): ComputedStyleStorage {
-    return compat
+export function createStorage(el: HTMLElement): ComputedStyleStorage {
+    return config.compat
         ? new ComputedStyleCompat(el)
         : new ComputedStyleExperimental(el);
 }

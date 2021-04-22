@@ -11,6 +11,8 @@ class InitializedError extends Error {
 }
 
 export const config = {
+    compat: false,
+
     get borderDetectionMode() {
         return borderDetectionMode
     },
