@@ -43,6 +43,6 @@ export class RevealStateManager {
     };
 
     removeBoundary = (store: RevealBoundaryStore) => {
-        this._storage = this._storage.filter(x => x === store);
+        this._storage = this._storage.filter(x => x !== store);
     };
 }
