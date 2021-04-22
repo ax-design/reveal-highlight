@@ -35,8 +35,8 @@ export class RevealBoundaryStore {
         this.container = $el;
     }
 
-    addReveal = ($el: HTMLCanvasElement) => {
-        const canvasConfig = new CanvasConfig(this, $el);
+    addReveal = ($canvas: HTMLCanvasElement, $container: HTMLElement) => {
+        const canvasConfig = new CanvasConfig(this, $canvas, $container);
 
         canvasConfig.cacheBoundingRect();
         canvasConfig.cacheCanvasPaintingStyle();
