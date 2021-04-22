@@ -136,10 +136,11 @@ export class CanvasConfig {
 
     pxRatio = window.devicePixelRatio || 1;
 
-    canvas: HTMLCanvasElement;
+    readonly container: HTMLElement;
+    readonly canvas: HTMLCanvasElement;
     ctx: CanvasRenderingContext2D | null;
 
-    computedStyle: ComputedStyleStorage;
+    private readonly computedStyle: ComputedStyleStorage;
 
     paintedWidth = 0;
     paintedHeight = 0;
@@ -198,11 +199,16 @@ export class CanvasConfig {
 
     mouseReleased = false;
 
-    constructor(store: RevealBoundaryStore, $el: HTMLCanvasElement) {
+    constructor(
+        store: RevealBoundaryStore,
+        $canvas: HTMLCanvasElement,
+        $container: HTMLElement
+    ) {
         this._store = store;
 
-        this.canvas = $el;
-        this.ctx = $el.getContext('2d');
+        this.container = $container;
+        this.canvas = $canvas;
+        this.ctx = $canvas.getContext('2d');
 
         const cachedCanvas = {
             borderReveal: createEmptyCanvas(),
@@ -229,8 +235,9 @@ export class CanvasConfig {
             },
         };
 
-        const compat = !!document.documentElement.dataset.revealCompat;
-        this.computedStyle = createStorage(this.canvas, compat);
+        this.computedStyle = createStorage($container);
+
+        console.log(this.computedStyle);
     }
 
     cacheBoundingRect = () => {
@@ -273,6 +280,16 @@ export class CanvasConfig {
         return trueFillRadius;
     };
 
+    getPropFromMultipleSource = (
+        domPropsName: string, 
+        cssPropsName: string
+    ) => {
+        const domProps = this.container.dataset[domPropsName]
+        if (domPropsName) return domProps
+
+        return this.computedStyle.get(cssPropsName)
+    }
+
     cacheCanvasPaintingStyle = () => {
         if (this.currentFrameId === this.cachedStyleFrameId) {
             return;
@@ -300,10 +317,11 @@ export class CanvasConfig {
         c.borderDecorationType =
             (this.computedStyle.get('--reveal-border-decoration-type') as BorderDecoration) || 'miter';
         c.borderWidth = this.computedStyle.getNumber('--reveal-border-width');
-        c.withLeftBorderFactor = this.computedStyle.get('--reveal-border-left') === 'line' ? 1 : 0;
-        c.withRightBorderFactor = this.computedStyle.get('--reveal-border-right') === 'line' ? 1 : 0;
-        c.withTopBorderFactor = this.computedStyle.get('--reveal-border-top') === 'line' ? 1 : 0;
-        c.withBottomBorderFactor = this.computedStyle.get('--reveal-border-bottom') === 'line' ? 1 : 0;
+        
+        c.withLeftBorderFactor = this.getPropFromMultipleSource('leftBorder', 'reveal-border-left') === 'line' ? 1 : 0;
+        c.withRightBorderFactor = this.getPropFromMultipleSource('rightBorder', 'reveal-border-right') === 'line' ? 1 : 0;
+        c.withTopBorderFactor = this.getPropFromMultipleSource('topBorder', 'reveal-border-top') === 'line' ? 1 : 0;
+        c.withBottomBorderFactor = this.getPropFromMultipleSource('bottomBorder', 'reveal-border-bottom') === 'line' ? 1 : 0;
         
         // Hover light related configurations
         c.hoverLight = this.computedStyle.get('--reveal-hover-light') === 'true';
