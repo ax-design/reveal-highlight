@@ -137,7 +137,7 @@ export class AxReveal extends PatchedHTMLElement {
         if (!this.boundary)
             throw new SyntaxError('You must use ' + AxRevealBoundary.ElementName + ' as the boundary of acrylic!');
 
-        this.boundary.waitForStorage(storage => setTimeout(() => storage.addReveal(this.canvas), 0));
+        this.boundary.waitForStorage(storage => setTimeout(() => storage.addReveal(this.canvas, this), 0));
     }
 
     constructor() {
