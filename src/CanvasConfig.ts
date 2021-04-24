@@ -236,8 +236,6 @@ export class CanvasConfig {
         };
 
         this.computedStyle = createStorage($container);
-
-        console.log(this.computedStyle);
     }
 
     cacheBoundingRect = () => {
