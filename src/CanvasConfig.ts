@@ -79,6 +79,7 @@ export interface CachedStyle {
     trueFillRadius: [number, number];
     borderStyle: string;
     borderColor: string;
+    borderFillRadius: number;
     borderDecorationType: BorderDecoration;
     borderDecorationRadius: number;
     topLeftBorderDecorationRadius: number;
@@ -104,9 +105,10 @@ export interface CachedStyle {
 
 interface CachedReveal {
     radius: number;
-    borderColor: string;
-    hoverLightColor: string;
+    radiusFactor: number;
+    color: string;
     opacity: number;
+    pattern: CanvasPattern | null;
 }
 
 /**
@@ -114,7 +116,10 @@ interface CachedReveal {
  * @interface CachedRevealBitmap
  */
 export interface CachedRevealBitmap {
-    cachedReveal: CachedReveal;
+    cachedReveal: {
+        borderReveal: CachedReveal;
+        fillReveal: CachedReveal;
+    };
     cachedCanvas: {
         borderReveal: HTMLCanvasElement;
         fillReveal: HTMLCanvasElement;
@@ -122,10 +127,6 @@ export interface CachedRevealBitmap {
     cachedCtx: {
         borderReveal: CanvasRenderingContext2D | null;
         fillReveal: CanvasRenderingContext2D | null;
-    };
-    cachedPattern: {
-        borderReveal: CanvasPattern | null;
-        fillReveal: CanvasPattern | null;
     };
 }
 
@@ -145,7 +146,7 @@ export class CanvasConfig {
     paintedWidth = 0;
     paintedHeight = 0;
 
-    cachedImg: CachedRevealBitmap;
+    protected cachedImg: CachedRevealBitmap;
 
     currentFrameId: number = -1;
 
@@ -166,6 +167,7 @@ export class CanvasConfig {
         opacity: 1,
         borderStyle: '',
         borderColor: '',
+        borderFillRadius: 0,
         borderDecorationType: 'miter',
         borderDecorationRadius: 0,
         topLeftBorderDecorationRadius: 0,
@@ -199,11 +201,7 @@ export class CanvasConfig {
 
     mouseReleased = false;
 
-    constructor(
-        store: RevealBoundaryStore,
-        $canvas: HTMLCanvasElement,
-        $container: HTMLElement
-    ) {
+    constructor(store: RevealBoundaryStore, $canvas: HTMLCanvasElement, $container: HTMLElement) {
         this._store = store;
 
         this.container = $container;
@@ -215,6 +213,9 @@ export class CanvasConfig {
             fillReveal: createEmptyCanvas(),
         };
 
+        document.body.appendChild(cachedCanvas.borderReveal);
+        document.body.appendChild(cachedCanvas.fillReveal);
+
         const cachedCtx = {
             borderReveal: cachedCanvas.borderReveal.getContext('2d'),
             fillReveal: cachedCanvas.fillReveal.getContext('2d'),
@@ -222,17 +223,23 @@ export class CanvasConfig {
 
         this.cachedImg = {
             cachedReveal: {
-                radius: -1,
-                borderColor: 'INVALID',
-                hoverLightColor: 'INVALID',
-                opacity: 0,
+                borderReveal: {
+                    radiusFactor: -1,
+                    radius: -1,
+                    color: 'INVALID',
+                    opacity: 0,
+                    pattern: null,
+                },
+                fillReveal: {
+                    radiusFactor: -1,
+                    radius: -1,
+                    color: 'INVALID',
+                    opacity: 0,
+                    pattern: null,
+                },
             },
             cachedCanvas,
             cachedCtx,
-            cachedPattern: {
-                borderReveal: null,
-                fillReveal: null,
-            },
         };
 
         this.computedStyle = createStorage($container);
@@ -255,19 +262,18 @@ export class CanvasConfig {
 
     getTrueFillRadius = (
         trueFillRadius = [0, 0] as [number, number],
-        fillMode = this.computedStyle.get('--reveal-hover-light-radius-mode'),
-        fillRadius = this.computedStyle.getNumber('--reveal-hover-light-radius')
+        fillMode = this.computedStyle.get('--reveal-hover-light-fill-radius-mode')
     ) => {
         const b = this.cachedBoundingRect;
 
         switch (fillMode) {
             case 'relative':
-                trueFillRadius[0] = Math.min(b.width, b.height) * fillRadius;
-                trueFillRadius[1] = Math.max(b.width, b.height) * fillRadius;
+                trueFillRadius[0] = Math.min(b.width, b.height);
+                trueFillRadius[1] = Math.max(b.width, b.height);
                 break;
             case 'absolute':
-                trueFillRadius[0] = fillRadius;
-                trueFillRadius[1] = fillRadius;
+                trueFillRadius[0] = -1;
+                trueFillRadius[1] = -1;
                 break;
             default:
                 throw new SyntaxError('The value of `--reveal-border-style` must be `relative`, `absolute`!');
@@ -278,15 +284,12 @@ export class CanvasConfig {
         return trueFillRadius;
     };
 
-    getPropFromMultipleSource = (
-        domPropsName: string, 
-        cssPropsName: string
-    ) => {
-        const domProps = this.container.dataset[domPropsName]
-        if (domPropsName) return domProps
+    getPropFromMultipleSource = (domPropsName: string, cssPropsName: string) => {
+        const domProps = this.container.dataset[domPropsName];
+        if (domProps) return domProps;
 
-        return this.computedStyle.get(cssPropsName)
-    }
+        return this.computedStyle.get(cssPropsName);
+    };
 
     cacheCanvasPaintingStyle = () => {
         if (this.currentFrameId === this.cachedStyleFrameId) {
@@ -308,25 +311,28 @@ export class CanvasConfig {
 
         c.color = parsedBaseColor;
         c.opacity = this.computedStyle.getNumber('--reveal-opacity');
-        
+
         // Border related configurations
         c.borderStyle = this.computedStyle.get('--reveal-border-style');
         c.borderColor = parsedBorderColor !== MAGIC_DEFAULT_COLOR ? parsedBorderColor : parsedBaseColor;
+        c.borderFillRadius = this.computedStyle.getNumber('--reveal-border-fill-radius');
         c.borderDecorationType =
             (this.computedStyle.get('--reveal-border-decoration-type') as BorderDecoration) || 'miter';
         c.borderWidth = this.computedStyle.getNumber('--reveal-border-width');
-        
-        c.withLeftBorderFactor = this.getPropFromMultipleSource('leftBorder', 'reveal-border-left') === 'line' ? 1 : 0;
-        c.withRightBorderFactor = this.getPropFromMultipleSource('rightBorder', 'reveal-border-right') === 'line' ? 1 : 0;
-        c.withTopBorderFactor = this.getPropFromMultipleSource('topBorder', 'reveal-border-top') === 'line' ? 1 : 0;
-        c.withBottomBorderFactor = this.getPropFromMultipleSource('bottomBorder', 'reveal-border-bottom') === 'line' ? 1 : 0;
-        
+
+        c.withLeftBorderFactor = this.getPropFromMultipleSource('leftBorder', '--reveal-border-left') === 'line' ? 1 : 0;
+        c.withRightBorderFactor =
+            this.getPropFromMultipleSource('rightBorder', '--reveal-border-right') === 'line' ? 1 : 0;
+        c.withTopBorderFactor = this.getPropFromMultipleSource('topBorder', '--reveal-border-top') === 'line' ? 1 : 0;
+        c.withBottomBorderFactor =
+            this.getPropFromMultipleSource('bottomBorder', '--reveal-border-bottom') === 'line' ? 1 : 0;
+
         // Hover light related configurations
         c.hoverLight = this.computedStyle.get('--reveal-hover-light') === 'true';
         c.hoverLightColor = parsedHoverLightColor !== MAGIC_DEFAULT_COLOR ? parsedHoverLightColor : parsedBaseColor;
-        c.hoverLightFillRadius = this.computedStyle.getNumber('--reveal-hover-light-radius');
-        c.hoverLightFillMode = this.computedStyle.get('--reveal-hover-light-radius-mode');
-        
+        c.hoverLightFillRadius = this.computedStyle.getNumber('--reveal-hover-light-fill-radius');
+        c.hoverLightFillMode = this.computedStyle.get('--reveal-hover-light-fill-radius-mode');
+
         // Press animation related configurations
         c.diffuse = this.computedStyle.get('--reveal-diffuse') === 'true';
         c.pressAnimation = this.computedStyle.get('--reveal-press-animation') === 'true';
@@ -348,7 +354,7 @@ export class CanvasConfig {
         c.bottomLeftBorderDecorationRadius = bl >= 0 ? bl : r;
         c.bottomRightBorderDecorationRadius = br >= 0 ? br : r;
 
-        this.getTrueFillRadius(c.trueFillRadius, c.hoverLightFillMode, c.hoverLightFillRadius);
+        this.getTrueFillRadius(c.trueFillRadius, c.hoverLightFillMode);
 
         if (!isValidateBorderDecorationType(c.borderDecorationType)) {
             throw new SyntaxError(
@@ -364,52 +370,54 @@ export class CanvasConfig {
         const radius = c.trueFillRadius[1] * this.pxRatio;
         const size = radius * 2;
 
-        const last = this.cachedImg.cachedReveal;
-        const compareBase = radius === last.radius && c.opacity === last.opacity;
-        const doNotNeedUpdateBorderReveal = compareBase && c.borderColor === last.borderColor;
-        const doNotNeedUpdateHoverLightReveal = compareBase && c.hoverLightColor === last.hoverLightColor;
-
-        if (doNotNeedUpdateBorderReveal && doNotNeedUpdateHoverLightReveal) return;
+        const lastStyle = this.cachedImg.cachedReveal;
 
         const { borderReveal, fillReveal } = this.cachedImg.cachedCanvas;
         const { borderReveal: borderRevealCtx, fillReveal: fillRevealCtx } = this.cachedImg.cachedCtx;
 
-        this.syncSizeToRevealRadius(borderReveal);
-        this.syncSizeToRevealRadius(fillReveal);
-
-        for (let i = 0; i <= 1; i++) {
+        for (let i = 0; i < 2; i++) {
             // 0 means border, 1 means hover light.
-            if (i === 0 && doNotNeedUpdateBorderReveal) continue;
-            if (i === 1 && doNotNeedUpdateHoverLightReveal) continue;
+            //-----------------------------------------
+            // Last rendered style.
+            const ls = i === 0 ? lastStyle.borderReveal : lastStyle.fillReveal;
+            const color = i === 0 ? c.borderColor : c.hoverLightColor;
+            const fillRadiusFactor = i === 0 ? c.borderFillRadius : c.hoverLightFillRadius;
 
-            const canvas = i === 0 ? borderReveal : fillReveal;
+            const doNotNeedUpdateReveal =
+                color === ls.color && c.opacity === ls.opacity && fillRadiusFactor === ls.radiusFactor;
+            if (doNotNeedUpdateReveal) return;
+
+            if (doNotNeedUpdateReveal) continue;
+
+            const reveal = i === 0 ? borderReveal : fillReveal;
             const ctx = i === 0 ? borderRevealCtx : fillRevealCtx;
+
+            this.syncSizeToRevealRadius(reveal, fillRadiusFactor);
+
             if (!ctx) continue;
 
-            const color = i === 0 ? c.borderColor : c.hoverLightColor;
-
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.clearRect(0, 0, reveal.width, reveal.height);
 
             const fillAlpha = i === 0 ? c.opacity : c.opacity * 0.5;
-
-            const grd = ctx.createRadialGradient(radius, radius, 0, radius, radius, radius);
+            const trueRadius = radius * fillRadiusFactor;
+            const grd = ctx.createRadialGradient(trueRadius, trueRadius, 0, trueRadius, trueRadius, trueRadius);
 
             grd.addColorStop(0, `rgba(${color}, ${fillAlpha})`);
             grd.addColorStop(1, `rgba(${color}, 0.0)`);
 
+            const trueSize = size * fillRadiusFactor;
             ctx.fillStyle = grd;
-            ctx.clearRect(0, 0, size, size);
-            ctx.fillRect(0, 0, size, size);
+            ctx.clearRect(0, 0, trueSize, trueSize);
+            ctx.fillRect(0, 0, trueSize, trueSize);
+
+            ls.radius = trueRadius;
+            ls.radiusFactor = fillRadiusFactor;
+            ls.color = color;
+            ls.opacity = c.opacity;
+
+            if (!this.ctx) continue;
+            ls.pattern = this.ctx.createPattern(reveal, 'no-repeat');
         }
-
-        this.cachedImg.cachedReveal.radius = radius;
-        this.cachedImg.cachedReveal.borderColor = c.borderColor;
-        this.cachedImg.cachedReveal.hoverLightColor = c.hoverLightColor;
-        this.cachedImg.cachedReveal.opacity = c.opacity;
-
-        if (!this.ctx) return;
-        this.cachedImg.cachedPattern.borderReveal = this.ctx.createPattern(borderReveal, 'no-repeat');
-        this.cachedImg.cachedPattern.fillReveal = this.ctx.createPattern(fillReveal, 'no-repeat');
     };
 
     updateCachedBitmap = () => {
@@ -437,11 +445,11 @@ export class CanvasConfig {
         }
     };
 
-    syncSizeToRevealRadius = (x: HTMLCanvasElement) => {
+    syncSizeToRevealRadius = (x: HTMLCanvasElement, factor: number) => {
         const { trueFillRadius } = this.cachedStyle;
 
         const radius = trueFillRadius[1] || 1;
-        const size = radius * 2 * this.pxRatio;
+        const size = radius * 2 * this.pxRatio * factor;
 
         if (x.width !== size || x.height !== size) {
             x.width = size;
@@ -516,19 +524,15 @@ export class CanvasConfig {
                      +-④----⑤-+
                      */
                     //              x                    y                   r         p
-                    this.ctx.moveTo(tl2                , bw * wtf                ); // ①
-                    this.ctx.arcTo (bw * wlf           , bw * wtf           ,
-                                    bw * wlf           , tl2 + bw * wtf     , tl2); // ②
-                    this.ctx.lineTo(bw * wlf           , h - bw * wbf - bl2      ); // ③
-                    this.ctx.arcTo (bw * wlf           , h - bw * wbf       ,
-                                    bw * wlf + bl2     , h - bw * wbf       , bl2); // ④
-                    this.ctx.lineTo(w - bw * wrf - br2 , h - bw * wbf            ); // ⑤
-                    this.ctx.arcTo (w - bw * wrf       , h - bw * wbf       ,
-                                    w - bw * wrf       , h - bw * wbf - br2 , br2); // ⑥
-                    this.ctx.lineTo(w - bw * wrf       , bw * wtf + tr2          ); // ⑦
-                    this.ctx.arcTo (w - bw * wrf       , bw * wtf           ,
-                                    w - bw * wrf - tr2 , bw * wtf           , tr2); // ⑧
-                    this.ctx.lineTo(tl2                , bw * wtf                ); // ①
+                    this.ctx.moveTo(tl2, bw * wtf); // ①
+                    this.ctx.arcTo(bw * wlf, bw * wtf, bw * wlf, tl2 + bw * wtf, tl2); // ②
+                    this.ctx.lineTo(bw * wlf, h - bw * wbf - bl2); // ③
+                    this.ctx.arcTo(bw * wlf, h - bw * wbf, bw * wlf + bl2, h - bw * wbf, bl2); // ④
+                    this.ctx.lineTo(w - bw * wrf - br2, h - bw * wbf); // ⑤
+                    this.ctx.arcTo(w - bw * wrf, h - bw * wbf, w - bw * wrf, h - bw * wbf - br2, br2); // ⑥
+                    this.ctx.lineTo(w - bw * wrf, bw * wtf + tr2); // ⑦
+                    this.ctx.arcTo(w - bw * wrf, bw * wtf, w - bw * wrf - tr2, bw * wtf, tr2); // ⑧
+                    this.ctx.lineTo(tl2, bw * wtf); // ①
                     /* prettier-ignore-start */
                 }
                 break;
@@ -555,15 +559,15 @@ export class CanvasConfig {
                      +-④----⑤-+
                      */
                     //              x                    y                       p
-                    this.ctx.moveTo(tl2 + bw * wlf     , bw * wtf          ); // ①
-                    this.ctx.lineTo(bw * wlf           , tl2 + bw * wtf    ); // ②
-                    this.ctx.lineTo(bw * wlf           , h - bl2 - bw * wbf); // ③
-                    this.ctx.lineTo(bw * wlf + bl2     , h - bw * wbf      ); // ④
-                    this.ctx.lineTo(w - br2 - bw * wrf , h - bw * wbf      ); // ⑤
-                    this.ctx.lineTo(w - bw * wrf       , h - br2 - bw * wbf); // ⑥
-                    this.ctx.lineTo(w - bw * wrf       , tr2 + bw * wtf    ); // ⑦
-                    this.ctx.lineTo(w - tr2 - bw * wrf , bw * wtf          ); // ⑧
-                    this.ctx.lineTo(tl2 + bw * wrf     , bw * wtf          ); // ①
+                    this.ctx.moveTo(tl2 + bw * wlf, bw * wtf); // ①
+                    this.ctx.lineTo(bw * wlf, tl2 + bw * wtf); // ②
+                    this.ctx.lineTo(bw * wlf, h - bl2 - bw * wbf); // ③
+                    this.ctx.lineTo(bw * wlf + bl2, h - bw * wbf); // ④
+                    this.ctx.lineTo(w - br2 - bw * wrf, h - bw * wbf); // ⑤
+                    this.ctx.lineTo(w - bw * wrf, h - br2 - bw * wbf); // ⑥
+                    this.ctx.lineTo(w - bw * wrf, tr2 + bw * wtf); // ⑦
+                    this.ctx.lineTo(w - tr2 - bw * wrf, bw * wtf); // ⑧
+                    this.ctx.lineTo(tl2 + bw * wrf, bw * wtf); // ①
                 }
                 break;
             case 'miter':
@@ -584,11 +588,11 @@ export class CanvasConfig {
                      ②--------③
                      */
                     //              x              y                 p
-                    this.ctx.moveTo(bw * wlf     , bw * wtf    ); // ①
-                    this.ctx.lineTo(bw * wlf     , h - bw * wbf); // ②
-                    this.ctx.lineTo(w - bw * wrf , h - bw * wbf); // ③
-                    this.ctx.lineTo(w - bw * wrf , bw * wtf    ); // ④
-                    this.ctx.lineTo(bw * wlf     , bw * wtf    ); // ①
+                    this.ctx.moveTo(bw * wlf, bw * wtf); // ①
+                    this.ctx.lineTo(bw * wlf, h - bw * wbf); // ②
+                    this.ctx.lineTo(w - bw * wrf, h - bw * wbf); // ③
+                    this.ctx.lineTo(w - bw * wrf, bw * wtf); // ④
+                    this.ctx.lineTo(bw * wlf, bw * wtf); // ①
                 }
                 break;
             default:
@@ -640,7 +644,7 @@ export class CanvasConfig {
         this.paintedWidth = b.width * this.pxRatio;
         this.paintedHeight = b.height * this.pxRatio;
 
-        const maxRadius = Math.max(c.trueFillRadius[0], c.trueFillRadius[1]);
+        const maxRadius = c.trueFillRadius[1];
 
         const inLeftBound = relativeX + maxRadius > 0;
         const inRightBound = relativeX - maxRadius < b.width;
@@ -656,16 +660,15 @@ export class CanvasConfig {
         this.cacheCanvasPaintingStyle();
         this.updateCachedBitmap();
 
-        const fillRadius = this.cachedImg.cachedReveal.radius;
-        const putX = Math.floor(relativeX * this.pxRatio - fillRadius);
-        const putY = Math.floor(relativeY * this.pxRatio - fillRadius);
-
         if (store.mouseInBoundary) {
             const mouseInCanvas = relativeX > 0 && relativeY > 0 && relativeX < b.width && relativeY < b.height;
 
-            const fillPattern = this.cachedImg.cachedPattern.fillReveal;
+            const fillPattern = this.cachedImg.cachedReveal.fillReveal.pattern;
             if (c.hoverLight && mouseInCanvas && fillPattern) {
                 // draw fill.
+                const radius = this.cachedImg.cachedReveal.fillReveal.radius;
+                const putX = Math.floor(relativeX * this.pxRatio - radius);
+                const putY = Math.floor(relativeY * this.pxRatio - radius);
                 this.ctx.setTransform(1, 0, 0, 1, 0, 0);
                 this.drawShape(false);
                 this.ctx.translate(putX, putY);
@@ -674,9 +677,12 @@ export class CanvasConfig {
             }
 
             const diffuse = (c.diffuse && mouseInRenderArea) || mouseInCanvas;
-            const borderPattern = this.cachedImg.cachedPattern.borderReveal;
+            const borderPattern = this.cachedImg.cachedReveal.borderReveal.pattern;
             if (c.borderWidth !== 0 && borderPattern && diffuse) {
                 // Draw border.
+                const radius = this.cachedImg.cachedReveal.borderReveal.radius;
+                const putX = Math.floor(relativeX * this.pxRatio - radius);
+                const putY = Math.floor(relativeY * this.pxRatio - radius);
                 this.ctx.setTransform(1, 0, 0, 1, 0, 0);
                 this.drawShape(true);
                 this.ctx.translate(putX, putY);

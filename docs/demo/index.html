@@ -309,7 +309,8 @@
         .detailed-color-adjustment {
           --reveal-border-color: #FF00C1;
           --reveal-hover-light-color: #00B8FF;
-          --reveal-press-animation-color: #4900FF;
+          --reveal-press-animation-color: #FFFFFF;
+          --reveal-opacity: 1.0;
         }
       </style>
       <div class="code">
@@ -317,7 +318,8 @@
         <pre>.my-reveal-container{
   --reveal-border-color: #FF00C1;
   --reveal-hover-light-color: #00B8FF;
-  --reveal-press-animation-color: #4900FF;
+  --reveal-press-animation-color: #FFFFFF;
+  --reveal-opacity: 1.0;
 }</pre>
       </div>
     </section>
@@ -352,6 +354,40 @@
         <h2>Border Width</h2>
         <pre>.my-reveal-container{
   --reveal-border-width: 3px;
+}</pre>
+      </div>
+    </section>
+
+    <section class="demo-block">
+      <div class="demo">
+        <ax-reveal-bound class="border-fill-radius">
+          <div class="ax-reveal-container">
+            <ax-reveal>
+              <button class="ax-reveal-button">Welcome</button>
+            </ax-reveal>
+            <ax-reveal>
+              <button class="ax-reveal-button">To</button>
+            </ax-reveal>
+          </div>
+          <div class="ax-reveal-container">
+            <ax-reveal>
+              <button class="ax-reveal-button">Project</button>
+            </ax-reveal>
+            <ax-reveal>
+              <button class="ax-reveal-button">Axiom!</button>
+            </ax-reveal>
+          </div>
+        </ax-reveal-bound>
+      </div>
+      <style>
+        .border-fill-radius {
+          --reveal-border-fill-radius: 0.2;
+        }
+      </style>
+      <div class="code">
+        <h2>Border Fill Radius</h2>
+        <pre>.my-reveal-container{
+  --reveal-border-fill-radius: 0.2;
 }</pre>
       </div>
     </section>
@@ -393,7 +429,7 @@
     <section class="demo-block">
       <div class="demo">
         <ax-reveal-bound class="different-sides">
-          <div>No Border Radius</div>
+          <div>No Single Border</div>
           <div class="ax-reveal-container">
             <ax-reveal class="no-top">
               <button class="ax-reveal-button">No Top</button>
@@ -637,13 +673,13 @@
       </div>
       <style>
         .fill-radius {
-          --reveal-hover-light-radius: 0.2;
+          --reveal-hover-light-fill-radius: 0.2;
         }
       </style>
       <div class="code">
         <h2>Fill Radius</h2>
         <pre>.my-reveal-container{
-  --reveal-hover-light-radius: 0.2;
+  --reveal-hover-light-fill-radius: 0.2;
 }</pre>
       </div>
     </section>
@@ -773,14 +809,14 @@
       </div>
       <style>
         .fill-mode {
-          --reveal-hover-light-radius: 0.1;
+          --reveal-hover-light-fill-radius: 0.1;
           --reveal-press-animation-radius-mode: constrained;
         }
       </style>
       <div class="code">
         <h2>Animation Fill Mode</h2>
         <pre>.my-reveal-container{
-  --reveal-hover-light-radius: 0.1;
+  --reveal-hover-light-fill-radius: 0.1;
   --reveal-press-animation-radius-mode: constrained;
 }</pre>
       </div>

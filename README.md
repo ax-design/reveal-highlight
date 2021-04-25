@@ -98,6 +98,14 @@ reveal-highlight use custom properties to manage the style of highlights
 
 **Magic Number:** If the value equals to `rgb(-1, -1, -1)`, the value of `--reveal-color`. It looks weired, but it is constrained by the CSS Typed OM specification.
 
+#### --reveal-border-fill-radius
+
+**Type:** `<number>`
+
+**Default:** `1.5`
+
+**Description:** Radius of the border gradient, please notice that this value is a number but not length.
+
 #### --reveal-border-width
 
 **Type:** `<number>`
@@ -154,7 +162,7 @@ Hover light is the light effect shown up when you hover on the reveal element, i
 
 **Magic Number:** If the value equals to `rgb(-1, -1, -1)`, the value of `--reveal-color`.
 
-#### --reveal-hover-light-radius
+#### --reveal-hover-light-fill-radius
 
 **Type:** `<number>`
 
@@ -162,7 +170,7 @@ Hover light is the light effect shown up when you hover on the reveal element, i
 
 **Description:** Radius of the highlight gradient, please notice that this value is a number but not length.
 
-#### --reveal-hover-light-radius-mode
+#### --reveal-hover-light-fill-radius-mode
 
 **Type:** `'relative' | 'absolute'`
 

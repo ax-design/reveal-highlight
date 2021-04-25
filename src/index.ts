@@ -60,6 +60,12 @@ export function register({
             inherits: true,
         });
         window.CSS.registerProperty({
+            name: '--reveal-border-fill-radius',
+            syntax: '<number>',
+            initialValue: '1.5',
+            inherits: true,
+        });
+        window.CSS.registerProperty({
             name: '--reveal-border-decoration-type',
             syntax: '<custom-ident>',
             initialValue: 'miter',
@@ -132,13 +138,13 @@ export function register({
             inherits: true,
         });
         window.CSS.registerProperty({
-            name: '--reveal-hover-light-radius',
+            name: '--reveal-hover-light-fill-radius',
             syntax: '<number>',
             initialValue: '1.5',
             inherits: true,
         });
         window.CSS.registerProperty({
-            name: '--reveal-hover-light-radius-mode',
+            name: '--reveal-hover-light-fill-radius-mode',
             syntax: '<custom-ident>',
             initialValue: 'relative',
             inherits: true,
@@ -189,6 +195,7 @@ export function register({
         root.style.setProperty('--reveal-border-style', 'full');
         root.style.setProperty('--reveal-border-color', MAGIC_DEFAULT_COLOR);
         root.style.setProperty('--reveal-border-width', '1px');
+        root.style.setProperty('--reveal-border-fill-radius', '1.5');
         root.style.setProperty('--reveal-border-decoration-type', 'miter');
         root.style.setProperty('--reveal-border-decoration-radius', '4');
         root.style.setProperty('--reveal-border-decoration-top-left-radius', '-1');
@@ -201,8 +208,8 @@ export function register({
         root.style.setProperty('--reveal-border-bottom', 'line');
         root.style.setProperty('--reveal-hover-light', 'true');
         root.style.setProperty('--reveal-hover-light-color', MAGIC_DEFAULT_COLOR);
-        root.style.setProperty('--reveal-hover-light-radius', '1.5');
-        root.style.setProperty('--reveal-hover-light-radius-mode', 'relative');
+        root.style.setProperty('--reveal-hover-light-fill-radius', '1.5');
+        root.style.setProperty('--reveal-hover-light-fill-radius-mode', 'relative');
         root.style.setProperty('--reveal-diffuse', 'true');
         root.style.setProperty('--reveal-press-animation', 'true');
         root.style.setProperty('--reveal-press-animation-radius-mode', 'cover');
