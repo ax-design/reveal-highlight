@@ -12,6 +12,10 @@ const isValidateBorderDecorationType = (x: string): x is BorderDecoration => {
 };
 
 const extractRGBValue = (x: string) => {
+    if (x === '') {
+        return '';
+    }
+
     if (x[0] === '#') {
         // Thanks bro:
         // https://stackoverflow.com/a/11508164/3931936
@@ -213,9 +217,6 @@ export class CanvasConfig {
             fillReveal: createEmptyCanvas(),
         };
 
-        document.body.appendChild(cachedCanvas.borderReveal);
-        document.body.appendChild(cachedCanvas.fillReveal);
-
         const cachedCtx = {
             borderReveal: cachedCanvas.borderReveal.getContext('2d'),
             fillReveal: cachedCanvas.fillReveal.getContext('2d'),
@@ -301,11 +302,12 @@ export class CanvasConfig {
         }
 
         const parsedBaseColor = extractRGBValue(this.computedStyle.getColor('--reveal-color')) || '0, 0, 0';
-        const parsedBorderColor = extractRGBValue(this.computedStyle.getColor('--reveal-border-color'));
-        const parsedHoverLightColor = extractRGBValue(this.computedStyle.getColor('--reveal-hover-light-color'));
-        const parsedPressAnimationColor = extractRGBValue(
-            this.computedStyle.getColor('--reveal-press-animation-color')
-        );
+        const parsedBorderColor =
+            extractRGBValue(this.computedStyle.getColor('--reveal-border-color')) || parsedBaseColor;
+        const parsedHoverLightColor =
+            extractRGBValue(this.computedStyle.getColor('--reveal-hover-light-color')) || parsedBaseColor;
+        const parsedPressAnimationColor =
+            extractRGBValue(this.computedStyle.getColor('--reveal-press-animation-color')) || parsedBaseColor;
 
         const c = this.cachedStyle;
 
@@ -314,13 +316,15 @@ export class CanvasConfig {
 
         // Border related configurations
         c.borderStyle = this.computedStyle.get('--reveal-border-style');
-        c.borderColor = parsedBorderColor !== MAGIC_DEFAULT_COLOR ? parsedBorderColor : parsedBaseColor;
+        c.borderColor = parsedBorderColor;
+
         c.borderFillRadius = this.computedStyle.getNumber('--reveal-border-fill-radius');
         c.borderDecorationType =
             (this.computedStyle.get('--reveal-border-decoration-type') as BorderDecoration) || 'miter';
         c.borderWidth = this.computedStyle.getNumber('--reveal-border-width');
 
-        c.withLeftBorderFactor = this.getPropFromMultipleSource('leftBorder', '--reveal-border-left') === 'line' ? 1 : 0;
+        c.withLeftBorderFactor =
+            this.getPropFromMultipleSource('leftBorder', '--reveal-border-left') === 'line' ? 1 : 0;
         c.withRightBorderFactor =
             this.getPropFromMultipleSource('rightBorder', '--reveal-border-right') === 'line' ? 1 : 0;
         c.withTopBorderFactor = this.getPropFromMultipleSource('topBorder', '--reveal-border-top') === 'line' ? 1 : 0;
@@ -329,7 +333,7 @@ export class CanvasConfig {
 
         // Hover light related configurations
         c.hoverLight = this.computedStyle.get('--reveal-hover-light') === 'true';
-        c.hoverLightColor = parsedHoverLightColor !== MAGIC_DEFAULT_COLOR ? parsedHoverLightColor : parsedBaseColor;
+        c.hoverLightColor = parsedHoverLightColor;
         c.hoverLightFillRadius = this.computedStyle.getNumber('--reveal-hover-light-fill-radius');
         c.hoverLightFillMode = this.computedStyle.get('--reveal-hover-light-fill-radius-mode');
 
@@ -337,8 +341,7 @@ export class CanvasConfig {
         c.diffuse = this.computedStyle.get('--reveal-diffuse') === 'true';
         c.pressAnimation = this.computedStyle.get('--reveal-press-animation') === 'true';
         c.pressAnimationFillMode = this.computedStyle.get('--reveal-press-animation-radius-mode');
-        c.pressAnimationColor =
-            parsedPressAnimationColor !== MAGIC_DEFAULT_COLOR ? parsedPressAnimationColor : parsedBaseColor;
+        c.pressAnimationColor = parsedPressAnimationColor;
         c.pressAnimationSpeed = this.computedStyle.getNumber('--reveal-press-animation-speed');
         c.releaseAnimationAccelerateRate = this.computedStyle.getNumber('--reveal-release-animation-accelerate-rate');
 

@@ -49,7 +49,7 @@ export function register({
         });
         window.CSS.registerProperty({
             name: '--reveal-border-color',
-            syntax: '<color>',
+            syntax: `<color>|${MAGIC_DEFAULT_COLOR}`,
             initialValue: MAGIC_DEFAULT_COLOR,
             inherits: true,
         });
@@ -133,7 +133,7 @@ export function register({
         });
         window.CSS.registerProperty({
             name: '--reveal-hover-light-color',
-            syntax: '<color>',
+            syntax: `<color>|${MAGIC_DEFAULT_COLOR}`,
             initialValue: MAGIC_DEFAULT_COLOR,
             inherits: true,
         });
@@ -163,7 +163,7 @@ export function register({
         });
         window.CSS.registerProperty({
             name: '--reveal-press-animation-color',
-            syntax: '<color>',
+            syntax: `<color>|${MAGIC_DEFAULT_COLOR}`,
             initialValue: MAGIC_DEFAULT_COLOR,
             inherits: true,
         });
