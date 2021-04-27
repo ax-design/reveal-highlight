@@ -74,7 +74,7 @@ export function register({
         window.CSS.registerProperty({
             name: '--reveal-border-decoration-radius',
             syntax: '<length>',
-            initialValue: '4px',
+            initialValue: '0',
             inherits: true,
         });
         window.CSS.registerProperty({
@@ -197,7 +197,7 @@ export function register({
         root.style.setProperty('--reveal-border-width', '1px');
         root.style.setProperty('--reveal-border-fill-radius', '1.5');
         root.style.setProperty('--reveal-border-decoration-type', 'miter');
-        root.style.setProperty('--reveal-border-decoration-radius', '4');
+        root.style.setProperty('--reveal-border-decoration-radius', '0');
         root.style.setProperty('--reveal-border-decoration-top-left-radius', '-1');
         root.style.setProperty('--reveal-border-decoration-top-right-radius', '-1');
         root.style.setProperty('--reveal-border-decoration-bottom-left-radius', '-1');
