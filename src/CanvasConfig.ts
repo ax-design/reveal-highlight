@@ -292,6 +292,13 @@ export class CanvasConfig {
         return this.computedStyle.get(cssPropsName);
     };
 
+    getNumberPropFromMultipleSource = (domPropsName: string, cssPropsName: string) => {
+        const domProps = this.container.dataset[domPropsName];
+        if (domProps) return Number.parseFloat(domProps);
+
+        return this.computedStyle.getNumber(cssPropsName);
+    };
+
     cacheCanvasPaintingStyle = () => {
         if (this.currentFrameId === this.cachedStyleFrameId) {
             return;
@@ -347,10 +354,10 @@ export class CanvasConfig {
 
         // Border decoration related configurations
         const r = this.computedStyle.getNumber('--reveal-border-decoration-radius');
-        const tl = this.computedStyle.getNumber('--reveal-border-decoration-top-left-radius');
-        const tr = this.computedStyle.getNumber('--reveal-border-decoration-top-right-radius');
-        const bl = this.computedStyle.getNumber('--reveal-border-decoration-bottom-left-radius');
-        const br = this.computedStyle.getNumber('--reveal-border-decoration-bottom-right-radius');
+        const tl = this.getNumberPropFromMultipleSource('topLeftBorderRadius', '--reveal-border-decoration-top-left-radius');
+        const tr = this.getNumberPropFromMultipleSource('topRightBorderRadius', '--reveal-border-decoration-top-right-radius');
+        const bl = this.getNumberPropFromMultipleSource('bottomLeftBorderRadius', '--reveal-border-decoration-bottom-left-radius');
+        const br = this.getNumberPropFromMultipleSource('bottomRightBorderRadius', '--reveal-border-decoration-bottom-right-radius');
 
         c.topLeftBorderDecorationRadius = tl >= 0 ? tl : r;
         c.topRightBorderDecorationRadius = tr >= 0 ? tr : r;
