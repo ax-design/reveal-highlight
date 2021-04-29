@@ -251,7 +251,7 @@ export class CanvasConfig {
             return;
         }
 
-        const boundingRect = this.canvas.getBoundingClientRect();
+        const boundingRect = this.container.getBoundingClientRect();
 
         this.cachedBoundingRect.top = Math.floor(boundingRect.top);
         this.cachedBoundingRect.left = Math.floor(boundingRect.left);

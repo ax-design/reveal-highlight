@@ -973,6 +973,48 @@
 
     <section class="demo-block">
       <div class="demo">
+        <ax-reveal-bound class="dynamic-size">
+          <div class="ax-reveal-container">
+            <ax-reveal>
+              <button class="ax-reveal-button">Welcome</button>
+            </ax-reveal>
+            <ax-reveal>
+              <button class="ax-reveal-button">To</button>
+            </ax-reveal>
+          </div>
+          <div class="ax-reveal-container">
+            <ax-reveal>
+              <button class="ax-reveal-button">Project</button>
+            </ax-reveal>
+            <ax-reveal>
+              <button class="ax-reveal-button">Axiom!</button>
+            </ax-reveal>
+          </div>
+        </ax-reveal-bound>
+      </div>
+      <style>
+        .dynamic-size.large ax-reveal {
+          width: 160px;
+          height: 160px;
+        }
+
+        .dynamic-size.large .ax-reveal-button {
+          min-width: 160px;
+          height: 160px;
+        }
+      </style>
+      <div class="code">
+        <h2>Dynamic size</h2>
+        <button 
+          onclick="document.querySelector('.dynamic-size')?.classList.toggle('large')"
+        >
+          Click here
+        </button>
+      </div>
+    </section>
+
+    <section class="demo-block">
+      <div class="demo">
         <div class="long-list no-diffuse">
           <ax-reveal-bound>
             <div class="ax-reveal-container">
