@@ -93,7 +93,7 @@ export class RevealBoundaryStore {
             const config = this.animationQueue[i];
 
             if (!frame || config.currentFrameId === frame) {
-                return;
+                continue;
             }
 
             config.currentFrameId = frame;

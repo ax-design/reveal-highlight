@@ -14,24 +14,33 @@ export class RevealStateManager {
         if (config.borderDetectionMode === 'experimentalAutoFit') {
             if (typeof Window === 'undefined') return;
 
-            window.addEventListener('pointermove', (event) => {
-                this.cachedMouseX = event.clientX;
-                this.cachedMouseY = event.clientY;
+            window.addEventListener('pointermove', this.handlePointerMove);
+            window.addEventListener('pointerdown', this.handlePointerMove);
 
-                if (!this.requestedTraverseBoundaries) {
-                    window.requestAnimationFrame(this.traverseBoundaries);
-                    this.requestedTraverseBoundaries = true;
+            window.addEventListener('touchend', () => {
+                for (let i = 0; i < this._storage.length; i++) {
+                    this._storage[i].onPointerLeaveBoundary();
                 }
             });
         }
     }
+
+    handlePointerMove = (event: PointerEvent) => {
+        this.cachedMouseX = event.clientX;
+        this.cachedMouseY = event.clientY;
+
+        if (!this.requestedTraverseBoundaries) {
+            window.requestAnimationFrame(this.traverseBoundaries);
+            this.requestedTraverseBoundaries = true;
+        }
+    };
 
     traverseBoundaries = () => {
         this.requestedTraverseBoundaries = false;
         for (let i = 0; i < this._storage.length; i++) {
             this._storage[i].onPointerMoveOnScreen(this.cachedMouseX, this.cachedMouseY);
         }
-    }
+    };
 
     newBoundary = ($el: HTMLElement) => {
         const hashId = this._currentHashId++;
@@ -43,6 +52,6 @@ export class RevealStateManager {
     };
 
     removeBoundary = (store: RevealBoundaryStore) => {
-        this._storage = this._storage.filter(x => x !== store);
+        this._storage = this._storage.filter((x) => x !== store);
     };
 }

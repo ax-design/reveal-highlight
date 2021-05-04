@@ -1,6 +1,5 @@
 import { ComputedStyleStorage, createStorage } from './ComputedStyleStorage.js';
 import { RevealBoundaryStore } from './RevealBoundryStore.js';
-import { MAGIC_DEFAULT_COLOR } from './variables.js';
 
 type BorderDecoration = 'round' | 'bevel' | 'miter';
 
@@ -611,7 +610,7 @@ export class CanvasConfig {
         this.ctx.closePath();
     };
 
-    paint = (force?: boolean, debug?: boolean): boolean => {
+    paint = (force?: boolean): boolean => {
         const store = this._store;
 
         const animationPlaying = store.animationQueue.includes(this);
