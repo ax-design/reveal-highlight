@@ -262,7 +262,7 @@ export class CanvasConfig {
 
     getTrueFillRadius = (
         trueFillRadius = [0, 0] as [number, number],
-        fillMode = this.computedStyle.get('--reveal-hover-light-fill-radius-mode')
+        fillMode = this.computedStyle.get('--reveal-hover-light-fill-radius-mode') || 'relative'
     ) => {
         const b = this.cachedBoundingRect;
 
@@ -276,7 +276,9 @@ export class CanvasConfig {
                 trueFillRadius[1] = -1;
                 break;
             default:
-                throw new SyntaxError('The value of `--reveal-border-style` must be `relative`, `absolute`!');
+                throw new SyntaxError(
+                    'The value of `--reveal-border-style` must be `relative`, `absolute`, but got `' + fillMode + '`!'
+                );
         }
 
         this._store.updateMaxRadius(Math.max(trueFillRadius[0], trueFillRadius[1]));
@@ -341,7 +343,7 @@ export class CanvasConfig {
         c.hoverLight = this.computedStyle.get('--reveal-hover-light') === 'true';
         c.hoverLightColor = parsedHoverLightColor;
         c.hoverLightFillRadius = this.computedStyle.getNumber('--reveal-hover-light-fill-radius');
-        c.hoverLightFillMode = this.computedStyle.get('--reveal-hover-light-fill-radius-mode');
+        c.hoverLightFillMode = this.computedStyle.get('--reveal-hover-light-fill-radius-mode') || 'relative';
 
         // Press animation related configurations
         c.diffuse = this.computedStyle.get('--reveal-diffuse') === 'true';
