@@ -47,7 +47,7 @@ export class RevealBoundaryStore {
 
     removeReveal = ($el: HTMLCanvasElement) => {
         this.canvasList = this.canvasList.filter((config) => {
-            return config && config.canvas === $el;
+            return config && config.canvas !== $el;
         });
     };
 
