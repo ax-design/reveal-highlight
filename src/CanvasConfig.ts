@@ -194,6 +194,8 @@ export class CanvasConfig {
         releaseAnimationAccelerateRate: 0,
     };
 
+    dirty: boolean = false;
+
     mouseUpClientX: number | null = null;
     mouseUpClientY: number | null = null;
     mouseDownAnimateStartFrame: number | null = null;
@@ -489,7 +491,9 @@ export class CanvasConfig {
 
         const innerAlpha = _innerAlpha < 0 ? 0 : _innerAlpha;
         const outerAlpha = _outerAlpha < 0 ? 0 : _outerAlpha;
-        const outerBorder = _outerBorder > 1 ? 1 : _outerBorder;
+        let outerBorder = 0;
+        outerBorder = _outerBorder > 1 ? 1 : _outerBorder;
+        outerBorder = _outerBorder < 0 ? 0 : _outerBorder;
 
         grd.addColorStop(0, `rgba(${pressAnimationColor},${innerAlpha})`);
         grd.addColorStop(outerBorder * 0.55, `rgba(${pressAnimationColor},${outerAlpha})`);
@@ -624,22 +628,42 @@ export class CanvasConfig {
         this.ctx.closePath();
     };
 
-    paint = (force?: boolean): boolean => {
+    clear = () => {
+        if (!this.ctx) return false;
+        if (!this.dirty) return false;
+
+        const { width, height } = this.cachedBoundingRect;
+
+        this.ctx.setTransform(1, 0, 0, 1, 0, 0);
+        this.ctx.clearRect(
+            0, 
+            0, 
+            width * window.devicePixelRatio, 
+            height * window.devicePixelRatio, 
+        );
+        this.dirty = false;
+        return true;
+    }
+
+    paint = (skipSamePointerPositionCheck?: boolean): boolean => {
         const store = this._store;
 
         const animationPlaying = store.animationQueue.includes(this);
         const samePosition = store.clientX === store.paintedClientX && store.clientY === store.paintedClientY;
 
-        if (samePosition && !animationPlaying && !force) {
+        if (samePosition && !skipSamePointerPositionCheck && !animationPlaying) {
             return false;
         }
 
         if (!this.ctx) return false;
 
+        this.dirty = true;
         this.ctx.setTransform(1, 0, 0, 1, 0, 0);
-        this.ctx.clearRect(0, 0, this.paintedWidth, this.paintedHeight);
-
-        store.dirty = false;
+        this.ctx.clearRect(
+            0, 0, 
+            this.paintedWidth, 
+            this.paintedHeight
+        );
 
         if (!store.mouseInBoundary && !animationPlaying) {
             return false;

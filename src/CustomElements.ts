@@ -102,7 +102,6 @@ export class AxRevealBoundary extends PatchedHTMLElement {
         }
         this.addEventListener('pointerdown', this.handlePointerDown);
         this.addEventListener('pointerup', this.handlePointerUp);
-        this.addEventListener('touchend', this.handlePointerLeave);
     }
 
     disconnectedCallback() {

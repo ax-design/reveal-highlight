@@ -17,7 +17,6 @@ export class RevealBoundaryStore {
 
     animationQueue: CanvasConfig[] = [];
     animationFrame: number | null = null;
-    dirty = false;
 
     mouseUpClientX = null;
     mouseUpClientY = null;
@@ -29,6 +28,8 @@ export class RevealBoundaryStore {
     mouseReleased = false;
 
     maxRadius = -1;
+
+    requestedAnimationFrame = false;
 
     constructor(id: number, $el: HTMLElement) {
         this.id = id;
@@ -53,7 +54,17 @@ export class RevealBoundaryStore {
 
     updateMaxRadius = (x: number) => {
         this.maxRadius = Math.max(x, this.maxRadius);
-    }
+    };
+
+    requestPaintAll = () => {
+        if (this.requestedAnimationFrame) return;
+        this.requestedAnimationFrame = true;
+
+        this.animationFrame = window.requestAnimationFrame((frame) => {
+            this.requestedAnimationFrame = false;
+            this.paintAll(frame);
+        });
+    };
 
     onPointerMoveOnScreen = (x: number, y: number) => {
         const boundingBox = this.container.getBoundingClientRect();
@@ -67,15 +78,15 @@ export class RevealBoundaryStore {
         this.clientX = x;
         this.clientY = y;
 
-        this.animationFrame = window.requestAnimationFrame(this.paintAll);
-        return true
-    }
+        this.requestPaintAll();
+        return true;
+    };
 
     onPointerEnterBoundary = () => {
         this.mouseInBoundary = true;
 
         if (!this.animationFrame) {
-            this.animationFrame = window.requestAnimationFrame(this.paintAll);
+            this.requestPaintAll();
         }
     };
 
@@ -84,8 +95,8 @@ export class RevealBoundaryStore {
         this.paintAll(0, true);
     };
 
-    paintAll = (frame: number, force?: boolean) => {
-        if (!force && !this.mouseInBoundary && this.animationQueue.length === 0) {
+    paintAll = (frame: number, skipSamePointerPositionCheck?: boolean) => {
+        if (!skipSamePointerPositionCheck && !this.mouseInBoundary && this.animationQueue.length === 0) {
             return;
         }
 
@@ -122,24 +133,32 @@ export class RevealBoundaryStore {
         for (let i = 0; i < this.canvasList.length; i++) {
             const config = this.canvasList[i];
             config.currentFrameId = frame;
-            config.paint(force);
+
+            if (this.mouseInBoundary) {
+                config.paint(skipSamePointerPositionCheck);
+            } else {
+                if (this.animationQueue.indexOf(config) === -1) {
+                    config.clear();
+                } else {
+                    config.paint(skipSamePointerPositionCheck);
+                }
+            }
         }
 
-        this.dirty = true;
         this.paintedClientX = this.clientX;
         this.paintedClientY = this.clientY;
 
         if (this.mouseInBoundary || this.animationQueue.length !== 0) {
-            this.animationFrame = window.requestAnimationFrame(this.paintAll);
+            this.requestPaintAll();
         } else {
             this.animationFrame = null;
         }
     };
 
-    resetAll = () => {
+    clearAll = () => {
         for (let i = 0; i < this.canvasList.length; i++) {
             const config = this.canvasList[i];
-            config.paint();
+            config.clear();
         }
     };
 
@@ -158,14 +177,16 @@ export class RevealBoundaryStore {
     };
 
     switchAnimation = () => {
-        this.animationQueue.forEach((config) => {
+        for (let i = 0; i < this.animationQueue.length; i++) {
+            const config = this.animationQueue[i];
+
             if (!config.mouseReleased) {
                 config.mouseReleased = true;
                 config.mouseDownAnimateReleasedFrame = config.mouseDownAnimateCurrentFrame;
                 config.mouseUpClientX = this.clientX;
                 config.mouseUpClientY = this.clientY;
             }
-        });
+        }
     };
 
     cleanUpAnimation = (config: CanvasConfig) => {

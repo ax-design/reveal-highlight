@@ -16,12 +16,13 @@ export class RevealStateManager {
 
             window.addEventListener('pointermove', this.handlePointerMove);
             window.addEventListener('pointerdown', this.handlePointerMove);
+            window.addEventListener('pointerout', this.handlePointerOut);
+        }
+    }
 
-            window.addEventListener('touchend', () => {
-                for (let i = 0; i < this._storage.length; i++) {
-                    this._storage[i].onPointerLeaveBoundary();
-                }
-            });
+    handlePointerOut = () => {
+        for (let i = 0; i < this._storage.length; i++) {
+            this._storage[i].onPointerLeaveBoundary();
         }
     }
 
