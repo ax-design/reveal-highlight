@@ -149,6 +149,7 @@ export class AxReveal extends PatchedHTMLElement {
     </div>
 <style>
     .ax-reveal { display: content; }
+    .ax-design * { user-drag: none; touch-action: none; }
     .content { position: relative; }
     canvas { top: 0; left: 0; pointer-events: none; width: 100%; height: 100%; position: absolute; }
     :host { display: inline-block; position: relative; }
@@ -158,6 +159,7 @@ export class AxReveal extends PatchedHTMLElement {
     :host([inline-flex]) { display: inline-flex; }
     :host([grid]) { display: grid; }
     :host([inline-grid]) { display: inline-grid; }
+    ::slotted(*) { user-drag: none; touch-action: none; }
     ::slotted(button) { outline:none; }
 </style>`;
         this.canvas = this.root.querySelector('canvas')!;
