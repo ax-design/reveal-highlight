@@ -7,14 +7,14 @@ class ServerSideHTMLElement {
         innerHTML: '',
         querySelector: (_x: string) => null,
     }
-    
+
     attachShadow = () => null;
 }
 
-const PatchedHTMLElement = 
-    typeof globalThis.Window === 'undefined' 
-    ? ServerSideHTMLElement as unknown as typeof HTMLElement
-    : HTMLElement;
+const PatchedHTMLElement =
+    typeof globalThis.Window === 'undefined'
+        ? ServerSideHTMLElement as unknown as typeof HTMLElement
+        : HTMLElement;
 
 export class AxRevealProvider extends PatchedHTMLElement {
     static readonly ElementName = 'ax-reveal-provider';
