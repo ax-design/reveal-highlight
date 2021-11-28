@@ -56,13 +56,13 @@ export class RevealBoundaryStore {
         this.maxRadius = Math.max(x, this.maxRadius);
     };
 
-    requestPaintAll = () => {
+    requestPaintAll = (cleanup?: boolean) => {
         if (this.requestedAnimationFrame) return;
         this.requestedAnimationFrame = true;
 
         this.animationFrame = window.requestAnimationFrame((frame) => {
             this.requestedAnimationFrame = false;
-            this.paintAll(frame);
+            this.paintAll(cleanup ? 0 : frame, true);
         });
     };
 
@@ -82,6 +82,9 @@ export class RevealBoundaryStore {
         return true;
     };
 
+    /**
+     * Repaint all canvas while user's pointer has entered the boundary.
+     */
     onPointerEnterBoundary = () => {
         this.mouseInBoundary = true;
 
@@ -90,16 +93,25 @@ export class RevealBoundaryStore {
         }
     };
 
+    /**
+     * Clear all canvas while user's pointer leave the bounary.
+     */
     onPointerLeaveBoundary = () => {
         this.mouseInBoundary = false;
-        this.paintAll(0, true);
+        this.requestPaintAll(true);
     };
 
-    paintAll = (frame: number, skipSamePointerPositionCheck?: boolean) => {
+    /**
+     * The painting method that draw everything on your screen.
+     * @param frame current frame index.
+     * @param skipSamePointerPositionCheck Literally. 
+     */
+    private paintAll = (frame: number, skipSamePointerPositionCheck?: boolean) => {
         if (!skipSamePointerPositionCheck && !this.mouseInBoundary && this.animationQueue.length === 0) {
             return;
         }
 
+        // Animation duration checkup
         for (let i = 0; i < this.animationQueue.length; i++) {
             const config = this.animationQueue[i];
 
@@ -126,7 +138,9 @@ export class RevealBoundaryStore {
             config.mouseDownAnimateLogicFrame = unitLogicFrame / speed;
 
             if (config.mouseDownAnimateLogicFrame > 1) {
-                this.cleanUpAnimation(config);
+                // The `config.paint` is implicitly called here.
+                this.cleanUpAnimationUnit(config);
+                config.cleanedUp = true;
             }
         }
 
@@ -134,14 +148,14 @@ export class RevealBoundaryStore {
             const config = this.canvasList[i];
             config.currentFrameId = frame;
 
-            if (this.mouseInBoundary) {
+            if (config.cleanedUp) {
+                config.cleanedUp = false;
+            } else if (this.mouseInBoundary) {
                 config.paint(skipSamePointerPositionCheck);
+            } else if (this.animationQueue.indexOf(config) === -1) {
+                config.clear();
             } else {
-                if (this.animationQueue.indexOf(config) === -1) {
-                    config.clear();
-                } else {
-                    config.paint(skipSamePointerPositionCheck);
-                }
+                config.paint(skipSamePointerPositionCheck);
             }
         }
 
@@ -155,13 +169,22 @@ export class RevealBoundaryStore {
         }
     };
 
+    /**
+     * Clear all canvas.
+     */
     clearAll = () => {
+        this.cleanupAnimation(true);
+
         for (let i = 0; i < this.canvasList.length; i++) {
             const config = this.canvasList[i];
             config.clear();
         }
     };
 
+    /**
+     * This is the effect while user pressed on the reveal highlight,
+     * the ripple start to spread slowly.
+     */
     initializeAnimation = () => {
         const config = this.canvasList.find((x) => x.mouseInCanvas());
 
@@ -176,6 +199,10 @@ export class RevealBoundaryStore {
         config.mouseReleased = false;
     };
 
+    /**
+     * This is the effect while user released it's pointer, the spreading
+     * ripple animation will start to accelerate.
+     */
     switchAnimation = () => {
         for (let i = 0; i < this.animationQueue.length; i++) {
             const config = this.animationQueue[i];
@@ -189,7 +216,24 @@ export class RevealBoundaryStore {
         }
     };
 
-    cleanUpAnimation = (config: CanvasConfig) => {
+    /**
+     * Cleanup all animations.
+     * @param skipPaint Only cleanup data or also clean up the canvas
+     * @param forceClean Clean the canvas or not
+     */
+    cleanupAnimation = (skipPaint?: boolean, forceClean?: boolean) => {
+        for (let i = 0; i < this.animationQueue.length; i++) {
+            const config = this.animationQueue[i];
+
+            this.cleanUpAnimationUnit(config, skipPaint, forceClean);
+        }
+    }
+
+    /**
+     * Clean up the config of an animation, but the canvas won't cleaned up.
+     * @param config The config to be cleaned up.
+     */
+    cleanUpAnimationUnit = (config: CanvasConfig, skipPaint?: boolean, forceClean?: boolean) => {
         config.mouseUpClientX = null;
         config.mouseUpClientY = null;
         config.mouseDownAnimateStartFrame = null;
@@ -204,7 +248,15 @@ export class RevealBoundaryStore {
             this.animationQueue.splice(configIdx, 1);
         }
 
-        config.paint(true);
+        if (!skipPaint) {
+            if (forceClean) {
+                config.clear();
+            } else if (this.mouseInBoundary) {
+                config.paint(true);
+            } else {
+                config.clear();
+            }
+        }
     };
 
     getRevealAnimationConfig = () => {

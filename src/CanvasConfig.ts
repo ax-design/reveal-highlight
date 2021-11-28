@@ -195,6 +195,11 @@ export class CanvasConfig {
     };
 
     dirty: boolean = false;
+    /**
+     * If is cleaned up by `RevealBoundaryStore` during animation duration
+     * checkup.
+     */
+    cleanedUp: boolean = false;
 
     mouseUpClientX: number | null = null;
     mouseUpClientY: number | null = null;
