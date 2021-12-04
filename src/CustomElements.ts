@@ -146,7 +146,7 @@ export class AxReveal extends PatchedHTMLElement {
     connectedCallback() {
         this.boundary = this.closest(AxRevealBoundary.ElementName) as AxRevealBoundary;
         if (!this.boundary)
-            throw new SyntaxError('You must use ' + AxRevealBoundary.ElementName + ' as the boundary of acrylic!');
+            throw new SyntaxError('You must use ' + AxRevealBoundary.ElementName + ' as the boundary of reveal highlight!');
 
         this.boundary.waitForStorage(storage => setTimeout(() => storage.addReveal(this.canvas, this), 0));
     }
@@ -176,3 +176,53 @@ export class AxReveal extends PatchedHTMLElement {
         this.canvas = this.root.querySelector('canvas')!;
     }
 }
+
+export class AxRevealNg extends PatchedHTMLElement {
+    static readonly ElementName = 'ax-reveal-ng';
+    private root = this.attachShadow({ mode: 'open' });
+    private svg: SVGElement;
+    private boundary!: AxRevealBoundary;
+
+    adoptedCallback() {
+        this.disconnectedCallback();
+        this.connectedCallback();
+    }
+
+    disconnectedCallback() {
+        this.boundary && this.boundary.waitForStorage(storage => storage.removeReveal(this.svg));
+    }
+
+    connectedCallback() {
+        this.boundary = this.closest(AxRevealBoundary.ElementName) as AxRevealBoundary;
+        if (!this.boundary)
+            throw new SyntaxError('You must use ' + AxRevealBoundary.ElementName + ' as the boundary of reveal highlight!');
+
+        this.boundary.waitForStorage(storage => setTimeout(() => storage.addReveal(this.svg, this), 0));
+    }
+
+    constructor() {
+        super();
+        this.root.innerHTML = `
+<div class="ax-reveal">
+    <svg></svg>
+    <div class="content"><slot></slot></div>
+    </div>
+<style>
+    .ax-reveal { display: content; }
+    .ax-design * { user-drag: none; touch-action: none; }
+    .content { position: relative; }
+    svg { top: 0; left: 0; pointer-events: none; width: 100%; height: 100%; position: absolute; }
+    :host { display: inline-block; position: relative; }
+    :host([block]) { display: block; }
+    :host([inline-block]) { display: inline-block; }
+    :host([flex]) { display: flex; }
+    :host([inline-flex]) { display: inline-flex; }
+    :host([grid]) { display: grid; }
+    :host([inline-grid]) { display: inline-grid; }
+    ::slotted(*) { user-drag: none; touch-action: none; }
+    ::slotted(button) { outline:none; }
+</style>`;
+        this.svg = this.root.querySelector('svg')!;
+    }
+}
+

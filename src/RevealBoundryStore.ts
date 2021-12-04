@@ -1,4 +1,7 @@
 import { CanvasConfig } from './CanvasConfig.js';
+import { SvgConfig } from './SvgConfig.js';
+
+type Config = CanvasConfig | SvgConfig;
 
 export class RevealBoundaryStore {
     id: number;
@@ -13,9 +16,9 @@ export class RevealBoundaryStore {
     paintedClientY = -1000;
 
     mouseInBoundary = false;
-    canvasList: CanvasConfig[] = [];
+    canvasList: Config[] = [];
 
-    animationQueue: CanvasConfig[] = [];
+    animationQueue: Config[] = [];
     animationFrame: number | null = null;
 
     mouseUpClientX = null;
@@ -36,19 +39,28 @@ export class RevealBoundaryStore {
         this.container = $el;
     }
 
-    addReveal = ($canvas: HTMLCanvasElement, $container: HTMLElement) => {
-        const canvasConfig = new CanvasConfig(this, $canvas, $container);
+    addReveal = ($element: HTMLCanvasElement | SVGElement, $container: HTMLElement) => {
+        let config: Config;
+        const elementType = Object.prototype.toString.call($element);
 
-        canvasConfig.cacheBoundingRect();
-        canvasConfig.cacheCanvasPaintingStyle();
-        canvasConfig.updateCachedBitmap();
+        if (elementType === '[object HTMLCanvasElement]') {
+            config = new CanvasConfig(this, $element as HTMLCanvasElement, $container);
+        } else if (elementType === '[object SVGSVGElement]') {
+            config = new SvgConfig(this, $element as SVGElement, $container);
+        } else {
+            throw new TypeError(`Unknown element type, got: ${elementType}, Canvas or SVG element expected.`)
+        }
 
-        this.canvasList.push(canvasConfig);
+        config.cacheBoundingRect();
+        config.cacheCanvasPaintingStyle();
+        config.updateCachedBitmap();
+
+        this.canvasList.push(config);
     };
 
-    removeReveal = ($el: HTMLCanvasElement) => {
+    removeReveal = ($el: HTMLCanvasElement | SVGElement) => {
         this.canvasList = this.canvasList.filter((config) => {
-            return config && config.canvas !== $el;
+            return config && config.element !== $el;
         });
     };
 
@@ -233,7 +245,7 @@ export class RevealBoundaryStore {
      * Clean up the config of an animation, but the canvas won't cleaned up.
      * @param config The config to be cleaned up.
      */
-    cleanUpAnimationUnit = (config: CanvasConfig, skipPaint?: boolean, forceClean?: boolean) => {
+    cleanUpAnimationUnit = (config: Config, skipPaint?: boolean, forceClean?: boolean) => {
         config.mouseUpClientX = null;
         config.mouseUpClientY = null;
         config.mouseDownAnimateStartFrame = null;

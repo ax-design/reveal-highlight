@@ -1,221 +1,19 @@
-import { ComputedStyleStorage, createStorage } from './ComputedStyleStorage.js';
 import { RevealBoundaryStore } from './RevealBoundryStore.js';
 
-type BorderDecoration = 'round' | 'bevel' | 'miter';
+import type { CachedRevealBitmap } from './utils/types.js';
 
-const isValidateBorderDecorationType = (x: string): x is BorderDecoration => {
-    if (x === 'round') return true;
-    if (x === 'bevel') return true;
-    if (x === 'miter') return true;
-    return false;
-};
-
-const extractRGBValue = (x: string) => {
-    if (x === '') {
-        return '';
-    }
-
-    if (x[0] === '#') {
-        // Thanks bro:
-        // https://stackoverflow.com/a/11508164/3931936
-        const hexVal = parseInt(x.substring(1), 16);
-
-        var r = (hexVal >> 16) & 255;
-        var g = (hexVal >> 8) & 255;
-        var b = hexVal & 255;
-
-        return r + ',' + g + ',' + b;
-    } else {
-        let result = '';
-        let beginSearch = false;
-        let numberPointer = 0;
-
-        for (let i = 0; i < x.length; i++) {
-            const char = x[i];
-            const charCode = char.charCodeAt(0) - 48;
-            const charIsNumber = charCode >= 0 && charCode < 10;
-
-            if (char === ' ') {
-                continue;
-            }
-
-            if (beginSearch && !charIsNumber && char !== ',' && char !== ')') {
-                throw new SyntaxError(`${x} is not a validate color value!`);
-            }
-
-            if (!beginSearch && char === '(') {
-                beginSearch = true;
-                continue;
-            }
-
-            if (numberPointer < 2 && char === ')') {
-                throw new SyntaxError(`${x} should have at least three color channel`);
-            }
-
-            if (char === ',') {
-                numberPointer++;
-            }
-
-            if (char === ')') {
-                return result;
-            }
-
-            if (beginSearch) {
-                result += char;
-            }
-        }
-
-        return result;
-    }
-};
-
-export interface CachedBoundingRect {
-    top: number;
-    left: number;
-    width: number;
-    height: number;
-}
-
-export interface CachedStyle {
-    color: string;
-    opacity: number;
-    trueFillRadius: [number, number];
-    borderStyle: string;
-    borderColor: string;
-    borderFillRadius: number;
-    borderDecorationType: BorderDecoration;
-    borderDecorationRadius: number;
-    topLeftBorderDecorationRadius: number;
-    topRightBorderDecorationRadius: number;
-    bottomLeftBorderDecorationRadius: number;
-    bottomRightBorderDecorationRadius: number;
-    withLeftBorderFactor: number;
-    withRightBorderFactor: number;
-    withTopBorderFactor: number;
-    withBottomBorderFactor: number;
-    borderWidth: number;
-    hoverLight: boolean;
-    hoverLightColor: string;
-    hoverLightFillMode: string;
-    hoverLightFillRadius: number;
-    diffuse: boolean;
-    pressAnimation: boolean;
-    pressAnimationFillMode: string;
-    pressAnimationColor: string;
-    pressAnimationSpeed: number;
-    releaseAnimationAccelerateRate: number;
-}
-
-interface CachedReveal {
-    radius: number;
-    radiusFactor: number;
-    color: string;
-    opacity: number;
-    pattern: CanvasPattern | null;
-}
-
-/**
- * Cached border and body pattern, for faster painting on the canvas.
- * @interface CachedRevealBitmap
- */
-export interface CachedRevealBitmap {
-    cachedReveal: {
-        borderReveal: CachedReveal;
-        fillReveal: CachedReveal;
-    };
-    cachedCanvas: {
-        borderReveal: HTMLCanvasElement;
-        fillReveal: HTMLCanvasElement;
-    };
-    cachedCtx: {
-        borderReveal: CanvasRenderingContext2D | null;
-        fillReveal: CanvasRenderingContext2D | null;
-    };
-}
+import { BaseConfig } from './BaseConfig.js';
 
 const createEmptyCanvas = () => document.createElement('canvas') as HTMLCanvasElement;
 
-export class CanvasConfig {
-    protected _store: RevealBoundaryStore;
-
-    pxRatio = window.devicePixelRatio || 1;
-
-    readonly container: HTMLElement;
-    readonly canvas: HTMLCanvasElement;
+export class CanvasConfig extends BaseConfig<HTMLCanvasElement> {
     ctx: CanvasRenderingContext2D | null;
-
-    private readonly computedStyle: ComputedStyleStorage;
-
-    paintedWidth = 0;
-    paintedHeight = 0;
 
     protected cachedImg: CachedRevealBitmap;
 
-    currentFrameId: number = -1;
-
-    cachedBoundingRectFrameId: number = -2;
-
-    cachedBoundingRect: CachedBoundingRect = {
-        top: -1,
-        left: -1,
-        width: -1,
-        height: -1,
-    };
-
-    cachedStyleFrameId: number = -2;
-
-    cachedStyle: CachedStyle = {
-        trueFillRadius: [0, 0],
-        color: '',
-        opacity: 1,
-        borderStyle: '',
-        borderColor: '',
-        borderFillRadius: 0,
-        borderDecorationType: 'miter',
-        borderDecorationRadius: 0,
-        topLeftBorderDecorationRadius: 0,
-        topRightBorderDecorationRadius: 0,
-        bottomLeftBorderDecorationRadius: 0,
-        bottomRightBorderDecorationRadius: 0,
-        withLeftBorderFactor: 1,
-        withRightBorderFactor: 1,
-        withTopBorderFactor: 1,
-        withBottomBorderFactor: 1,
-        borderWidth: 1,
-        hoverLight: true,
-        hoverLightColor: '',
-        hoverLightFillMode: '',
-        hoverLightFillRadius: 0,
-        diffuse: true,
-        pressAnimation: true,
-        pressAnimationFillMode: '',
-        pressAnimationColor: '',
-        pressAnimationSpeed: 0,
-        releaseAnimationAccelerateRate: 0,
-    };
-
-    dirty: boolean = false;
-    /**
-     * If is cleaned up by `RevealBoundaryStore` during animation duration
-     * checkup.
-     */
-    cleanedUp: boolean = false;
-
-    mouseUpClientX: number | null = null;
-    mouseUpClientY: number | null = null;
-    mouseDownAnimateStartFrame: number | null = null;
-    mouseDownAnimateCurrentFrame: number | null = null;
-    mouseDownAnimateReleasedFrame: number | null = null;
-    mouseDownAnimateLogicFrame: number | null = null;
-    mousePressed = false;
-
-    mouseReleased = false;
-
     constructor(store: RevealBoundaryStore, $canvas: HTMLCanvasElement, $container: HTMLElement) {
-        this._store = store;
+        super(store, $canvas, $container);
 
-        this.container = $container;
-        this.canvas = $canvas;
         this.ctx = $canvas.getContext('2d');
 
         const cachedCanvas = {
@@ -248,152 +46,7 @@ export class CanvasConfig {
             cachedCanvas,
             cachedCtx,
         };
-
-        this.computedStyle = createStorage($container);
     }
-
-    cacheBoundingRect = () => {
-        if (this.currentFrameId === this.cachedBoundingRectFrameId) {
-            return;
-        }
-
-        const boundingRect = this.container.getBoundingClientRect();
-
-        this.cachedBoundingRect.top = Math.floor(boundingRect.top);
-        this.cachedBoundingRect.left = Math.floor(boundingRect.left);
-        this.cachedBoundingRect.width = Math.floor(boundingRect.width);
-        this.cachedBoundingRect.height = Math.floor(boundingRect.height);
-
-        this.cachedBoundingRectFrameId = this.currentFrameId;
-    };
-
-    getTrueFillRadius = (
-        trueFillRadius = [0, 0] as [number, number],
-        fillMode = this.computedStyle.get('--reveal-hover-light-fill-radius-mode') || 'relative'
-    ) => {
-        const b = this.cachedBoundingRect;
-
-        switch (fillMode) {
-            case 'relative':
-                trueFillRadius[0] = Math.min(b.width, b.height);
-                trueFillRadius[1] = Math.max(b.width, b.height);
-                break;
-            case 'absolute':
-                trueFillRadius[0] = -1;
-                trueFillRadius[1] = -1;
-                break;
-            default:
-                throw new SyntaxError(
-                    'The value of `--reveal-border-style` must be `relative`, `absolute`, but got `' + fillMode + '`!'
-                );
-        }
-
-        this._store.updateMaxRadius(Math.max(trueFillRadius[0], trueFillRadius[1]));
-
-        return trueFillRadius;
-    };
-
-    getPropFromMultipleSource = (domPropsName: string, cssPropsName: string) => {
-        const domProps = this.container.dataset[domPropsName];
-        if (domProps) return domProps;
-
-        return this.computedStyle.get(cssPropsName);
-    };
-
-    getNumberPropFromMultipleSource = (domPropsName: string, cssPropsName: string) => {
-        const domProps = this.container.dataset[domPropsName];
-        if (domProps) return Number.parseFloat(domProps);
-
-        return this.computedStyle.getNumber(cssPropsName);
-    };
-
-    cacheCanvasPaintingStyle = () => {
-        if (this.currentFrameId === this.cachedStyleFrameId) {
-            return;
-        }
-
-        if (this.computedStyle.size() === 0) {
-            return;
-        }
-
-        const parsedBaseColor = extractRGBValue(this.computedStyle.getColor('--reveal-color')) || '0, 0, 0';
-        const parsedBorderColor =
-            extractRGBValue(this.computedStyle.getColor('--reveal-border-color')) || parsedBaseColor;
-        const parsedHoverLightColor =
-            extractRGBValue(this.computedStyle.getColor('--reveal-hover-light-color')) || parsedBaseColor;
-        const parsedPressAnimationColor =
-            extractRGBValue(this.computedStyle.getColor('--reveal-press-animation-color')) || parsedBaseColor;
-
-        const c = this.cachedStyle;
-
-        c.color = parsedBaseColor;
-        c.opacity = this.computedStyle.getNumber('--reveal-opacity');
-
-        // Border related configurations
-        c.borderStyle = this.computedStyle.get('--reveal-border-style');
-        c.borderColor = parsedBorderColor;
-
-        c.borderFillRadius = this.computedStyle.getNumber('--reveal-border-fill-radius');
-        c.borderDecorationType =
-            (this.computedStyle.get('--reveal-border-decoration-type') as BorderDecoration) || 'miter';
-        c.borderWidth = this.computedStyle.getNumber('--reveal-border-width');
-
-        c.withLeftBorderFactor =
-            this.getPropFromMultipleSource('leftBorder', '--reveal-border-left') === 'line' ? 1 : 0;
-        c.withRightBorderFactor =
-            this.getPropFromMultipleSource('rightBorder', '--reveal-border-right') === 'line' ? 1 : 0;
-        c.withTopBorderFactor = this.getPropFromMultipleSource('topBorder', '--reveal-border-top') === 'line' ? 1 : 0;
-        c.withBottomBorderFactor =
-            this.getPropFromMultipleSource('bottomBorder', '--reveal-border-bottom') === 'line' ? 1 : 0;
-
-        // Hover light related configurations
-        c.hoverLight = this.computedStyle.get('--reveal-hover-light') === 'true';
-        c.hoverLightColor = parsedHoverLightColor;
-        c.hoverLightFillRadius = this.computedStyle.getNumber('--reveal-hover-light-fill-radius');
-        c.hoverLightFillMode = this.computedStyle.get('--reveal-hover-light-fill-radius-mode') || 'relative';
-
-        // Press animation related configurations
-        c.diffuse = this.computedStyle.get('--reveal-diffuse') === 'true';
-        c.pressAnimation = this.computedStyle.get('--reveal-press-animation') === 'true';
-        c.pressAnimationFillMode = this.computedStyle.get('--reveal-press-animation-radius-mode');
-        c.pressAnimationColor = parsedPressAnimationColor;
-        c.pressAnimationSpeed = this.computedStyle.getNumber('--reveal-press-animation-speed');
-        c.releaseAnimationAccelerateRate = this.computedStyle.getNumber('--reveal-release-animation-accelerate-rate');
-
-        // Border decoration related configurations
-        const r = this.computedStyle.getNumber('--reveal-border-decoration-radius');
-        const tl = this.getNumberPropFromMultipleSource(
-            'topLeftBorderRadius',
-            '--reveal-border-decoration-top-left-radius'
-        );
-        const tr = this.getNumberPropFromMultipleSource(
-            'topRightBorderRadius',
-            '--reveal-border-decoration-top-right-radius'
-        );
-        const bl = this.getNumberPropFromMultipleSource(
-            'bottomLeftBorderRadius',
-            '--reveal-border-decoration-bottom-left-radius'
-        );
-        const br = this.getNumberPropFromMultipleSource(
-            'bottomRightBorderRadius',
-            '--reveal-border-decoration-bottom-right-radius'
-        );
-
-        c.topLeftBorderDecorationRadius = tl >= 0 ? tl : r;
-        c.topRightBorderDecorationRadius = tr >= 0 ? tr : r;
-        c.bottomLeftBorderDecorationRadius = bl >= 0 ? bl : r;
-        c.bottomRightBorderDecorationRadius = br >= 0 ? br : r;
-
-        this.getTrueFillRadius(c.trueFillRadius, c.hoverLightFillMode);
-
-        if (!isValidateBorderDecorationType(c.borderDecorationType)) {
-            throw new SyntaxError(
-                'The value of `--reveal-border-decoration-type` must be `round`, `bevel` or `miter`!'
-            );
-        }
-
-        this.cachedStyleFrameId = this.currentFrameId;
-    };
 
     updateCachedReveal = () => {
         const c = this.cachedStyle;
@@ -453,38 +106,6 @@ export class CanvasConfig {
     updateCachedBitmap = () => {
         if (!this.ctx) return;
         this.updateCachedReveal();
-    };
-
-    mouseInCanvas = () => {
-        const b = this.cachedBoundingRect;
-
-        const relativeX = this._store.clientX - b.left;
-        const relativeY = this._store.clientY - b.top;
-
-        return relativeX > 0 && relativeY > 0 && relativeX < b.width && relativeY < b.height;
-    };
-
-    syncSizeToElement = (x: HTMLCanvasElement) => {
-        const b = this.cachedBoundingRect;
-
-        if (x.width !== b.width || x.height !== b.height) {
-            x.width = b.width * this.pxRatio;
-            x.height = b.height * this.pxRatio;
-            x.style.width = `${b.width}px`;
-            x.style.height = `${b.height}px`;
-        }
-    };
-
-    syncSizeToRevealRadius = (x: HTMLCanvasElement, factor: number) => {
-        const { trueFillRadius } = this.cachedStyle;
-
-        const radius = trueFillRadius[1] || 1;
-        const size = radius * 2 * this.pxRatio * factor;
-
-        if (x.width !== size || x.height !== size) {
-            x.width = size;
-            x.height = size;
-        }
     };
 
     updateAnimateGrd = (frame: number, grd: CanvasGradient) => {
@@ -641,10 +262,10 @@ export class CanvasConfig {
 
         this.ctx.setTransform(1, 0, 0, 1, 0, 0);
         this.ctx.clearRect(
-            0, 
-            0, 
-            width * window.devicePixelRatio, 
-            height * window.devicePixelRatio, 
+            0,
+            0,
+            width * window.devicePixelRatio,
+            height * window.devicePixelRatio,
         );
         this.dirty = false;
         return true;
@@ -665,8 +286,8 @@ export class CanvasConfig {
         this.dirty = true;
         this.ctx.setTransform(1, 0, 0, 1, 0, 0);
         this.ctx.clearRect(
-            0, 0, 
-            this.paintedWidth, 
+            0, 0,
+            this.paintedWidth,
             this.paintedHeight
         );
 
@@ -678,7 +299,7 @@ export class CanvasConfig {
             return false;
         }
 
-        this.syncSizeToElement(this.canvas);
+        this.syncSizeToElement(this.element);
         this.cacheBoundingRect();
 
         const b = this.cachedBoundingRect;
@@ -751,21 +372,21 @@ export class CanvasConfig {
             const animateGrd =
                 this.mouseReleased && this.mouseUpClientX && this.mouseUpClientY
                     ? this.ctx.createRadialGradient(
-                          (this.mouseUpClientX - b.left) * this.pxRatio,
-                          (this.mouseUpClientY - b.top) * this.pxRatio,
-                          0,
-                          (this.mouseUpClientX - b.left) * this.pxRatio,
-                          (this.mouseUpClientY - b.top) * this.pxRatio,
-                          grdRadius * this.pxRatio
-                      )
+                        (this.mouseUpClientX - b.left) * this.pxRatio,
+                        (this.mouseUpClientY - b.top) * this.pxRatio,
+                        0,
+                        (this.mouseUpClientX - b.left) * this.pxRatio,
+                        (this.mouseUpClientY - b.top) * this.pxRatio,
+                        grdRadius * this.pxRatio
+                    )
                     : this.ctx.createRadialGradient(
-                          relativeX * this.pxRatio,
-                          relativeY * this.pxRatio,
-                          0,
-                          relativeX * this.pxRatio,
-                          relativeY * this.pxRatio,
-                          grdRadius * this.pxRatio
-                      );
+                        relativeX * this.pxRatio,
+                        relativeY * this.pxRatio,
+                        0,
+                        relativeX * this.pxRatio,
+                        relativeY * this.pxRatio,
+                        grdRadius * this.pxRatio
+                    );
             this.updateAnimateGrd(this.mouseDownAnimateLogicFrame, animateGrd);
 
             this.drawShape(false);
