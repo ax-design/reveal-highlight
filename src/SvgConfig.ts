@@ -97,41 +97,70 @@ export class SvgConfig extends BaseConfig<SVGElement> {
         let d = '';
 
 
+        // Step 1: Starting point
+        d += hollow ? `M ${tl * wlf}, 0 ` : `M ${bw}, ${tl2 * wtf + bw} `;
+
         switch (c.borderDecorationType) {
             // Oh... Fuck again...
             case 'round':
-                // Step 1: Starting point
-                d += hollow ? `M ${tl * wlf}, 0 ` : `M ${bw}, ${tl2 * wtf + bw} `;
                 // Step 2: Draw shape
                 if (hollow) {
                     // Step 2-1: This is outer path, drawing clockwise
                     d += `
-                        h ${w - tl - tr}
+                        h ${w - tl - tr} 
                         a ${tr}, ${tr} 0 0 1 ${tr}, ${tr} 
                         v ${h - tr - br} 
                         a ${br}, ${br} 0 0 1 ${-br}, ${br} 
                         h ${-h + tr + br} 
                         a ${bl}, ${bl} 0 0 1 ${-bl}, ${-bl} 
-                        v ${-h + tr + br}
+                        v ${-h + tr + br} 
                         a ${tl}, ${tl} 0 0 1 ${tl}, ${-tl} 
                         Z 
                     `;
                 }
                 // Step 2-2: This is the inner path, drawing anti-clockwise
                 d += `
-                    M ${bw}, ${tl2 + bw}
-                    v ${h - tl2 - bl2 - bw * 2}
-                    a ${bl2}, ${bl2} 0 0 0 ${bl2}, ${bl2}
-                    h ${w - bl2 - br2 - bw * 2}
+                    M ${bw}, ${tl2 + bw} 
+                    v ${h - tl2 - bl2 - bw * 2} 
+                    a ${bl2}, ${bl2} 0 0 0 ${bl2}, ${bl2} 
+                    h ${w - bl2 - br2 - bw * 2} 
                     a ${br2}, ${br2} 0 0 0 ${br2}, ${-br2} 
-                    v ${-h + tl2 + bl2 + bw * 2}
+                    v ${-h + tl2 + bl2 + bw * 2} 
                     a ${tr2}, ${tr2} 0 0 0 ${-tr2}, ${-tr2} 
-                    h ${-w + bl2 + br2 + bw * 2}
+                    h ${-w + bl2 + br2 + bw * 2} 
                     a ${tl2}, ${tl2} 0 0 0 ${-tl2}, ${tl2} 
                 `;
-                // Step 3: Close the path
-                d += hollow ? `L ${tl2 + bw}, ${tl2 + bw}` : `z`;
+                break;
+            case 'bevel':
+                if (hollow) {
+                    // Step 2-1: This is outer path, drawing clockwise
+                    d += `
+                        h ${w - tl - tr}
+                        l ${tr} ${tr} 
+                        v ${h - tr - br} 
+                        l ${-br} ${br} 
+                        h ${-h + tr + br} 
+                        l ${-bl} ${-bl} 
+                        v ${-h + tr + br} 
+                        l ${tl} ${-tl} 
+                        Z 
+                    `;
+                }
+                // Step 2-2: This is the inner path, drawing anti-clockwise
+                d += `
+                    M ${bw}, ${tl2 + bw} 
+                    v ${h - tl2 - bl2 - bw * 2} 
+                    l ${bl2} ${bl2} 
+                    h ${w - bl2 - br2 - bw * 2} 
+                    l ${br2} ${-br2} 
+                    v ${-h + tl2 + bl2 + bw * 2} 
+                    l ${-tr2} ${-tr2} 
+                    h ${-w + bl2 + br2 + bw * 2} 
+                    l ${-tl2} ${tl2} 
+                `;
         }
+        // Step 3: Close the path
+        d += hollow ? `L ${tl2 + bw}, ${tl2 + bw}` : `z`;
     };
 
     clear = () => {
