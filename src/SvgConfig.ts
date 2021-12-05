@@ -158,9 +158,35 @@ export class SvgConfig extends BaseConfig<SVGElement> {
                     h ${-w + bl2 + br2 + bw * 2} 
                     l ${-tl2} ${tl2} 
                 `;
+                break;
+            case 'miter':
+                // Step 2: Draw shape
+                if (hollow) {
+                    // Step 2-1: This is outer path, drawing clockwise
+                    d += `
+                        M 0, 0 
+                        h ${w} 
+                        v ${h} 
+                        h ${0 - w} 
+                        v ${0 - h}
+                        Z
+                    `;
+                }
+                // Step 2-2: This is the inner path, drawing anti-clockwise
+                d += `
+                    M ${bw}, ${bw}
+                    v ${h - bw * 2}
+                    h ${w - bw * 2}
+                    v ${-h + bw * 2}
+                    h ${-w + bw * 2}
+                `;
         }
         // Step 3: Close the path
-        d += hollow ? `L ${tl2 + bw}, ${tl2 + bw}` : `z`;
+        if (c.borderDecorationType === 'miter') {
+            d += hollow ? `L ${bw}, ${bw}` : `z`;
+        } else {
+            d += hollow ? `L ${tl2 + bw}, ${tl2 + bw}` : `z`;
+        }
     };
 
     clear = () => {
