@@ -157,7 +157,7 @@ export class AxReveal extends PatchedHTMLElement {
 <div class="ax-reveal">
     <canvas></canvas>
     <div class="content"><slot></slot></div>
-    </div>
+</div>
 <style>
     .ax-reveal { display: content; }
     .ax-design * { user-drag: none; touch-action: none; }
@@ -204,9 +204,28 @@ export class AxRevealNg extends PatchedHTMLElement {
         super();
         this.root.innerHTML = `
 <div class="ax-reveal">
-    <svg></svg>
+    <svg>
+        <defs>
+            <radialGradient id="borderGrad" gradientUnits="userSpaceOnUse">
+                <stop id="borderCenter" offset="0%" />
+                <stop id="borderOut" offset="100%" />
+            </radialGradient>
+            <radialGradient id="fillGrad" gradientUnits="userSpaceOnUse">
+                <stop id="fillCenter" offset="0%" />
+                <stop id="fillOut" offset="100%" />
+            </radialGradient>
+            <radialGradient id="rippleGrad" gradientUnits="userSpaceOnUse">
+                <stop id="rippleCenter" />
+                <stop id="rippleMiddle" />
+                <stop id="rippleOut" />
+            </radialGradient>
+        </defs>
+        <path id="borderPath" fill="url(#borderGrad)" />
+        <path id="fillPath" fill="url(#fillGrad)" />
+        <path id="ripplePath" fill="url(#rippleGrad)" />
+    </svg>
     <div class="content"><slot></slot></div>
-    </div>
+</div>
 <style>
     .ax-reveal { display: content; }
     .ax-design * { user-drag: none; touch-action: none; }

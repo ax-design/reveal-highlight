@@ -4,8 +4,6 @@ import type { CachedRevealPath } from './utils/types.js';
 
 import { BaseConfig } from './BaseConfig.js';
 
-const createEmptyPath = () => document.createElementNS('http://www.w3.org/2000/svg', 'path');
-
 export class SvgConfig extends BaseConfig<SVGElement> {
     protected cachedImg: CachedRevealPath;
 
@@ -14,9 +12,32 @@ export class SvgConfig extends BaseConfig<SVGElement> {
         this._store = store;
 
         const cachedPath = {
-            borderReveal: createEmptyPath(),
-            fillReveal: createEmptyPath(),
+            borderReveal: $svg.querySelector('#borderPath') as SVGPathElement,
+            fillReveal: $svg.querySelector('#fillPath') as SVGPathElement,
+            rippleReveal: $svg.querySelector('#ripplePath') as SVGPathElement,
         };
+
+        const cachedGradient = {
+            borderReveal: $svg.querySelector('#borderPath') as SVGRadialGradientElement,
+            fillReveal: $svg.querySelector('#fillPath') as SVGRadialGradientElement,
+            rippleReveal: $svg.querySelector('#ripplePath') as SVGRadialGradientElement,
+        }
+
+        const cachedGradientStop = {
+            borderReveal: [
+                $svg.querySelector('#borderCenter') as SVGStopElement,
+                $svg.querySelector('#borderOut') as SVGStopElement,
+            ] as const,
+            fillReveal: [
+                $svg.querySelector('#fillCenter') as SVGStopElement,
+                $svg.querySelector('#fillOut') as SVGStopElement,
+            ] as const,
+            rippleReveal: [
+                $svg.querySelector('#rippleCenter') as SVGStopElement,
+                $svg.querySelector('#rippleMiddle') as SVGStopElement,
+                $svg.querySelector('#rippleOut') as SVGStopElement,
+            ] as const,
+        }
 
         this.cachedImg = {
             cachedReveal: {
@@ -36,6 +57,8 @@ export class SvgConfig extends BaseConfig<SVGElement> {
                 },
             },
             cachedPath,
+            cachedGradient,
+            cachedGradientStop,
         };
     }
 

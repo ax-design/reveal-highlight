@@ -20,9 +20,25 @@ export interface CachedStyle {
     topRightBorderDecorationRadius: number;
     bottomLeftBorderDecorationRadius: number;
     bottomRightBorderDecorationRadius: number;
+    /**
+     * @param withLeftBorderFactor
+     * If the left border is shown, this value is 1, or the value is 0.
+     */
     withLeftBorderFactor: number;
+    /**
+     * @param withRightBorderFactor
+     * If the right border is shown, this value is 1, or the value is 0.
+     */
     withRightBorderFactor: number;
+    /**
+     * @param withTopBorderFactor
+     * If the top border is shown, this value is 1, or the value is 0.
+     */
     withTopBorderFactor: number;
+    /**
+     * @param withBottomBorderFactor
+     * If the bottom border is shown, this value is 1, or the value is 0.
+     */
     withBottomBorderFactor: number;
     borderWidth: number;
     hoverLight: boolean;
@@ -76,5 +92,16 @@ export interface CachedRevealPath {
     cachedPath: {
         borderReveal: SVGPathElement;
         fillReveal: SVGPathElement;
+        rippleReveal: SVGPathElement;
+    };
+    cachedGradient: {
+        borderReveal: SVGRadialGradientElement;
+        fillReveal: SVGRadialGradientElement;
+        rippleReveal: SVGRadialGradientElement;
+    };
+    cachedGradientStop: {
+        borderReveal: Readonly<[SVGStopElement, SVGStopElement]>;
+        fillReveal: Readonly<[SVGStopElement, SVGStopElement]>;
+        rippleReveal: Readonly<[SVGStopElement, SVGStopElement, SVGStopElement]>;
     };
 }
