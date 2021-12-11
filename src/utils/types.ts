@@ -86,22 +86,22 @@ export interface CachedRevealBitmap {
  */
 export interface CachedRevealPath {
     cachedReveal: {
-        borderReveal: CachedReveal;
-        fillReveal: CachedReveal;
+        readonly borderReveal: CachedReveal;
+        readonly fillReveal: CachedReveal;
     };
     cachedPath: {
-        borderReveal: SVGPathElement;
-        fillReveal: SVGPathElement;
-        rippleReveal: SVGPathElement;
+        readonly borderReveal: SVGPathElement;
+        readonly fillReveal: SVGPathElement;
+        readonly rippleReveal: SVGPathElement;
     };
     cachedGradient: {
-        borderReveal: SVGRadialGradientElement;
-        fillReveal: SVGRadialGradientElement;
-        rippleReveal: SVGRadialGradientElement;
+        readonly borderReveal: SVGRadialGradientElement;
+        readonly fillReveal: SVGRadialGradientElement;
+        readonly rippleReveal: SVGRadialGradientElement;
     };
     cachedGradientStop: {
-        borderReveal: Readonly<[SVGStopElement, SVGStopElement]>;
-        fillReveal: Readonly<[SVGStopElement, SVGStopElement]>;
-        rippleReveal: Readonly<[SVGStopElement, SVGStopElement, SVGStopElement]>;
+        readonly borderReveal: Readonly<[SVGStopElement, SVGStopElement]>;
+        readonly fillReveal: Readonly<[SVGStopElement, SVGStopElement]>;
+        readonly rippleReveal: Readonly<[SVGStopElement, SVGStopElement, SVGStopElement]>;
     };
 }

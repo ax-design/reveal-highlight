@@ -108,7 +108,7 @@ export class CanvasConfig extends BaseConfig<HTMLCanvasElement> {
         this.updateCachedReveal();
     };
 
-    updateAnimateGrd = (frame: number, grd: CanvasGradient) => {
+    private updateAnimateGrd = (frame: number, grd: CanvasGradient) => {
         const { pressAnimationColor, opacity } = this.cachedStyle;
 
         const _innerAlpha = opacity * (0.2 - frame);
@@ -186,7 +186,7 @@ export class CanvasConfig extends BaseConfig<HTMLCanvasElement> {
                     this.ctx.lineTo(w - bw * wrf, bw * wtf + tr2); // ⑦
                     this.ctx.arcTo(w - bw * wrf, bw * wtf, w - bw * wrf - tr2, bw * wtf, tr2); // ⑧
                     this.ctx.lineTo(tl2, bw * wtf); // ①
-                    /* prettier-ignore-start */
+                    /* prettier-ignore-end */
                 }
                 break;
             case 'bevel':
@@ -252,6 +252,17 @@ export class CanvasConfig extends BaseConfig<HTMLCanvasElement> {
         }
 
         this.ctx.closePath();
+    };
+
+    syncSizeToElement = (x: HTMLCanvasElement) => {
+        const b = this.cachedBoundingRect;
+
+        if (x.width !== b.width || x.height !== b.height) {
+            x.width = b.width * this.pxRatio;
+            x.height = b.height * this.pxRatio;
+            x.style.width = `${b.width}px`;
+            x.style.height = `${b.height}px`;
+        }
     };
 
     clear = () => {

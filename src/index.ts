@@ -1,4 +1,4 @@
-import { AxRevealProvider, AxRevealBoundary, AxReveal } from './CustomElements.js';
+import { AxRevealProvider, AxRevealBoundary, AxReveal, AxRevealNg } from './CustomElements.js';
 import { config } from './config.js';
 import { MAGIC_DEFAULT_COLOR } from './variables.js';
 
@@ -6,6 +6,7 @@ function registerCustomElements() {
     customElements.define(AxRevealProvider.ElementName, AxRevealProvider);
     customElements.define(AxRevealBoundary.ElementName, AxRevealBoundary);
     customElements.define(AxReveal.ElementName, AxReveal);
+    customElements.define(AxRevealNg.ElementName, AxRevealNg);
 }
 
 export interface AxRevealHighlightRegisterOptions {

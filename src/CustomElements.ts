@@ -206,16 +206,16 @@ export class AxRevealNg extends PatchedHTMLElement {
 <div class="ax-reveal">
     <svg>
         <defs>
-            <radialGradient id="borderGrad" gradientUnits="userSpaceOnUse">
+            <radialGradient id="borderGrad" gradientUnits="userSpaceOnUse" r="0">
                 <stop id="borderCenter" offset="0%" />
                 <stop id="borderOut" offset="100%" />
             </radialGradient>
-            <radialGradient id="fillGrad" gradientUnits="userSpaceOnUse">
+            <radialGradient id="fillGrad" gradientUnits="userSpaceOnUse" r="0">
                 <stop id="fillCenter" offset="0%" />
                 <stop id="fillOut" offset="100%" />
             </radialGradient>
-            <radialGradient id="rippleGrad" gradientUnits="userSpaceOnUse">
-                <stop id="rippleCenter" />
+            <radialGradient id="rippleGrad" gradientUnits="userSpaceOnUse" r="0">
+                <stop id="rippleCenter" offset="0%" />
                 <stop id="rippleMiddle" />
                 <stop id="rippleOut" />
             </radialGradient>

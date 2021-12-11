@@ -4,10 +4,10 @@ import type { CachedRevealPath } from './utils/types.js';
 
 import { BaseConfig } from './BaseConfig.js';
 
-export class SvgConfig extends BaseConfig<SVGElement> {
+export class SvgConfig extends BaseConfig<SVGSVGElement> {
     protected cachedImg: CachedRevealPath;
 
-    constructor(store: RevealBoundaryStore, $svg: SVGElement, $container: HTMLElement) {
+    constructor(store: RevealBoundaryStore, $svg: SVGSVGElement, $container: HTMLElement) {
         super(store, $svg, $container);
         this._store = store;
 
@@ -18,9 +18,9 @@ export class SvgConfig extends BaseConfig<SVGElement> {
         };
 
         const cachedGradient = {
-            borderReveal: $svg.querySelector('#borderPath') as SVGRadialGradientElement,
-            fillReveal: $svg.querySelector('#fillPath') as SVGRadialGradientElement,
-            rippleReveal: $svg.querySelector('#ripplePath') as SVGRadialGradientElement,
+            borderReveal: $svg.querySelector('#borderGrad') as SVGRadialGradientElement,
+            fillReveal: $svg.querySelector('#fillGrad') as SVGRadialGradientElement,
+            rippleReveal: $svg.querySelector('#rippleGrad') as SVGRadialGradientElement,
         }
 
         const cachedGradientStop = {
@@ -62,16 +62,75 @@ export class SvgConfig extends BaseConfig<SVGElement> {
         };
     }
 
-    updateCachedReveal = () => {
-    };
-
     updateCachedBitmap = () => {
+    }
+
+    updateCachedReveal = () => {
+        const c = this.cachedStyle;
+        const stops = this.cachedImg.cachedGradientStop;
+        stops.borderReveal[0].style.stopColor = c.borderColor;
+        stops.borderReveal[1].style.stopColor = c.borderColor;
+        stops.borderReveal[0].style.stopOpacity = '1';
+        stops.borderReveal[1].style.stopOpacity = '0';
+
+        stops.fillReveal[0].style.stopColor = c.hoverLightColor;
+        stops.fillReveal[1].style.stopColor = c.hoverLightColor;
+        stops.fillReveal[0].style.stopOpacity = '1';
+        stops.fillReveal[1].style.stopOpacity = '0';
+
+        stops.rippleReveal[0].style.stopColor = c.pressAnimationColor;
+        stops.rippleReveal[1].style.stopColor = c.pressAnimationColor;
+        stops.rippleReveal[2].style.stopColor = c.pressAnimationColor;
+
+        const grads = this.cachedImg.cachedGradient;
+        const isAbsoluteFill = c.trueFillRadius[0] === -1;
+        grads.borderReveal.r.baseVal.value = isAbsoluteFill 
+            ? c.borderFillRadius 
+            : c.borderFillRadius * c.trueFillRadius[1];
+        grads.fillReveal.r.baseVal.value = isAbsoluteFill 
+            ? c.hoverLightFillRadius 
+            : c.hoverLightFillRadius * c.trueFillRadius[0];
     };
 
-    updateAnimateGrd = (frame: number, grd: CanvasGradient) => {
+    private updateAnimateGrd = (frame: number, x: number, y: number, radius: number) => {
+        const { opacity } = this.cachedStyle;
+
+        const _innerAlpha = opacity * (0.2 - frame);
+        const _outerAlpha = opacity * (0.1 - frame * 0.07);
+        const _outerBorder = 0.1 + frame * 0.8;
+
+        const innerAlpha = _innerAlpha < 0 ? 0 : _innerAlpha;
+        const outerAlpha = _outerAlpha < 0 ? 0 : _outerAlpha;
+        let outerBorder = 0;
+        outerBorder = _outerBorder > 1 ? 1 : _outerBorder;
+        outerBorder = _outerBorder < 0 ? 0 : _outerBorder;
+
+        const stops = this.cachedImg.cachedGradientStop;
+        stops.rippleReveal[0].style.stopOpacity = innerAlpha.toString();
+        stops.rippleReveal[1].style.stopOpacity = outerAlpha.toString();
+        stops.rippleReveal[2].style.stopOpacity = '0';
+
+        stops.rippleReveal[0].offset.baseVal = 0;
+        stops.rippleReveal[1].offset.baseVal = outerBorder * 0.55;
+        stops.rippleReveal[2].offset.baseVal = outerBorder;
+
+        const grads = this.cachedImg.cachedGradient;
+        grads.rippleReveal.r.baseVal.value = radius;
+        grads.rippleReveal.cx.baseVal.value = x;
+        grads.rippleReveal.cy.baseVal.value = y;
     };
 
-    private drawShape = (hollow: boolean) => {
+    private updateGradientPosition = (x: number, y: number) => {
+        const grads = this.cachedImg.cachedGradient;
+
+        grads.borderReveal.cx.baseVal.value = x;
+        grads.borderReveal.cy.baseVal.value = y;
+
+        grads.fillReveal.cx.baseVal.value = x;
+        grads.fillReveal.cy.baseVal.value = y;
+    }
+
+    private drawShape = (hollow: boolean, $target: SVGPathElement) => {
         const b = this.cachedBoundingRect;
         const w = b.width;
         const h = b.height;
@@ -111,7 +170,7 @@ export class SvgConfig extends BaseConfig<SVGElement> {
                         a ${tr}, ${tr} 0 0 1 ${tr}, ${tr} 
                         v ${h - tr - br} 
                         a ${br}, ${br} 0 0 1 ${-br}, ${br} 
-                        h ${-h + tr + br} 
+                        h ${-w + bl + br} 
                         a ${bl}, ${bl} 0 0 1 ${-bl}, ${-bl} 
                         v ${-h + tr + br} 
                         a ${tl}, ${tl} 0 0 1 ${tl}, ${-tl} 
@@ -125,7 +184,7 @@ export class SvgConfig extends BaseConfig<SVGElement> {
                     a ${bl2}, ${bl2} 0 0 0 ${bl2}, ${bl2} 
                     h ${w - bl2 - br2 - bw * 2} 
                     a ${br2}, ${br2} 0 0 0 ${br2}, ${-br2} 
-                    v ${-h + tl2 + bl2 + bw * 2} 
+                    v ${-h + tr2 + br2 + bw * 2} 
                     a ${tr2}, ${tr2} 0 0 0 ${-tr2}, ${-tr2} 
                     h ${-w + bl2 + br2 + bw * 2} 
                     a ${tl2}, ${tl2} 0 0 0 ${-tl2}, ${tl2} 
@@ -139,14 +198,14 @@ export class SvgConfig extends BaseConfig<SVGElement> {
                         l ${tr} ${tr} 
                         v ${h - tr - br} 
                         l ${-br} ${br} 
-                        h ${-h + tr + br} 
+                        h ${-w + tr + br} 
                         l ${-bl} ${-bl} 
                         v ${-h + tr + br} 
                         l ${tl} ${-tl} 
                         Z 
                     `;
                 }
-                // Step 2-2: This is the inner path, drawing anti-clockwise
+                // // Step 2-2: This is the inner path, drawing anti-clockwise
                 d += `
                     M ${bw}, ${tl2 + bw} 
                     v ${h - tl2 - bl2 - bw * 2} 
@@ -187,12 +246,134 @@ export class SvgConfig extends BaseConfig<SVGElement> {
         } else {
             d += hollow ? `L ${tl2 + bw}, ${tl2 + bw}` : `z`;
         }
+
+        $target.setAttribute('d', d);
+    };
+
+    syncSizeToElement = (x: SVGSVGElement) => {
+        const b = this.cachedBoundingRect;
+        const width = x.width.baseVal;
+        const height = x.height.baseVal;
+
+        if (width.value !== b.width || height.value !== b.height) {
+            width.value = b.width;
+            height.value = b.height;
+        }
     };
 
     clear = () => {
+        if (!this.dirty) return false;
+
+        const paths = this.cachedImg.cachedPath;
+
+        paths.borderReveal.style.fill = 'transparent';
+        paths.fillReveal.style.fill = 'transparent';
+        paths.rippleReveal.style.fill = 'transparent';
     }
 
     paint = (skipSamePointerPositionCheck?: boolean): boolean => {
-        return false
+        const store = this._store;
+
+        const animationPlaying = store.animationQueue.includes(this);
+        const samePosition = store.clientX === store.paintedClientX && store.clientY === store.paintedClientY;
+
+        if (samePosition && !skipSamePointerPositionCheck && !animationPlaying) {
+            return false;
+        }
+
+        if (!store.mouseInBoundary && !animationPlaying) {
+            return false;
+        }
+
+        if (!this.cachedImg.cachedReveal) {
+            return false;
+        }
+
+        this.dirty = true;
+
+        this.syncSizeToElement(this.element);
+        this.cacheBoundingRect();
+
+        const b = this.cachedBoundingRect;
+
+        const relativeX = store.clientX - b.left;
+        const relativeY = store.clientY - b.top;
+
+        if (Number.isNaN(relativeX) || Number.isNaN(relativeY)) {
+            return false;
+        }
+
+        const c = this.cachedStyle;
+        this.getTrueFillRadius(c.trueFillRadius);
+
+        this.paintedWidth = b.width;
+        this.paintedHeight = b.height;
+
+        const maxRadius = c.trueFillRadius[1];
+
+        const inLeftBound = relativeX + maxRadius > 0;
+        const inRightBound = relativeX - maxRadius < b.width;
+        const inTopBound = relativeY + maxRadius > 0;
+        const inBottomBound = relativeY - maxRadius < b.height;
+
+        const mouseInRenderArea = inLeftBound && inRightBound && inTopBound && inBottomBound;
+
+        if (!mouseInRenderArea && !animationPlaying) {
+            return false;
+        }
+
+        this.cacheCanvasPaintingStyle();
+        this.updateCachedReveal();
+
+        this.updateGradientPosition(relativeX, relativeY);
+
+        this.drawShape(true, this.cachedImg.cachedPath.borderReveal);
+        this.drawShape(false, this.cachedImg.cachedPath.fillReveal);
+        this.drawShape(false, this.cachedImg.cachedPath.rippleReveal);
+
+        if (store.mouseInBoundary) {
+            const mouseInCanvas = relativeX > 0 && relativeY > 0 && relativeX < b.width && relativeY < b.height;
+
+            const fillPattern = this.cachedImg.cachedReveal.fillReveal.pattern;
+            if (c.hoverLight && mouseInCanvas && fillPattern) {
+                // draw fill.
+                this.cachedImg.cachedPath.fillReveal.style.fill = 'url(#fillGrad)';
+            } else if (this.cachedImg.cachedPath.fillReveal.style.fill !== 'transparent') {
+                this.cachedImg.cachedPath.fillReveal.style.fill = 'transparent';
+            }
+
+            const diffuse = (c.diffuse && mouseInRenderArea) || mouseInCanvas;
+            if (c.borderWidth !== 0 && diffuse) {
+                // Draw border.
+                // this.cachedImg.cachedPath.borderReveal.style.fill = 'url(#borderGrad)';
+                this.cachedImg.cachedPath.borderReveal.style.fill = 'red';
+            } else if (this.cachedImg.cachedPath.borderReveal.style.fill !== 'transparent') {
+                this.cachedImg.cachedPath.borderReveal.style.fill = 'transparent';
+            }
+        }
+
+        if (c.pressAnimation && this.mousePressed && this.mouseDownAnimateLogicFrame) {
+            const grdRadius =
+                c.pressAnimationFillMode === 'constrained' ? c.trueFillRadius[1] : Math.max(b.width, b.height);
+
+            this.mouseReleased && this.mouseUpClientX && this.mouseUpClientY
+                ? this.updateAnimateGrd(
+                    this.mouseDownAnimateLogicFrame,
+                    this.mouseUpClientX - b.left,
+                    this.mouseUpClientY - b.top,
+                    grdRadius
+                )
+                : this.updateAnimateGrd(
+                    this.mouseDownAnimateLogicFrame,
+                    relativeX,
+                    relativeY,
+                    grdRadius
+                )
+            this.cachedImg.cachedPath.rippleReveal.style.fill = 'url(#borderGrad)';
+        } else if (this.cachedImg.cachedPath.rippleReveal.style.fill !== 'transparent') {
+            this.cachedImg.cachedPath.rippleReveal.style.fill = 'transparent';
+        }
+
+        return true;
     };
 }

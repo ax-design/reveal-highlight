@@ -46,7 +46,7 @@ export class RevealBoundaryStore {
         if (elementType === '[object HTMLCanvasElement]') {
             config = new CanvasConfig(this, $element as HTMLCanvasElement, $container);
         } else if (elementType === '[object SVGSVGElement]') {
-            config = new SvgConfig(this, $element as SVGElement, $container);
+            config = new SvgConfig(this, $element as SVGSVGElement, $container);
         } else {
             throw new TypeError(`Unknown element type, got: ${elementType}, Canvas or SVG element expected.`)
         }

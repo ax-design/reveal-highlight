@@ -239,17 +239,6 @@ export class BaseConfig<T extends Element> {
         return relativeX > 0 && relativeY > 0 && relativeX < b.width && relativeY < b.height;
     };
 
-    syncSizeToElement = (x: HTMLCanvasElement) => {
-        const b = this.cachedBoundingRect;
-
-        if (x.width !== b.width || x.height !== b.height) {
-            x.width = b.width * this.pxRatio;
-            x.height = b.height * this.pxRatio;
-            x.style.width = `${b.width}px`;
-            x.style.height = `${b.height}px`;
-        }
-    };
-
     syncSizeToRevealRadius = (x: HTMLCanvasElement, factor: number) => {
         const { trueFillRadius } = this.cachedStyle;
 
@@ -260,23 +249,5 @@ export class BaseConfig<T extends Element> {
             x.width = size;
             x.height = size;
         }
-    };
-
-    updateAnimateGrd = (frame: number, grd: CanvasGradient) => {
-        const { pressAnimationColor, opacity } = this.cachedStyle;
-
-        const _innerAlpha = opacity * (0.2 - frame);
-        const _outerAlpha = opacity * (0.1 - frame * 0.07);
-        const _outerBorder = 0.1 + frame * 0.8;
-
-        const innerAlpha = _innerAlpha < 0 ? 0 : _innerAlpha;
-        const outerAlpha = _outerAlpha < 0 ? 0 : _outerAlpha;
-        let outerBorder = 0;
-        outerBorder = _outerBorder > 1 ? 1 : _outerBorder;
-        outerBorder = _outerBorder < 0 ? 0 : _outerBorder;
-
-        grd.addColorStop(0, `rgba(${pressAnimationColor},${innerAlpha})`);
-        grd.addColorStop(outerBorder * 0.55, `rgba(${pressAnimationColor},${outerAlpha})`);
-        grd.addColorStop(outerBorder, `rgba(${pressAnimationColor}, 0)`);
     };
 }
