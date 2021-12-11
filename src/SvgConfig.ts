@@ -144,9 +144,16 @@ export class SvgConfig extends BaseConfig<SVGSVGElement> {
         const br = c.bottomRightBorderDecorationRadius;
 
         const wlf = c.withLeftBorderFactor;
-        const wrf = c.withRightBorderFactor;
-        const wtf = c.withTopBorderFactor;
-        const wbf = c.withBottomBorderFactor;
+
+        const rwlf = c.withLeftBorderFactor ? 0 : 1;
+        const rwrf = c.withRightBorderFactor ? 0 : 1;
+        const rwtf = c.withTopBorderFactor ? 0 : 1;
+        const rwbf = c.withBottomBorderFactor ? 0 : 1;
+
+        const ntlc = !c.withTopBorderFactor && !c.withLeftBorderFactor;
+        const ntrc = !c.withTopBorderFactor && !c.withRightBorderFactor;
+        const nblc = !c.withBottomBorderFactor && !c.withLeftBorderFactor;
+        const nbrc = !c.withBottomBorderFactor && !c.withRightBorderFactor;
 
         const tl2 = bw < tl ? tl - bw : 0;
         const tr2 = bw < tr ? tr - bw : 0;
@@ -155,9 +162,8 @@ export class SvgConfig extends BaseConfig<SVGSVGElement> {
 
         let d = '';
 
-
         // Step 1: Starting point
-        d += hollow ? `M ${tl * wlf}, 0 ` : `M ${bw}, ${tl2 * wtf + bw} `;
+        d += hollow ? `M ${tl}, 0 ` : `M ${bw}, ${tl2 + bw} `;
 
         switch (c.borderDecorationType) {
             // Oh... Fuck again...
@@ -179,15 +185,16 @@ export class SvgConfig extends BaseConfig<SVGSVGElement> {
                 }
                 // Step 2-2: This is the inner path, drawing anti-clockwise
                 d += `
-                    M ${bw}, ${tl2 + bw} 
-                    v ${h - tl2 - bl2 - bw * 2} 
+                    M ${bw * wlf}, ${tl2 + bw} 
+                    v ${h - tl2 - bl2 - bw * 2 + rwbf * bw} 
                     a ${bl2}, ${bl2} 0 0 0 ${bl2}, ${bl2} 
-                    h ${w - bl2 - br2 - bw * 2} 
+                    h ${w - bl2 - br2 - bw * 2 + rwlf * bw + rwrf * bw} 
                     a ${br2}, ${br2} 0 0 0 ${br2}, ${-br2} 
-                    v ${-h + tr2 + br2 + bw * 2} 
+                    v ${-h + tr2 + br2 + bw * 2 - rwtf * bw - rwbf * bw} 
                     a ${tr2}, ${tr2} 0 0 0 ${-tr2}, ${-tr2} 
-                    h ${-w + bl2 + br2 + bw * 2} 
+                    h ${-w + bl2 + br2 + bw * 2 - rwlf * bw - rwrf * bw} 
                     a ${tl2}, ${tl2} 0 0 0 ${-tl2}, ${tl2} 
+                    L ${bw * wlf}, ${tl2 + bw} 
                 `;
                 break;
             case 'bevel':
@@ -208,14 +215,30 @@ export class SvgConfig extends BaseConfig<SVGSVGElement> {
                 // // Step 2-2: This is the inner path, drawing anti-clockwise
                 d += `
                     M ${bw}, ${tl2 + bw} 
+                    ${ rwlf ? `h ${-bw}` : ''} 
                     v ${h - tl2 - bl2 - bw * 2} 
+                    ${ rwlf ? `h ${bw}` : ''} 
+                    ${ nblc ? `l ${-bw} 0` : ''} 
                     l ${bl2} ${bl2} 
+                    ${ nblc ? `l ${bw} 0` : ''} 
+                    ${ rwbf ? `v ${bw}` : ''} 
                     h ${w - bl2 - br2 - bw * 2} 
+                    ${ rwbf ? `v ${-bw}` : ''} 
+                    ${ nbrc ? `l ${bw} 0` : ''} 
                     l ${br2} ${-br2} 
+                    ${ nbrc ? `l ${-bw} 0` : ''} 
+                    ${ rwrf ? `h ${bw}` : ''} 
                     v ${-h + tl2 + bl2 + bw * 2} 
+                    ${ rwrf ? `h ${-bw}` : ''} 
+                    ${ ntrc ? `l 0 ${-bw}` : ''} 
                     l ${-tr2} ${-tr2} 
-                    h ${-w + bl2 + br2 + bw * 2} 
+                    ${ ntrc ? `l 0 ${bw}` : ''} 
+                    ${ rwtf ? `v ${-bw}` : ''} 
+                    h ${-w + bl2 + br2 + bw * 2}  
+                    ${ rwtf ? `v ${bw}` : ''} 
+                    ${ ntlc ? `l 0 ${-bw}` : ''} 
                     l ${-tl2} ${tl2} 
+                    ${ ntlc ? `l 0 ${bw}` : ''} 
                 `;
                 break;
             case 'miter':
