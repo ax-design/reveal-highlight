@@ -358,21 +358,19 @@ export class SvgConfig extends BaseConfig<SVGSVGElement> {
         this.drawShape(false, this.cachedImg.cachedPath.rippleReveal);
 
         if (store.mouseInBoundary) {
-            const mouseInCanvas = relativeX > 0 && relativeY > 0 && relativeX < b.width && relativeY < b.height;
+            const mouseInElement = relativeX > 0 && relativeY > 0 && relativeX < b.width && relativeY < b.height;
 
-            const fillPattern = this.cachedImg.cachedReveal.fillReveal.pattern;
-            if (c.hoverLight && mouseInCanvas && fillPattern) {
+            if (c.hoverLight && mouseInElement) {
                 // draw fill.
                 this.cachedImg.cachedPath.fillReveal.style.fill = 'url(#fillGrad)';
             } else if (this.cachedImg.cachedPath.fillReveal.style.fill !== 'transparent') {
                 this.cachedImg.cachedPath.fillReveal.style.fill = 'transparent';
             }
 
-            const diffuse = (c.diffuse && mouseInRenderArea) || mouseInCanvas;
+            const diffuse = (c.diffuse && mouseInRenderArea) || mouseInElement;
             if (c.borderWidth !== 0 && diffuse) {
                 // Draw border.
-                // this.cachedImg.cachedPath.borderReveal.style.fill = 'url(#borderGrad)';
-                this.cachedImg.cachedPath.borderReveal.style.fill = 'red';
+                this.cachedImg.cachedPath.borderReveal.style.fill = 'url(#borderGrad)';
             } else if (this.cachedImg.cachedPath.borderReveal.style.fill !== 'transparent') {
                 this.cachedImg.cachedPath.borderReveal.style.fill = 'transparent';
             }
