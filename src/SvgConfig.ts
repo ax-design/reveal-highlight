@@ -105,8 +105,6 @@ export class SvgConfig extends BaseConfig<SVGSVGElement> {
         outerBorder = _outerBorder > 1 ? 1 : _outerBorder;
         outerBorder = _outerBorder < 0 ? 0 : _outerBorder;
 
-        console.log(outerBorder);
-
         const stops = this.cachedImg.cachedGradientStop;
         stops.rippleReveal[0].style.stopOpacity = innerAlpha.toString();
         stops.rippleReveal[1].style.stopOpacity = outerAlpha.toString();
@@ -400,7 +398,7 @@ export class SvgConfig extends BaseConfig<SVGSVGElement> {
                     relativeY,
                     grdRadius
                 )
-            this.cachedImg.cachedPath.rippleReveal.style.fill = 'url(#borderGrad)';
+            this.cachedImg.cachedPath.rippleReveal.style.fill = 'url(#rippleGrad)';
         } else if (this.cachedImg.cachedPath.rippleReveal.style.fill !== 'transparent') {
             this.cachedImg.cachedPath.rippleReveal.style.fill = 'transparent';
         }
