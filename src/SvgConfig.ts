@@ -351,13 +351,18 @@ export class SvgConfig extends BaseConfig<SVGSVGElement> {
         }
 
         this.cacheCanvasPaintingStyle();
-        this.updateCachedReveal();
+
+        if (this.fillDirty) {
+            this.updateCachedReveal();
+        }
 
         this.updateGradientPosition(relativeX, relativeY);
 
-        this.drawShape(true, this.cachedImg.cachedPath.borderReveal);
-        this.drawShape(false, this.cachedImg.cachedPath.fillReveal);
-        this.drawShape(false, this.cachedImg.cachedPath.rippleReveal);
+        if (this.shapeDirty) {
+            this.drawShape(true, this.cachedImg.cachedPath.borderReveal);
+            this.drawShape(false, this.cachedImg.cachedPath.fillReveal);
+            this.drawShape(false, this.cachedImg.cachedPath.rippleReveal);
+        }
 
         if (store.mouseInBoundary) {
             const mouseInElement = relativeX > 0 && relativeY > 0 && relativeX < b.width && relativeY < b.height;
