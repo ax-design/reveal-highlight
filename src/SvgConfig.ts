@@ -70,12 +70,12 @@ export class SvgConfig extends BaseConfig<SVGSVGElement> {
         const stops = this.cachedImg.cachedGradientStop;
         stops.borderReveal[0].style.stopColor = c.borderColor;
         stops.borderReveal[1].style.stopColor = c.borderColor;
-        stops.borderReveal[0].style.stopOpacity = '1';
+        stops.borderReveal[0].style.stopOpacity = c.opacity.toString();
         stops.borderReveal[1].style.stopOpacity = '0';
 
         stops.fillReveal[0].style.stopColor = c.hoverLightColor;
         stops.fillReveal[1].style.stopColor = c.hoverLightColor;
-        stops.fillReveal[0].style.stopOpacity = '1';
+        stops.fillReveal[0].style.stopOpacity = (c.opacity * 0.5).toString();
         stops.fillReveal[1].style.stopOpacity = '0';
 
         stops.rippleReveal[0].style.stopColor = c.pressAnimationColor;
@@ -144,6 +144,9 @@ export class SvgConfig extends BaseConfig<SVGSVGElement> {
         const br = c.bottomRightBorderDecorationRadius;
 
         const wlf = c.withLeftBorderFactor;
+        const wrf = c.withRightBorderFactor;
+        const wtf = c.withTopBorderFactor;
+        const wbf = c.withBottomBorderFactor;
 
         const rwlf = c.withLeftBorderFactor ? 0 : 1;
         const rwrf = c.withRightBorderFactor ? 0 : 1;
@@ -256,11 +259,11 @@ export class SvgConfig extends BaseConfig<SVGSVGElement> {
                 }
                 // Step 2-2: This is the inner path, drawing anti-clockwise
                 d += `
-                    M ${bw}, ${bw}
-                    v ${h - bw * 2}
-                    h ${w - bw * 2}
-                    v ${-h + bw * 2}
-                    h ${-w + bw * 2}
+                    M ${bw * wlf}, ${bw * wtf}
+                    v ${h - wtf * bw - wbf * bw}
+                    h ${w - wlf * bw - wrf * bw}
+                    v ${-h + wtf * bw + wbf * bw}
+                    h ${-w + wlf * bw + wrf * bw}
                 `;
         }
         // Step 3: Close the path
