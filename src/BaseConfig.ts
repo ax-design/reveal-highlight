@@ -62,6 +62,11 @@ export class BaseConfig<T extends Element> {
     };
 
     dirty: boolean = false;
+
+    shapeDirty: boolean = false;
+    fillDirty: boolean = false;
+    animationDirty: boolean = false;
+
     /**
      * If is cleaned up by `RevealBoundaryStore` during animation duration
      * checkup.
@@ -159,41 +164,40 @@ export class BaseConfig<T extends Element> {
         const parsedPressAnimationColor =
             extractRGBValue(this.computedStyle.getColor('--reveal-press-animation-color')) || parsedBaseColor;
 
-        const c = this.cachedStyle;
 
-        c.color = parsedBaseColor;
-        c.opacity = this.computedStyle.getNumber('--reveal-opacity');
+        const nextColor = parsedBaseColor;
+        const nextOpacity = this.computedStyle.getNumber('--reveal-opacity');
 
         // Border related configurations
-        c.borderStyle = this.computedStyle.get('--reveal-border-style');
-        c.borderColor = parsedBorderColor;
+        const nextBorderStyle = this.computedStyle.get('--reveal-border-style');
+        const nextBorderColor = parsedBorderColor;
 
-        c.borderFillRadius = this.computedStyle.getNumber('--reveal-border-fill-radius');
-        c.borderDecorationType =
+        const nextBorderFillRadius = this.computedStyle.getNumber('--reveal-border-fill-radius');
+        const nextBorderDecorationType =
             (this.computedStyle.get('--reveal-border-decoration-type') as BorderDecoration) || 'miter';
-        c.borderWidth = this.computedStyle.getNumber('--reveal-border-width');
+        const nextBorderWidth = this.computedStyle.getNumber('--reveal-border-width');
 
-        c.withLeftBorderFactor =
+        const nextWithLeftBorderFactor =
             this.getPropFromMultipleSource('leftBorder', '--reveal-border-left') === 'line' ? 1 : 0;
-        c.withRightBorderFactor =
+        const nextWithRightBorderFactor =
             this.getPropFromMultipleSource('rightBorder', '--reveal-border-right') === 'line' ? 1 : 0;
-        c.withTopBorderFactor = this.getPropFromMultipleSource('topBorder', '--reveal-border-top') === 'line' ? 1 : 0;
-        c.withBottomBorderFactor =
+        const nextWithTopBorderFactor = this.getPropFromMultipleSource('topBorder', '--reveal-border-top') === 'line' ? 1 : 0;
+        const nextWithBottomBorderFactor =
             this.getPropFromMultipleSource('bottomBorder', '--reveal-border-bottom') === 'line' ? 1 : 0;
 
         // Hover light related configurations
-        c.hoverLight = this.computedStyle.get('--reveal-hover-light') === 'true';
-        c.hoverLightColor = parsedHoverLightColor;
-        c.hoverLightFillRadius = this.computedStyle.getNumber('--reveal-hover-light-fill-radius');
-        c.hoverLightFillMode = this.computedStyle.get('--reveal-hover-light-fill-radius-mode') || 'relative';
+        const nextHoverLight = this.computedStyle.get('--reveal-hover-light') === 'true';
+        const nextHoverLightColor = parsedHoverLightColor;
+        const nextHoverLightFillRadius = this.computedStyle.getNumber('--reveal-hover-light-fill-radius');
+        const nextHoverLightFillMode = this.computedStyle.get('--reveal-hover-light-fill-radius-mode') || 'relative';
 
         // Press animation related configurations
-        c.diffuse = this.computedStyle.get('--reveal-diffuse') === 'true';
-        c.pressAnimation = this.computedStyle.get('--reveal-press-animation') === 'true';
-        c.pressAnimationFillMode = this.computedStyle.get('--reveal-press-animation-radius-mode');
-        c.pressAnimationColor = parsedPressAnimationColor;
-        c.pressAnimationSpeed = this.computedStyle.getNumber('--reveal-press-animation-speed');
-        c.releaseAnimationAccelerateRate = this.computedStyle.getNumber('--reveal-release-animation-accelerate-rate');
+        const nextDiffuse = this.computedStyle.get('--reveal-diffuse') === 'true';
+        const nextPressAnimation = this.computedStyle.get('--reveal-press-animation') === 'true';
+        const nextPressAnimationFillMode = this.computedStyle.get('--reveal-press-animation-radius-mode');
+        const nextPressAnimationColor = parsedPressAnimationColor;
+        const nextPressAnimationSpeed = this.computedStyle.getNumber('--reveal-press-animation-speed');
+        const nextReleaseAnimationAccelerateRate = this.computedStyle.getNumber('--reveal-release-animation-accelerate-rate');
 
         // Border decoration related configurations
         const r = this.computedStyle.getNumber('--reveal-border-decoration-radius');
@@ -214,10 +218,74 @@ export class BaseConfig<T extends Element> {
             '--reveal-border-decoration-bottom-right-radius'
         );
 
-        c.topLeftBorderDecorationRadius = tl >= 0 ? tl : r;
-        c.topRightBorderDecorationRadius = tr >= 0 ? tr : r;
-        c.bottomLeftBorderDecorationRadius = bl >= 0 ? bl : r;
-        c.bottomRightBorderDecorationRadius = br >= 0 ? br : r;
+        const nextTopLeftBorderDecorationRadius = tl >= 0 ? tl : r;
+        const nextTopRightBorderDecorationRadius = tr >= 0 ? tr : r;
+        const nextBottomLeftBorderDecorationRadius = bl >= 0 ? bl : r;
+        const nextBottomRightBorderDecorationRadius = br >= 0 ? br : r;
+
+        const c = this.cachedStyle;
+
+        this.fillDirty = false;
+        this.shapeDirty = false;
+        this.animationDirty = false;
+
+        this.fillDirty = this.fillDirty || c.color === nextColor;
+        this.fillDirty = this.fillDirty || c.opacity === nextOpacity;
+        this.fillDirty = this.fillDirty || c.borderColor === nextBorderColor;
+        this.fillDirty = this.fillDirty || c.borderFillRadius === nextBorderFillRadius;
+        this.fillDirty = this.fillDirty || c.hoverLightColor === nextHoverLightColor;
+        this.fillDirty = this.fillDirty || c.hoverLightFillRadius === nextHoverLightFillRadius;
+        this.fillDirty = this.fillDirty || c.hoverLightFillMode === nextHoverLightFillMode;
+
+        this.shapeDirty = this.shapeDirty || c.borderStyle === nextBorderStyle;
+        this.shapeDirty = this.shapeDirty || c.borderDecorationType === nextBorderDecorationType;
+        this.shapeDirty = this.shapeDirty || c.borderWidth === nextBorderWidth;
+        this.shapeDirty = this.shapeDirty || c.withLeftBorderFactor === nextWithLeftBorderFactor;
+        this.shapeDirty = this.shapeDirty || c.withRightBorderFactor === nextWithRightBorderFactor;
+        this.shapeDirty = this.shapeDirty || c.withTopBorderFactor === nextWithTopBorderFactor;
+        this.shapeDirty = this.shapeDirty || c.withBottomBorderFactor === nextWithBottomBorderFactor;
+        this.shapeDirty = this.shapeDirty || c.topLeftBorderDecorationRadius === nextTopLeftBorderDecorationRadius;
+        this.shapeDirty = this.shapeDirty || c.topRightBorderDecorationRadius === nextTopRightBorderDecorationRadius;
+        this.shapeDirty = this.shapeDirty || c.bottomLeftBorderDecorationRadius === nextBottomLeftBorderDecorationRadius;
+        this.shapeDirty = this.shapeDirty || c.bottomRightBorderDecorationRadius === nextBottomRightBorderDecorationRadius;
+
+        this.animationDirty = this.animationDirty || c.pressAnimation === nextPressAnimation;
+        this.animationDirty = this.animationDirty || c.pressAnimationFillMode === nextPressAnimationFillMode;
+        this.animationDirty = this.animationDirty || c.pressAnimationColor === nextPressAnimationColor;
+        this.animationDirty = this.animationDirty || c.pressAnimationSpeed === nextPressAnimationSpeed;
+        this.animationDirty = this.animationDirty || c.releaseAnimationAccelerateRate === nextReleaseAnimationAccelerateRate;
+
+        c.color = nextColor;
+        c.opacity = nextOpacity;
+
+        c.borderStyle = nextBorderStyle;
+        c.borderColor = nextBorderColor;
+
+        c.borderFillRadius = nextBorderFillRadius;
+        c.borderDecorationType = nextBorderDecorationType;
+        c.borderWidth = nextBorderWidth;
+
+        c.withLeftBorderFactor = nextWithBottomBorderFactor;
+        c.withRightBorderFactor = nextWithRightBorderFactor;
+        c.withTopBorderFactor = nextWithTopBorderFactor;
+        c.withBottomBorderFactor = nextWithBottomBorderFactor;
+
+        c.hoverLight = nextHoverLight;
+        c.hoverLightColor = nextHoverLightColor;
+        c.hoverLightFillRadius = nextHoverLightFillRadius;
+        c.hoverLightFillMode = nextHoverLightFillMode;
+
+        c.diffuse = nextDiffuse;
+        c.pressAnimation = nextPressAnimation;
+        c.pressAnimationFillMode = nextPressAnimationFillMode;
+        c.pressAnimationColor = nextPressAnimationColor;
+        c.pressAnimationSpeed = nextPressAnimationSpeed;
+        c.releaseAnimationAccelerateRate = nextReleaseAnimationAccelerateRate;
+
+        c.topLeftBorderDecorationRadius = nextTopLeftBorderDecorationRadius;
+        c.topRightBorderDecorationRadius = nextTopRightBorderDecorationRadius;
+        c.bottomLeftBorderDecorationRadius = nextBottomLeftBorderDecorationRadius;
+        c.bottomRightBorderDecorationRadius = nextBottomRightBorderDecorationRadius;
 
         this.getTrueFillRadius(c.trueFillRadius, c.hoverLightFillMode);
 
