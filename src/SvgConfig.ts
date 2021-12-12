@@ -84,11 +84,11 @@ export class SvgConfig extends BaseConfig<SVGSVGElement> {
 
         const grads = this.cachedImg.cachedGradient;
         const isAbsoluteFill = c.trueFillRadius[0] === -1;
-        grads.borderReveal.r.baseVal.value = isAbsoluteFill 
-            ? c.borderFillRadius 
+        grads.borderReveal.r.baseVal.value = isAbsoluteFill
+            ? c.borderFillRadius
             : c.borderFillRadius * c.trueFillRadius[1];
-        grads.fillReveal.r.baseVal.value = isAbsoluteFill 
-            ? c.hoverLightFillRadius 
+        grads.fillReveal.r.baseVal.value = isAbsoluteFill
+            ? c.hoverLightFillRadius
             : c.hoverLightFillRadius * c.trueFillRadius[0];
     };
 
@@ -104,6 +104,8 @@ export class SvgConfig extends BaseConfig<SVGSVGElement> {
         let outerBorder = 0;
         outerBorder = _outerBorder > 1 ? 1 : _outerBorder;
         outerBorder = _outerBorder < 0 ? 0 : _outerBorder;
+
+        console.log(outerBorder);
 
         const stops = this.cachedImg.cachedGradientStop;
         stops.rippleReveal[0].style.stopOpacity = innerAlpha.toString();
@@ -218,30 +220,30 @@ export class SvgConfig extends BaseConfig<SVGSVGElement> {
                 // // Step 2-2: This is the inner path, drawing anti-clockwise
                 d += `
                     M ${bw}, ${tl2 + bw} 
-                    ${ rwlf ? `h ${-bw}` : ''} 
+                    ${rwlf ? `h ${-bw}` : ''} 
                     v ${h - tl2 - bl2 - bw * 2} 
-                    ${ rwlf ? `h ${bw}` : ''} 
-                    ${ nblc ? `l ${-bw} 0` : ''} 
+                    ${rwlf ? `h ${bw}` : ''} 
+                    ${nblc ? `l ${-bw} 0` : ''} 
                     l ${bl2} ${bl2} 
-                    ${ nblc ? `l ${bw} 0` : ''} 
-                    ${ rwbf ? `v ${bw}` : ''} 
+                    ${nblc ? `l ${bw} 0` : ''} 
+                    ${rwbf ? `v ${bw}` : ''} 
                     h ${w - bl2 - br2 - bw * 2} 
-                    ${ rwbf ? `v ${-bw}` : ''} 
-                    ${ nbrc ? `l ${bw} 0` : ''} 
+                    ${rwbf ? `v ${-bw}` : ''} 
+                    ${nbrc ? `l ${bw} 0` : ''} 
                     l ${br2} ${-br2} 
-                    ${ nbrc ? `l ${-bw} 0` : ''} 
-                    ${ rwrf ? `h ${bw}` : ''} 
+                    ${nbrc ? `l ${-bw} 0` : ''} 
+                    ${rwrf ? `h ${bw}` : ''} 
                     v ${-h + tl2 + bl2 + bw * 2} 
-                    ${ rwrf ? `h ${-bw}` : ''} 
-                    ${ ntrc ? `l 0 ${-bw}` : ''} 
+                    ${rwrf ? `h ${-bw}` : ''} 
+                    ${ntrc ? `l 0 ${-bw}` : ''} 
                     l ${-tr2} ${-tr2} 
-                    ${ ntrc ? `l 0 ${bw}` : ''} 
-                    ${ rwtf ? `v ${-bw}` : ''} 
+                    ${ntrc ? `l 0 ${bw}` : ''} 
+                    ${rwtf ? `v ${-bw}` : ''} 
                     h ${-w + bl2 + br2 + bw * 2}  
-                    ${ rwtf ? `v ${bw}` : ''} 
-                    ${ ntlc ? `l 0 ${-bw}` : ''} 
+                    ${rwtf ? `v ${bw}` : ''} 
+                    ${ntlc ? `l 0 ${-bw}` : ''} 
                     l ${-tl2} ${tl2} 
-                    ${ ntlc ? `l 0 ${bw}` : ''} 
+                    ${ntlc ? `l 0 ${bw}` : ''} 
                 `;
                 break;
             case 'miter':
