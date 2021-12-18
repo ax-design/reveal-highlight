@@ -35,7 +35,6 @@ export class BaseConfig<T extends Element> {
         trueFillRadius: [0, 0],
         color: '',
         opacity: 1,
-        borderStyle: '',
         borderColor: '',
         borderFillRadius: 0,
         borderDecorationType: 'miter',
@@ -124,7 +123,7 @@ export class BaseConfig<T extends Element> {
                 break;
             default:
                 throw new SyntaxError(
-                    'The value of `--reveal-border-style` must be `relative`, `absolute`, but got `' + fillMode + '`!'
+                    'The value of `--reveal-hover-light-fill-radius-mode` must be `relative`, `absolute`, but got `' + fillMode + '`!'
                 );
         }
 
@@ -169,7 +168,6 @@ export class BaseConfig<T extends Element> {
         const nextOpacity = this.computedStyle.getNumber('--reveal-opacity');
 
         // Border related configurations
-        const nextBorderStyle = this.computedStyle.get('--reveal-border-style');
         const nextBorderColor = parsedBorderColor;
 
         const nextBorderFillRadius = this.computedStyle.getNumber('--reveal-border-fill-radius');
@@ -237,7 +235,6 @@ export class BaseConfig<T extends Element> {
         this.fillDirty = this.fillDirty || c.hoverLightFillRadius === nextHoverLightFillRadius;
         this.fillDirty = this.fillDirty || c.hoverLightFillMode === nextHoverLightFillMode;
 
-        this.shapeDirty = this.shapeDirty || c.borderStyle === nextBorderStyle;
         this.shapeDirty = this.shapeDirty || c.borderDecorationType === nextBorderDecorationType;
         this.shapeDirty = this.shapeDirty || c.borderWidth === nextBorderWidth;
         this.shapeDirty = this.shapeDirty || c.withLeftBorderFactor === nextWithLeftBorderFactor;
@@ -258,7 +255,6 @@ export class BaseConfig<T extends Element> {
         c.color = nextColor;
         c.opacity = nextOpacity;
 
-        c.borderStyle = nextBorderStyle;
         c.borderColor = nextBorderColor;
 
         c.borderFillRadius = nextBorderFillRadius;

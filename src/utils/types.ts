@@ -11,7 +11,6 @@ export interface CachedStyle {
     color: string;
     opacity: number;
     trueFillRadius: [number, number];
-    borderStyle: string;
     borderColor: string;
     borderFillRadius: number;
     borderDecorationType: BorderDecoration;

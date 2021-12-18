@@ -132,14 +132,6 @@ reveal-highlight use custom properties to manage the style of highlights
 
 **Note:** To control each corner, use `--reveal-border-decoration-top-left-radius`, `--reveal-border-decoration-top-right-radius`, `--reveal-border-decoration-bottom-left-radius`, `--reveal-border-decoration-bottom-right-radius`, if the value of these values are negative, `--reveal-border-decoration-radius` would be used.
 
-#### --reveal-border-style
-
-**Type:** `'full' | 'half'`
-
-**Default:** `'full'`
-
-**Description:** If `full` provided, there'll be four sides of the element will have a light effect, if `half` provided, only the top and bottom side will have a light effect.
-
 ### Hover light
 
 Hover light is the light effect shown up when you hover on the reveal element, it will fill the whole element.

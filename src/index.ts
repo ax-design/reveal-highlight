@@ -43,12 +43,6 @@ export function register({
             inherits: true,
         });
         window.CSS.registerProperty({
-            name: '--reveal-border-style',
-            syntax: '<custom-ident>',
-            initialValue: 'full',
-            inherits: true,
-        });
-        window.CSS.registerProperty({
             name: '--reveal-border-color',
             syntax: `<color>|${MAGIC_DEFAULT_COLOR}`,
             initialValue: MAGIC_DEFAULT_COLOR,
@@ -193,7 +187,6 @@ export function register({
 
         root.style.setProperty('--reveal-color', 'rgb(0, 0, 0)');
         root.style.setProperty('--reveal-opacity', '0.26');
-        root.style.setProperty('--reveal-border-style', 'full');
         root.style.setProperty('--reveal-border-color', MAGIC_DEFAULT_COLOR);
         root.style.setProperty('--reveal-border-width', '1px');
         root.style.setProperty('--reveal-border-fill-radius', '1.5');
