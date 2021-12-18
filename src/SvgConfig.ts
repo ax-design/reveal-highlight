@@ -90,6 +90,8 @@ export class SvgConfig extends BaseConfig<SVGSVGElement> {
         grads.fillReveal.r.baseVal.value = isAbsoluteFill
             ? c.hoverLightFillRadius
             : c.hoverLightFillRadius * c.trueFillRadius[0];
+        
+        this.fillDirty = false;
     };
 
     private updateAnimateGrd = (frame: number, x: number, y: number, radius: number) => {
@@ -371,6 +373,7 @@ export class SvgConfig extends BaseConfig<SVGSVGElement> {
             this.drawShape(true, this.cachedImg.cachedPath.borderReveal);
             this.drawShape(false, this.cachedImg.cachedPath.fillReveal);
             this.drawShape(false, this.cachedImg.cachedPath.rippleReveal);
+            this.shapeDirty = false;
         }
 
         if (store.mouseInBoundary) {

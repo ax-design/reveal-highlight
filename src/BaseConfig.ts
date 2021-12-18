@@ -223,34 +223,30 @@ export class BaseConfig<T extends Element> {
 
         const c = this.cachedStyle;
 
-        this.fillDirty = false;
-        this.shapeDirty = false;
-        this.animationDirty = false;
+        this.fillDirty = this.fillDirty || c.color !== nextColor;
+        this.fillDirty = this.fillDirty || c.opacity !== nextOpacity;
+        this.fillDirty = this.fillDirty || c.borderColor !== nextBorderColor;
+        this.fillDirty = this.fillDirty || c.borderFillRadius !== nextBorderFillRadius;
+        this.fillDirty = this.fillDirty || c.hoverLightColor !== nextHoverLightColor;
+        this.fillDirty = this.fillDirty || c.hoverLightFillRadius !== nextHoverLightFillRadius;
+        this.fillDirty = this.fillDirty || c.hoverLightFillMode !== nextHoverLightFillMode;
 
-        this.fillDirty = this.fillDirty || c.color === nextColor;
-        this.fillDirty = this.fillDirty || c.opacity === nextOpacity;
-        this.fillDirty = this.fillDirty || c.borderColor === nextBorderColor;
-        this.fillDirty = this.fillDirty || c.borderFillRadius === nextBorderFillRadius;
-        this.fillDirty = this.fillDirty || c.hoverLightColor === nextHoverLightColor;
-        this.fillDirty = this.fillDirty || c.hoverLightFillRadius === nextHoverLightFillRadius;
-        this.fillDirty = this.fillDirty || c.hoverLightFillMode === nextHoverLightFillMode;
+        this.shapeDirty = this.shapeDirty || c.borderDecorationType !== nextBorderDecorationType;
+        this.shapeDirty = this.shapeDirty || c.borderWidth !== nextBorderWidth;
+        this.shapeDirty = this.shapeDirty || c.withLeftBorderFactor !== nextWithLeftBorderFactor;
+        this.shapeDirty = this.shapeDirty || c.withRightBorderFactor !== nextWithRightBorderFactor;
+        this.shapeDirty = this.shapeDirty || c.withTopBorderFactor !== nextWithTopBorderFactor;
+        this.shapeDirty = this.shapeDirty || c.withBottomBorderFactor !== nextWithBottomBorderFactor;
+        this.shapeDirty = this.shapeDirty || c.topLeftBorderDecorationRadius !== nextTopLeftBorderDecorationRadius;
+        this.shapeDirty = this.shapeDirty || c.topRightBorderDecorationRadius !== nextTopRightBorderDecorationRadius;
+        this.shapeDirty = this.shapeDirty || c.bottomLeftBorderDecorationRadius !== nextBottomLeftBorderDecorationRadius;
+        this.shapeDirty = this.shapeDirty || c.bottomRightBorderDecorationRadius !== nextBottomRightBorderDecorationRadius;
 
-        this.shapeDirty = this.shapeDirty || c.borderDecorationType === nextBorderDecorationType;
-        this.shapeDirty = this.shapeDirty || c.borderWidth === nextBorderWidth;
-        this.shapeDirty = this.shapeDirty || c.withLeftBorderFactor === nextWithLeftBorderFactor;
-        this.shapeDirty = this.shapeDirty || c.withRightBorderFactor === nextWithRightBorderFactor;
-        this.shapeDirty = this.shapeDirty || c.withTopBorderFactor === nextWithTopBorderFactor;
-        this.shapeDirty = this.shapeDirty || c.withBottomBorderFactor === nextWithBottomBorderFactor;
-        this.shapeDirty = this.shapeDirty || c.topLeftBorderDecorationRadius === nextTopLeftBorderDecorationRadius;
-        this.shapeDirty = this.shapeDirty || c.topRightBorderDecorationRadius === nextTopRightBorderDecorationRadius;
-        this.shapeDirty = this.shapeDirty || c.bottomLeftBorderDecorationRadius === nextBottomLeftBorderDecorationRadius;
-        this.shapeDirty = this.shapeDirty || c.bottomRightBorderDecorationRadius === nextBottomRightBorderDecorationRadius;
-
-        this.animationDirty = this.animationDirty || c.pressAnimation === nextPressAnimation;
-        this.animationDirty = this.animationDirty || c.pressAnimationFillMode === nextPressAnimationFillMode;
-        this.animationDirty = this.animationDirty || c.pressAnimationColor === nextPressAnimationColor;
-        this.animationDirty = this.animationDirty || c.pressAnimationSpeed === nextPressAnimationSpeed;
-        this.animationDirty = this.animationDirty || c.releaseAnimationAccelerateRate === nextReleaseAnimationAccelerateRate;
+        this.animationDirty = this.animationDirty || c.pressAnimation !== nextPressAnimation;
+        this.animationDirty = this.animationDirty || c.pressAnimationFillMode !== nextPressAnimationFillMode;
+        this.animationDirty = this.animationDirty || c.pressAnimationColor !== nextPressAnimationColor;
+        this.animationDirty = this.animationDirty || c.pressAnimationSpeed !== nextPressAnimationSpeed;
+        this.animationDirty = this.animationDirty || c.releaseAnimationAccelerateRate !== nextReleaseAnimationAccelerateRate;
 
         c.color = nextColor;
         c.opacity = nextOpacity;
