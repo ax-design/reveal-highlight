@@ -1,0 +1,1108 @@
+<!DOCTYPE html>
+
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>AxRevealHighlight Demo - Axiom Design System</title>
+
+  <style>
+    .demo-block {
+      display: flex;
+      border-bottom: #aaa dashed 1px;
+    }
+
+    .demo {
+      width: 500px;
+      margin: 10px;
+      padding-top: 1em;
+    }
+
+    .code {
+      width: 100%;
+    }
+
+    .ax-reveal-ng-container {
+      display: flex;
+    }
+
+    .ax-reveal-ng-container>ax-reveal-ng {
+      margin: 5px;
+    }
+
+    .ax-reveal-ng-button {
+      min-width: 120px;
+      padding: 15px 25px;
+      border: none;
+      background: none;
+      user-select: none;
+    }
+  </style>
+</head>
+
+<body>
+  <ax-reveal-provider>
+    <h1>Welcome to project Axiom!</h1>
+    <p>Project Axiom is a web component set which aims to combine good part of Fluent Design System and Material Design
+      to a single design language.</p>
+    <p>This repo contains code of Reveal Highlight effect of Fluent design System.</p>
+
+    <section class="demo-block">
+      <div class="demo">
+        <ax-reveal-bound>
+          <div class="ax-reveal-ng-container">
+            <ax-reveal-ng>
+              <button class="ax-reveal-ng-button">Welcome</button>
+            </ax-reveal-ng>
+            <ax-reveal-ng>
+              <button class="ax-reveal-ng-button">To</button>
+            </ax-reveal-ng>
+          </div>
+          <div class="ax-reveal-ng-container">
+            <ax-reveal-ng>
+              <button class="ax-reveal-ng-button">Project</button>
+            </ax-reveal-ng>
+            <ax-reveal-ng>
+              <button class="ax-reveal-ng-button">Axiom!</button>
+            </ax-reveal-ng>
+          </div>
+        </ax-reveal-bound>
+      </div>
+      <div class="code">
+        <h2>General Button</h2>
+        <p>In order to use this component, we need to prepare some HTML:</p>
+        <pre>&lt;ax-reveal-provider&gt;
+  &lt;ax-reveal-bound class=&quot;my-reveal-container&quot;&gt;
+      &lt;ax-reveal-ng&gt;
+        &lt;button class=&quot;ax-reveal-ng-button&quot;&gt;Reveal&lt;/button&gt;
+      &lt;/ax-reveal-ng&gt;
+      &lt;ax-reveal-ng&gt;
+        &lt;button class=&quot;ax-reveal-ng-button&quot;&gt;To&lt;/button&gt;
+      &lt;/ax-reveal-ng&gt;
+    &lt;/div&gt;
+  &lt;/ax-reveal-bound&gt;
+&lt;/ax-reveal-provider&gt;</pre>
+      </div>
+    </section>
+
+    <section class="demo-block">
+      <div class="demo">
+        <ax-reveal-bound class="round-corner">
+          <div class="ax-reveal-ng-container">
+            <ax-reveal-ng>
+              <button class="ax-reveal-ng-button">Welcome</button>
+            </ax-reveal-ng>
+            <ax-reveal-ng>
+              <button class="ax-reveal-ng-button">To</button>
+            </ax-reveal-ng>
+          </div>
+          <div class="ax-reveal-ng-container">
+            <ax-reveal-ng>
+              <button class="ax-reveal-ng-button">Project</button>
+            </ax-reveal-ng>
+            <ax-reveal-ng>
+              <button class="ax-reveal-ng-button">Axiom!</button>
+            </ax-reveal-ng>
+          </div>
+        </ax-reveal-bound>
+      </div>
+      <style>
+        .round-corner {
+          --reveal-border-decoration-type: round;
+          --reveal-border-decoration-radius: 8px;
+        }
+      </style>
+      <div class="code">
+        <h2>Round Corner</h2>
+        <pre>.my-reveal-container{
+  --reveal-border-decoration-type: round;
+  --reveal-border-decoration-size: 4px;
+}</pre>
+      </div>
+    </section>
+
+    <section class="demo-block">
+      <div class="demo">
+        <ax-reveal-bound class="round-corner custom-radius">
+          <div class="ax-reveal-ng-container">
+            <ax-reveal-ng>
+              <button class="ax-reveal-ng-button">Welcome</button>
+            </ax-reveal-ng>
+            <ax-reveal-ng>
+              <button class="ax-reveal-ng-button">To</button>
+            </ax-reveal-ng>
+          </div>
+          <div class="ax-reveal-ng-container">
+            <ax-reveal-ng>
+              <button class="ax-reveal-ng-button">Project</button>
+            </ax-reveal-ng>
+            <ax-reveal-ng>
+              <button class="ax-reveal-ng-button">Axiom!</button>
+            </ax-reveal-ng>
+          </div>
+        </ax-reveal-bound>
+      </div>
+      <style>
+        .custom-radius ax-reveal-ng {
+          --reveal-border-decoration-top-left-radius: 0;
+          --reveal-border-decoration-top-right-radius: 10px;
+          --reveal-border-decoration-bottom-left-radius: 20px;
+          --reveal-border-decoration-bottom-right-radius: 0;
+        }
+      </style>
+      <div class="code">
+        <h2>Custom border radius</h2>
+        <pre>.my-reveal-container{
+  --reveal-border-decoration-type: round;
+  --reveal-border-decoration-top-left-radius: 0;
+  --reveal-border-decoration-top-right-radius: 10px;
+  --reveal-border-decoration-bottom-left-radius: 20px;
+  --reveal-border-decoration-bottom-right-radius: 0;
+}</pre>
+      </div>
+    </section>
+
+    <section class="demo-block">
+      <div class="demo">
+        <ax-reveal-bound class="bevel-corner">
+          <div class="ax-reveal-ng-container">
+            <ax-reveal-ng>
+              <button class="ax-reveal-ng-button">Welcome</button>
+            </ax-reveal-ng>
+            <ax-reveal-ng>
+              <button class="ax-reveal-ng-button">To</button>
+            </ax-reveal-ng>
+          </div>
+          <div class="ax-reveal-ng-container">
+            <ax-reveal-ng>
+              <button class="ax-reveal-ng-button">Project</button>
+            </ax-reveal-ng>
+            <ax-reveal-ng>
+              <button class="ax-reveal-ng-button">Axiom!</button>
+            </ax-reveal-ng>
+          </div>
+        </ax-reveal-bound>
+      </div>
+      <style>
+        .bevel-corner {
+          --reveal-border-decoration-type: bevel;
+          --reveal-border-decoration-radius: 16px;
+        }
+      </style>
+      <div class="code">
+        <h2>Even more fancy</h2>
+        <pre>.my-reveal-container{
+  --reveal-border-decoration-type: bevel;
+  --reveal-border-decoration-size: 16px;
+}</pre>
+      </div>
+    </section>
+
+    <section class="demo-block">
+      <div class="demo">
+        <ax-reveal-bound class="with-opacity">
+          <div class="ax-reveal-ng-container">
+            <ax-reveal-ng>
+              <button class="ax-reveal-ng-button">Welcome</button>
+            </ax-reveal-ng>
+            <ax-reveal-ng>
+              <button class="ax-reveal-ng-button">To</button>
+            </ax-reveal-ng>
+          </div>
+          <div class="ax-reveal-ng-container">
+            <ax-reveal-ng>
+              <button class="ax-reveal-ng-button">Project</button>
+            </ax-reveal-ng>
+            <ax-reveal-ng>
+              <button class="ax-reveal-ng-button">Axiom!</button>
+            </ax-reveal-ng>
+          </div>
+        </ax-reveal-bound>
+      </div>
+      <style>
+        .with-opacity {
+          --reveal-opacity: 1.0;
+        }
+      </style>
+      <div class="code">
+        <h2>Opacity</h2>
+        <pre>.my-reveal-container{
+  --reveal-opacity: 1.0;
+}</pre>
+      </div>
+    </section>
+
+    <section class="demo-block">
+      <div class="demo">
+        <ax-reveal-bound>
+          <div class="ax-reveal-ng-container">
+            <ax-reveal-ng class="colored-button1">
+              <button class="ax-reveal-ng-button">Welcome</button>
+            </ax-reveal-ng>
+            <ax-reveal-ng class="colored-button2">
+              <button class="ax-reveal-ng-button">To</button>
+            </ax-reveal-ng>
+          </div>
+          <div class="ax-reveal-ng-container">
+            <ax-reveal-ng class="colored-button3">
+              <button class="ax-reveal-ng-button">Project</button>
+            </ax-reveal-ng>
+            <ax-reveal-ng class="colored-button4">
+              <button class="ax-reveal-ng-button">Axiom!</button>
+            </ax-reveal-ng>
+          </div>
+        </ax-reveal-bound>
+      </div>
+      <style>
+        .colored-button1 {
+          --reveal-color: red;
+        }
+        .colored-button2 {
+          --reveal-color: #7cbb00;
+        }
+        .colored-button3 {
+          --reveal-color: rgb(255, 187, 0);
+        }
+        .colored-button4 {
+          --reveal-color: #00A1F1;
+        }
+      </style>
+      <div class="code">
+        <h2>Colored Button</h2>
+        <pre>.colored-button1 {
+  --reveal-color: red;
+}
+
+.colored-button2 {
+  --reveal-color: #7cbb00;
+}
+
+.colored-button3 {
+  --reveal-color: rgb(255, 187, 0);
+}
+
+.colored-button4 {
+  --reveal-color: #00A1F1;
+}</pre>
+      </div>
+    </section>
+
+    <section class="demo-block">
+      <div class="demo">
+        <ax-reveal-bound class="detailed-color-adjustment">
+          <div class="ax-reveal-ng-container">
+            <ax-reveal-ng>
+              <button class="ax-reveal-ng-button">Welcome</button>
+            </ax-reveal-ng>
+            <ax-reveal-ng>
+              <button class="ax-reveal-ng-button">To</button>
+            </ax-reveal-ng>
+          </div>
+          <div class="ax-reveal-ng-container">
+            <ax-reveal-ng>
+              <button class="ax-reveal-ng-button">Project</button>
+            </ax-reveal-ng>
+            <ax-reveal-ng>
+              <button class="ax-reveal-ng-button">Axiom!</button>
+            </ax-reveal-ng>
+          </div>
+        </ax-reveal-bound>
+      </div>
+      <style>
+        .detailed-color-adjustment {
+          --reveal-border-color: #FF00C1;
+          --reveal-hover-light-color: #00B8FF;
+          --reveal-press-animation-color: #FFFFFF;
+          --reveal-opacity: 1.0;
+        }
+      </style>
+      <div class="code">
+        <h2>Customize Every Parts</h2>
+        <pre>.my-reveal-container{
+  --reveal-border-color: #FF00C1;
+  --reveal-hover-light-color: #00B8FF;
+  --reveal-press-animation-color: #FFFFFF;
+  --reveal-opacity: 1.0;
+}</pre>
+      </div>
+    </section>
+
+    <section class="demo-block">
+      <div class="demo">
+        <ax-reveal-bound class="border-width">
+          <div class="ax-reveal-ng-container">
+            <ax-reveal-ng>
+              <button class="ax-reveal-ng-button">Welcome</button>
+            </ax-reveal-ng>
+            <ax-reveal-ng>
+              <button class="ax-reveal-ng-button">To</button>
+            </ax-reveal-ng>
+          </div>
+          <div class="ax-reveal-ng-container">
+            <ax-reveal-ng>
+              <button class="ax-reveal-ng-button">Project</button>
+            </ax-reveal-ng>
+            <ax-reveal-ng>
+              <button class="ax-reveal-ng-button">Axiom!</button>
+            </ax-reveal-ng>
+          </div>
+        </ax-reveal-bound>
+      </div>
+      <style>
+        .border-width {
+          --reveal-border-width: 3px;
+        }
+      </style>
+      <div class="code">
+        <h2>Border Width</h2>
+        <pre>.my-reveal-container{
+  --reveal-border-width: 3px;
+}</pre>
+      </div>
+    </section>
+
+    <section class="demo-block">
+      <div class="demo">
+        <ax-reveal-bound class="border-fill-radius">
+          <div class="ax-reveal-ng-container">
+            <ax-reveal-ng>
+              <button class="ax-reveal-ng-button">Welcome</button>
+            </ax-reveal-ng>
+            <ax-reveal-ng>
+              <button class="ax-reveal-ng-button">To</button>
+            </ax-reveal-ng>
+          </div>
+          <div class="ax-reveal-ng-container">
+            <ax-reveal-ng>
+              <button class="ax-reveal-ng-button">Project</button>
+            </ax-reveal-ng>
+            <ax-reveal-ng>
+              <button class="ax-reveal-ng-button">Axiom!</button>
+            </ax-reveal-ng>
+          </div>
+        </ax-reveal-bound>
+      </div>
+      <style>
+        .border-fill-radius {
+          --reveal-border-fill-radius: 0.2;
+        }
+      </style>
+      <div class="code">
+        <h2>Border Fill Radius</h2>
+        <pre>.my-reveal-container{
+  --reveal-border-fill-radius: 0.2;
+}</pre>
+      </div>
+    </section>
+
+    <section class="demo-block">
+      <div class="demo">
+        <ax-reveal-bound class="no-border">
+          <div class="ax-reveal-ng-container">
+            <ax-reveal-ng>
+              <button class="ax-reveal-ng-button">Welcome</button>
+            </ax-reveal-ng>
+            <ax-reveal-ng>
+              <button class="ax-reveal-ng-button">To</button>
+            </ax-reveal-ng>
+          </div>
+          <div class="ax-reveal-ng-container">
+            <ax-reveal-ng>
+              <button class="ax-reveal-ng-button">Project</button>
+            </ax-reveal-ng>
+            <ax-reveal-ng>
+              <button class="ax-reveal-ng-button">Axiom!</button>
+            </ax-reveal-ng>
+          </div>
+        </ax-reveal-bound>
+      </div>
+      <style>
+        .no-border {
+          --reveal-border-width: 0;
+        }
+      </style>
+      <div class="code">
+        <h2>No border</h2>
+        <pre>.my-reveal-container{
+  --reveal-border-width: 0;
+}</pre>
+      </div>
+    </section>
+
+    <section class="demo-block">
+      <div class="demo">
+        <ax-reveal-bound class="different-sides">
+          <div>No Single Border</div>
+          <div class="ax-reveal-ng-container">
+            <ax-reveal-ng class="no-top">
+              <button class="ax-reveal-ng-button">No Top</button>
+            </ax-reveal-ng>
+            <ax-reveal-ng class="no-bottom">
+              <button class="ax-reveal-ng-button">No Bottom</button>
+            </ax-reveal-ng>
+          </div>
+          <div class="ax-reveal-ng-container">
+            <ax-reveal-ng class="no-left">
+              <button class="ax-reveal-ng-button">No Left</button>
+            </ax-reveal-ng>
+            <ax-reveal-ng class="no-right">
+              <button class="ax-reveal-ng-button">No Right</button>
+            </ax-reveal-ng>
+          </div>
+          <div class="ax-reveal-ng-container">
+            <ax-reveal-ng class="horizontal">
+              <button class="ax-reveal-ng-button">Horizontal</button>
+            </ax-reveal-ng>
+            <ax-reveal-ng class="vertical">
+              <button class="ax-reveal-ng-button">Vertical</button>
+            </ax-reveal-ng>
+          </div>
+          <div class="ax-reveal-ng-container">
+            <ax-reveal-ng class="only-top">
+              <button class="ax-reveal-ng-button">Only Top</button>
+            </ax-reveal-ng>
+            <ax-reveal-ng class="only-bottom">
+              <button class="ax-reveal-ng-button">Only Bottom</button>
+            </ax-reveal-ng>
+          </div>
+          <div class="ax-reveal-ng-container">
+            <ax-reveal-ng class="only-left">
+              <button class="ax-reveal-ng-button">Only Left</button>
+            </ax-reveal-ng>
+            <ax-reveal-ng class="only-right">
+              <button class="ax-reveal-ng-button">Only Right</button>
+            </ax-reveal-ng>
+          </div>
+          <div>With Round Border Radius</div>
+          <div class="ax-reveal-ng-container round-corner">
+            <ax-reveal-ng class="no-top">
+              <button class="ax-reveal-ng-button">No Top</button>
+            </ax-reveal-ng>
+            <ax-reveal-ng class="no-bottom">
+              <button class="ax-reveal-ng-button">No Bottom</button>
+            </ax-reveal-ng>
+          </div>
+          <div class="ax-reveal-ng-container round-corner">
+            <ax-reveal-ng class="no-left">
+              <button class="ax-reveal-ng-button">No Left</button>
+            </ax-reveal-ng>
+            <ax-reveal-ng class="no-right">
+              <button class="ax-reveal-ng-button">No Right</button>
+            </ax-reveal-ng>
+          </div>
+          <div class="ax-reveal-ng-container round-corner">
+            <ax-reveal-ng class="horizontal">
+              <button class="ax-reveal-ng-button">Horizontal</button>
+            </ax-reveal-ng>
+            <ax-reveal-ng class="vertical">
+              <button class="ax-reveal-ng-button">Vertical</button>
+            </ax-reveal-ng>
+          </div>
+          <div class="ax-reveal-ng-container round-corner">
+            <ax-reveal-ng class="only-top">
+              <button class="ax-reveal-ng-button">Only Top</button>
+            </ax-reveal-ng>
+            <ax-reveal-ng class="only-bottom">
+              <button class="ax-reveal-ng-button">Only Bottom</button>
+            </ax-reveal-ng>
+          </div>
+          <div class="ax-reveal-ng-container round-corner">
+            <ax-reveal-ng class="only-left">
+              <button class="ax-reveal-ng-button">Only Left</button>
+            </ax-reveal-ng>
+            <ax-reveal-ng class="only-right">
+              <button class="ax-reveal-ng-button">Only Right</button>
+            </ax-reveal-ng>
+          </div>
+          <div>With Bevel Border Radius</div>
+          <div class="ax-reveal-ng-container bevel-corner">
+            <ax-reveal-ng class="no-top">
+              <button class="ax-reveal-ng-button">No Top</button>
+            </ax-reveal-ng>
+            <ax-reveal-ng class="no-bottom">
+              <button class="ax-reveal-ng-button">No Bottom</button>
+            </ax-reveal-ng>
+          </div>
+          <div class="ax-reveal-ng-container bevel-corner">
+            <ax-reveal-ng class="no-left">
+              <button class="ax-reveal-ng-button">No Left</button>
+            </ax-reveal-ng>
+            <ax-reveal-ng class="no-right">
+              <button class="ax-reveal-ng-button">No Right</button>
+            </ax-reveal-ng>
+          </div>
+          <div class="ax-reveal-ng-container bevel-corner">
+            <ax-reveal-ng class="horizontal">
+              <button class="ax-reveal-ng-button">Horizontal</button>
+            </ax-reveal-ng>
+            <ax-reveal-ng class="vertical">
+              <button class="ax-reveal-ng-button">Vertical</button>
+            </ax-reveal-ng>
+          </div>
+          <div class="ax-reveal-ng-container bevel-corner">
+            <ax-reveal-ng class="only-top">
+              <button class="ax-reveal-ng-button">Only Top</button>
+            </ax-reveal-ng>
+            <ax-reveal-ng class="only-bottom">
+              <button class="ax-reveal-ng-button">Only Bottom</button>
+            </ax-reveal-ng>
+          </div>
+          <div class="ax-reveal-ng-container bevel-corner">
+            <ax-reveal-ng class="only-left">
+              <button class="ax-reveal-ng-button">Only Left</button>
+            </ax-reveal-ng>
+            <ax-reveal-ng class="only-right">
+              <button class="ax-reveal-ng-button">Only Right</button>
+            </ax-reveal-ng>
+          </div>
+        </ax-reveal-bound>
+      </div>
+      <style>
+        .no-top {
+          --reveal-border-top: none;
+        }
+        .no-bottom {
+          --reveal-border-bottom: none;
+        }
+        .no-left {
+          --reveal-border-left: none;
+        }
+        .no-right {
+          --reveal-border-right: none;
+        }
+        .horizontal {
+          --reveal-border-left: none;
+          --reveal-border-right: none;
+        }
+        .vertical {
+          --reveal-border-top: none;
+          --reveal-border-bottom: none;
+        }
+        .only-top {
+          --reveal-border-bottom: none;
+          --reveal-border-left: none;
+          --reveal-border-right: none;
+        }
+        .only-bottom {
+          --reveal-border-top: none;
+          --reveal-border-left: none;
+          --reveal-border-right: none;
+        }
+        .only-left {
+          --reveal-border-top: none;
+          --reveal-border-bottom: none;
+          --reveal-border-right: none;
+        }
+        .only-right {
+          --reveal-border-top: none;
+          --reveal-border-bottom: none;
+          --reveal-border-left: none;
+        }
+      </style>
+      <div class="code">
+        <h2>No border</h2>
+        <pre>.no-top {
+  --reveal-border-top: none;
+}
+
+.no-bottom {
+  --reveal-border-bottom: none;
+}
+
+.no-left {
+  --reveal-border-left: none;
+}
+
+.no-right {
+  --reveal-border-right: none;
+}
+
+.horizontal {
+  --reveal-border-left: none;
+  --reveal-border-right: none;
+}
+
+.vertical {
+  --reveal-border-top: none;
+  --reveal-border-bottom: none;
+}
+
+.only-top {
+  --reveal-border-bottom: none;
+  --reveal-border-left: none;
+  --reveal-border-right: none;
+}
+
+.only-bottom {
+  --reveal-border-top: none;
+  --reveal-border-left: none;
+  --reveal-border-right: none;
+}
+
+.only-left {
+  --reveal-border-top: none;
+  --reveal-border-bottom: none;
+  --reveal-border-right: none;
+}
+
+.only-right {
+  --reveal-border-top: none;
+  --reveal-border-bottom: none;
+  --reveal-border-right: none;
+}</pre>
+      </div>
+    </section>
+
+    <section class="demo-block">
+      <div class="demo">
+        <ax-reveal-bound class="fill-radius">
+          <div class="ax-reveal-ng-container">
+            <ax-reveal-ng>
+              <button class="ax-reveal-ng-button">Welcome</button>
+            </ax-reveal-ng>
+            <ax-reveal-ng>
+              <button class="ax-reveal-ng-button">To</button>
+            </ax-reveal-ng>
+          </div>
+          <div class="ax-reveal-ng-container">
+            <ax-reveal-ng>
+              <button class="ax-reveal-ng-button">Project</button>
+            </ax-reveal-ng>
+            <ax-reveal-ng>
+              <button class="ax-reveal-ng-button">Axiom!</button>
+            </ax-reveal-ng>
+          </div>
+        </ax-reveal-bound>
+      </div>
+      <style>
+        .fill-radius {
+          --reveal-hover-light-fill-radius: 0.2;
+        }
+      </style>
+      <div class="code">
+        <h2>Fill Radius</h2>
+        <pre>.my-reveal-container{
+  --reveal-hover-light-fill-radius: 0.2;
+}</pre>
+      </div>
+    </section>
+
+    <section class="demo-block">
+      <div class="demo">
+        <ax-reveal-bound class="no-fill">
+          <div class="ax-reveal-ng-container">
+            <ax-reveal-ng>
+              <button class="ax-reveal-ng-button">Welcome</button>
+            </ax-reveal-ng>
+            <ax-reveal-ng>
+              <button class="ax-reveal-ng-button">To</button>
+            </ax-reveal-ng>
+          </div>
+          <div class="ax-reveal-ng-container">
+            <ax-reveal-ng>
+              <button class="ax-reveal-ng-button">Project</button>
+            </ax-reveal-ng>
+            <ax-reveal-ng>
+              <button class="ax-reveal-ng-button">Axiom!</button>
+            </ax-reveal-ng>
+          </div>
+        </ax-reveal-bound>
+      </div>
+      <style>
+        .no-fill {
+          --reveal-hover-light: false;
+        }
+      </style>
+      <div class="code">
+        <h2>No Fill</h2>
+        <pre>.my-reveal-container{
+  --reveal-hover-light: false;
+}</pre>
+      </div>
+    </section>
+
+    <section class="demo-block">
+      <div class="demo">
+        <ax-reveal-bound class="hold-animation">
+          <div class="ax-reveal-ng-container">
+            <ax-reveal-ng>
+              <button class="ax-reveal-ng-button">Welcome</button>
+            </ax-reveal-ng>
+            <ax-reveal-ng>
+              <button class="ax-reveal-ng-button">To</button>
+            </ax-reveal-ng>
+          </div>
+          <div class="ax-reveal-ng-container">
+            <ax-reveal-ng>
+              <button class="ax-reveal-ng-button">Project</button>
+            </ax-reveal-ng>
+            <ax-reveal-ng>
+              <button class="ax-reveal-ng-button">Axiom!</button>
+            </ax-reveal-ng>
+          </div>
+        </ax-reveal-bound>
+      </div>
+      <style>
+        .hold-animation {
+          --reveal-press-animation-speed: 8000;
+        }
+      </style>
+      <div class="code">
+        <h2>Hold animation</h2>
+        <pre>.my-reveal-container{
+  --reveal-animate-speed: 8000;
+}</pre>
+      </div>
+    </section>
+
+    <section class="demo-block">
+      <div class="demo">
+        <ax-reveal-bound class="release-animation">
+          <div class="ax-reveal-ng-container">
+            <ax-reveal-ng>
+              <button class="ax-reveal-ng-button">Welcome</button>
+            </ax-reveal-ng>
+            <ax-reveal-ng>
+              <button class="ax-reveal-ng-button">To</button>
+            </ax-reveal-ng>
+          </div>
+          <div class="ax-reveal-ng-container">
+            <ax-reveal-ng>
+              <button class="ax-reveal-ng-button">Project</button>
+            </ax-reveal-ng>
+            <ax-reveal-ng>
+              <button class="ax-reveal-ng-button">Axiom!</button>
+            </ax-reveal-ng>
+          </div>
+        </ax-reveal-bound>
+      </div>
+      <style>
+        .release-animation {
+          --reveal-release-animation-accelerate-rate: 20;
+        }
+      </style>
+      <div class="code">
+        <h2>Release animation</h2>
+        <pre>.my-reveal-container{
+  --reveal-released-accelerate-rate: 20;
+}</pre>
+      </div>
+    </section>
+
+    <section class="demo-block">
+      <div class="demo">
+        <ax-reveal-bound class="fill-mode">
+          <div class="ax-reveal-ng-container">
+            <ax-reveal-ng>
+              <button class="ax-reveal-ng-button">Welcome</button>
+            </ax-reveal-ng>
+            <ax-reveal-ng>
+              <button class="ax-reveal-ng-button">To</button>
+            </ax-reveal-ng>
+          </div>
+          <div class="ax-reveal-ng-container">
+            <ax-reveal-ng>
+              <button class="ax-reveal-ng-button">Project</button>
+            </ax-reveal-ng>
+            <ax-reveal-ng>
+              <button class="ax-reveal-ng-button">Axiom!</button>
+            </ax-reveal-ng>
+          </div>
+        </ax-reveal-bound>
+      </div>
+      <style>
+        .fill-mode {
+          --reveal-hover-light-fill-radius: 0.1;
+          --reveal-press-animation-radius-mode: constrained;
+        }
+      </style>
+      <div class="code">
+        <h2>Animation Fill Mode</h2>
+        <pre>.my-reveal-container{
+  --reveal-hover-light-fill-radius: 0.1;
+  --reveal-press-animation-radius-mode: constrained;
+}</pre>
+      </div>
+    </section>
+
+    <section class="demo-block">
+      <div class="demo">
+        <ax-reveal-bound class="no-animation">
+          <div class="ax-reveal-ng-container">
+            <ax-reveal-ng>
+              <button class="ax-reveal-ng-button">Welcome</button>
+            </ax-reveal-ng>
+            <ax-reveal-ng>
+              <button class="ax-reveal-ng-button">To</button>
+            </ax-reveal-ng>
+          </div>
+          <div class="ax-reveal-ng-container">
+            <ax-reveal-ng>
+              <button class="ax-reveal-ng-button">Project</button>
+            </ax-reveal-ng>
+            <ax-reveal-ng>
+              <button class="ax-reveal-ng-button">Axiom!</button>
+            </ax-reveal-ng>
+          </div>
+        </ax-reveal-bound>
+      </div>
+      <style>
+        .no-animation {
+          --reveal-press-animation: false;
+        }
+      </style>
+      <div class="code">
+        <h2>No animation</h2>
+        <pre>.my-reveal-container{
+  --reveal-press-animation: false;
+}</pre>
+      </div>
+    </section>
+
+    <section class="demo-block">
+      <div class="demo">
+        <div class="long-list">
+          <ax-reveal-bound>
+            <div class="ax-reveal-ng-container">
+              <ax-reveal-ng>
+                <button class="ax-reveal-ng-button">A lovely item</button>
+              </ax-reveal-ng>
+              <ax-reveal-ng>
+                <button class="ax-reveal-ng-button">A lovely item</button>
+              </ax-reveal-ng>
+              <ax-reveal-ng>
+                <button class="ax-reveal-ng-button">A lovely item</button>
+              </ax-reveal-ng>
+              <ax-reveal-ng>
+                <button class="ax-reveal-ng-button">A lovely item</button>
+              </ax-reveal-ng>
+              <ax-reveal-ng>
+                <button class="ax-reveal-ng-button">A lovely item</button>
+              </ax-reveal-ng>
+              <ax-reveal-ng>
+                <button class="ax-reveal-ng-button">A lovely item</button>
+              </ax-reveal-ng>
+              <ax-reveal-ng>
+                <button class="ax-reveal-ng-button">A lovely item</button>
+              </ax-reveal-ng>
+              <ax-reveal-ng>
+                <button class="ax-reveal-ng-button">A lovely item</button>
+              </ax-reveal-ng>
+              <ax-reveal-ng>
+                <button class="ax-reveal-ng-button">A lovely item</button>
+              </ax-reveal-ng>
+              <ax-reveal-ng>
+                <button class="ax-reveal-ng-button">A lovely item</button>
+              </ax-reveal-ng>
+              <ax-reveal-ng>
+                <button class="ax-reveal-ng-button">A lovely item</button>
+              </ax-reveal-ng>
+              <ax-reveal-ng>
+                <button class="ax-reveal-ng-button">A lovely item</button>
+              </ax-reveal-ng>
+              <ax-reveal-ng>
+                <button class="ax-reveal-ng-button">A lovely item</button>
+              </ax-reveal-ng>
+              <ax-reveal-ng>
+                <button class="ax-reveal-ng-button">A lovely item</button>
+              </ax-reveal-ng>
+              <ax-reveal-ng>
+                <button class="ax-reveal-ng-button">A lovely item</button>
+              </ax-reveal-ng>
+              <ax-reveal-ng>
+                <button class="ax-reveal-ng-button">A lovely item</button>
+              </ax-reveal-ng>
+              <ax-reveal-ng>
+                <button class="ax-reveal-ng-button">A lovely item</button>
+              </ax-reveal-ng>
+              <ax-reveal-ng>
+                <button class="ax-reveal-ng-button">A lovely item</button>
+              </ax-reveal-ng>
+              <ax-reveal-ng>
+                <button class="ax-reveal-ng-button">A lovely item</button>
+              </ax-reveal-ng>
+              <ax-reveal-ng>
+                <button class="ax-reveal-ng-button">A lovely item</button>
+              </ax-reveal-ng>
+              <ax-reveal-ng>
+                <button class="ax-reveal-ng-button">A lovely item</button>
+              </ax-reveal-ng>
+              <ax-reveal-ng>
+                <button class="ax-reveal-ng-button">A lovely item</button>
+              </ax-reveal-ng>
+              <ax-reveal-ng>
+                <button class="ax-reveal-ng-button">A lovely item</button>
+              </ax-reveal-ng>
+              <ax-reveal-ng>
+                <button class="ax-reveal-ng-button">A lovely item</button>
+              </ax-reveal-ng>
+              <ax-reveal-ng>
+                <button class="ax-reveal-ng-button">A lovely item</button>
+              </ax-reveal-ng>
+              <ax-reveal-ng>
+                <button class="ax-reveal-ng-button">A lovely item</button>
+              </ax-reveal-ng>
+              <ax-reveal-ng>
+                <button class="ax-reveal-ng-button">A lovely item</button>
+              </ax-reveal-ng>
+            </div>
+        </div>
+        </ax-reveal-bound>
+      </div>
+      <style>
+        .long-list {
+          --reveal-border-style: half;
+          height: 300px;
+          width: 250px;
+          margin-bottom: 15px;
+          overflow-y: scroll;
+        }
+
+        .long-list .ax-reveal-ng-container {
+          flex-direction: column;
+        }
+
+        .long-list .ax-reveal-ng-container>ax-reveal-ng {
+          margin: 0;
+        }
+      </style>
+      <div class="code">
+        <h2>List style</h2>
+        <pre>.my-reveal-container{
+  --reveal-border-style: half;
+}</pre>
+      </div>
+    </section>
+
+    <section class="demo-block">
+      <div class="demo">
+        <ax-reveal-bound class="dynamic-size">
+          <div class="ax-reveal-ng-container">
+            <ax-reveal-ng>
+              <button class="ax-reveal-ng-button">Welcome</button>
+            </ax-reveal-ng>
+            <ax-reveal-ng>
+              <button class="ax-reveal-ng-button">To</button>
+            </ax-reveal-ng>
+          </div>
+          <div class="ax-reveal-ng-container">
+            <ax-reveal-ng>
+              <button class="ax-reveal-ng-button">Project</button>
+            </ax-reveal-ng>
+            <ax-reveal-ng>
+              <button class="ax-reveal-ng-button">Axiom!</button>
+            </ax-reveal-ng>
+          </div>
+        </ax-reveal-bound>
+      </div>
+      <style>
+        .dynamic-size.large ax-reveal-ng {
+          width: 160px;
+          height: 160px;
+        }
+
+        .dynamic-size.large .ax-reveal-ng-button {
+          min-width: 160px;
+          height: 160px;
+        }
+      </style>
+      <div class="code">
+        <h2>Dynamic size</h2>
+        <button 
+          onclick="document.querySelector('.dynamic-size')?.classList.toggle('large')"
+        >
+          Click here
+        </button>
+      </div>
+    </section>
+
+    <section class="demo-block">
+      <div class="demo">
+        <div class="long-list no-diffuse">
+          <ax-reveal-bound>
+            <div class="ax-reveal-ng-container">
+              <ax-reveal-ng>
+                <button class="ax-reveal-ng-button">A lovely item</button>
+              </ax-reveal-ng>
+              <ax-reveal-ng>
+                <button class="ax-reveal-ng-button">A lovely item</button>
+              </ax-reveal-ng>
+              <ax-reveal-ng>
+                <button class="ax-reveal-ng-button">A lovely item</button>
+              </ax-reveal-ng>
+              <ax-reveal-ng>
+                <button class="ax-reveal-ng-button">A lovely item</button>
+              </ax-reveal-ng>
+              <ax-reveal-ng>
+                <button class="ax-reveal-ng-button">A lovely item</button>
+              </ax-reveal-ng>
+            </div>
+        </div>
+        </ax-reveal-bound>
+      </div>
+      <style>
+        .no-diffuse {
+          --reveal-diffuse: false;
+          overflow-y: auto;
+          height: auto;
+        }
+      </style>
+      <div class="code">
+        <h2>No diffuse</h2>
+        <pre>.my-reveal-container{
+  --reveal-border-style: half;
+  --reveal-diffuse: false;
+}</pre>
+      </div>
+    </section>
+    <section class="round-corner benchmark">
+      <h2>Benchmark (100 Items)</h2>
+      <ax-reveal-bound>
+        <ax-reveal-ng>🥩</ax-reveal-ng><ax-reveal-ng>🥚</ax-reveal-ng><ax-reveal-ng>🥛</ax-reveal-ng><ax-reveal-ng>👀</ax-reveal-ng><ax-reveal-ng>📎</ax-reveal-ng>
+        <ax-reveal-ng>🥩</ax-reveal-ng><ax-reveal-ng>🥚</ax-reveal-ng><ax-reveal-ng>🥛</ax-reveal-ng><ax-reveal-ng>👀</ax-reveal-ng><ax-reveal-ng>📎</ax-reveal-ng>
+        <ax-reveal-ng>🥩</ax-reveal-ng><ax-reveal-ng>🥚</ax-reveal-ng><ax-reveal-ng>🥛</ax-reveal-ng><ax-reveal-ng>👀</ax-reveal-ng><ax-reveal-ng>📎</ax-reveal-ng>
+        <ax-reveal-ng>🥩</ax-reveal-ng><ax-reveal-ng>🥚</ax-reveal-ng><ax-reveal-ng>🥛</ax-reveal-ng><ax-reveal-ng>👀</ax-reveal-ng><ax-reveal-ng>📎</ax-reveal-ng>
+        <ax-reveal-ng>🥩</ax-reveal-ng><ax-reveal-ng>🥚</ax-reveal-ng><ax-reveal-ng>🥛</ax-reveal-ng><ax-reveal-ng>👀</ax-reveal-ng><ax-reveal-ng>📎</ax-reveal-ng>
+        <ax-reveal-ng>🥩</ax-reveal-ng><ax-reveal-ng>🥚</ax-reveal-ng><ax-reveal-ng>🥛</ax-reveal-ng><ax-reveal-ng>👀</ax-reveal-ng><ax-reveal-ng>📎</ax-reveal-ng>
+        <ax-reveal-ng>🥩</ax-reveal-ng><ax-reveal-ng>🥚</ax-reveal-ng><ax-reveal-ng>🥛</ax-reveal-ng><ax-reveal-ng>👀</ax-reveal-ng><ax-reveal-ng>📎</ax-reveal-ng>
+        <ax-reveal-ng>🥩</ax-reveal-ng><ax-reveal-ng>🥚</ax-reveal-ng><ax-reveal-ng>🥛</ax-reveal-ng><ax-reveal-ng>👀</ax-reveal-ng><ax-reveal-ng>📎</ax-reveal-ng>
+        <ax-reveal-ng>🥩</ax-reveal-ng><ax-reveal-ng>🥚</ax-reveal-ng><ax-reveal-ng>🥛</ax-reveal-ng><ax-reveal-ng>👀</ax-reveal-ng><ax-reveal-ng>📎</ax-reveal-ng>
+        <ax-reveal-ng>🥩</ax-reveal-ng><ax-reveal-ng>🥚</ax-reveal-ng><ax-reveal-ng>🥛</ax-reveal-ng><ax-reveal-ng>👀</ax-reveal-ng><ax-reveal-ng>📎</ax-reveal-ng>
+        <ax-reveal-ng>🥩</ax-reveal-ng><ax-reveal-ng>🥚</ax-reveal-ng><ax-reveal-ng>🥛</ax-reveal-ng><ax-reveal-ng>👀</ax-reveal-ng><ax-reveal-ng>📎</ax-reveal-ng>
+        <ax-reveal-ng>🥩</ax-reveal-ng><ax-reveal-ng>🥚</ax-reveal-ng><ax-reveal-ng>🥛</ax-reveal-ng><ax-reveal-ng>👀</ax-reveal-ng><ax-reveal-ng>📎</ax-reveal-ng>
+        <ax-reveal-ng>🥩</ax-reveal-ng><ax-reveal-ng>🥚</ax-reveal-ng><ax-reveal-ng>🥛</ax-reveal-ng><ax-reveal-ng>👀</ax-reveal-ng><ax-reveal-ng>📎</ax-reveal-ng>
+        <ax-reveal-ng>🥩</ax-reveal-ng><ax-reveal-ng>🥚</ax-reveal-ng><ax-reveal-ng>🥛</ax-reveal-ng><ax-reveal-ng>👀</ax-reveal-ng><ax-reveal-ng>📎</ax-reveal-ng>
+        <ax-reveal-ng>🥩</ax-reveal-ng><ax-reveal-ng>🥚</ax-reveal-ng><ax-reveal-ng>🥛</ax-reveal-ng><ax-reveal-ng>👀</ax-reveal-ng><ax-reveal-ng>📎</ax-reveal-ng>
+        <ax-reveal-ng>🥩</ax-reveal-ng><ax-reveal-ng>🥚</ax-reveal-ng><ax-reveal-ng>🥛</ax-reveal-ng><ax-reveal-ng>👀</ax-reveal-ng><ax-reveal-ng>📎</ax-reveal-ng>
+        <ax-reveal-ng>🥩</ax-reveal-ng><ax-reveal-ng>🥚</ax-reveal-ng><ax-reveal-ng>🥛</ax-reveal-ng><ax-reveal-ng>👀</ax-reveal-ng><ax-reveal-ng>📎</ax-reveal-ng>
+        <ax-reveal-ng>🥩</ax-reveal-ng><ax-reveal-ng>🥚</ax-reveal-ng><ax-reveal-ng>🥛</ax-reveal-ng><ax-reveal-ng>👀</ax-reveal-ng><ax-reveal-ng>📎</ax-reveal-ng>
+        <ax-reveal-ng>🥩</ax-reveal-ng><ax-reveal-ng>🥚</ax-reveal-ng><ax-reveal-ng>🥛</ax-reveal-ng><ax-reveal-ng>👀</ax-reveal-ng><ax-reveal-ng>📎</ax-reveal-ng>
+        <ax-reveal-ng>🥩</ax-reveal-ng><ax-reveal-ng>🥚</ax-reveal-ng><ax-reveal-ng>🥛</ax-reveal-ng><ax-reveal-ng>👀</ax-reveal-ng><ax-reveal-ng>📎</ax-reveal-ng>
+      </ax-reveal-bound>
+
+      <style>
+        .benchmark {
+          font-size: 0;
+        }
+
+        .benchmark ax-reveal-ng {
+          width: 40px;
+          height: 40px;
+          margin: 4px;
+          padding: 8px;
+          font-size: 24px;
+          text-align: center;
+          line-height: 40px;
+          cursor: default;
+        }
+      </style>
+    </section>
+  </ax-reveal-provider>
+  <script type="module">
+    // For package developer.
+    import { register } from '../../../es/index.js';
+    // import { register } from 'https://unpkg.com/@ax-design/reveal-highlight/es/index.js';
+    register({
+      compat: true,
+      borderDetectionMode: 'experimentalAutoFit',
+    });
+  </script>
+</body>
