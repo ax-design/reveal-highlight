@@ -78,18 +78,25 @@ export class RevealBoundaryStore {
         });
     };
 
-    onPointerMoveOnScreen = (x: number, y: number) => {
-        const boundingBox = this.container.getBoundingClientRect();
-
-        if (x < boundingBox.left - this.maxRadius) return false;
-        if (x > boundingBox.right + this.maxRadius) return false;
-        if (y < boundingBox.top - this.maxRadius) return false;
-        if (y > boundingBox.bottom + this.maxRadius) return false;
-        this.mouseInBoundary = true;
-
+    updatePointerPosition = (x: number, y: number) => {
         this.clientX = x;
         this.clientY = y;
 
+        const boundingBox = this.container.getBoundingClientRect();
+
+        let mouseInBoundary = true;
+
+        if (x < boundingBox.left - this.maxRadius) mouseInBoundary = false;
+        if (x > boundingBox.right + this.maxRadius) mouseInBoundary = false;
+        if (y < boundingBox.top - this.maxRadius) mouseInBoundary = false;
+        if (y > boundingBox.bottom + this.maxRadius) mouseInBoundary = false;
+
+        this.mouseInBoundary = mouseInBoundary;
+    }
+
+    onPointerMoveOnScreen = (x: number, y: number) => {
+        this.updatePointerPosition(x, y);
+        if (!this.mouseInBoundary) return;
         this.requestPaintAll();
         return true;
     };
