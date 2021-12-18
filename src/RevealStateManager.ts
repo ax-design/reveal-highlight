@@ -19,13 +19,13 @@ export class RevealStateManager {
             // Window.pointerleave won't be triggered if the finger
             // leave the screen, so we use pointer up here.
             window.addEventListener('pointerup', (ev) => {
-                if (ev.type !== 'mouse') this.handlePointerLeave();
+                if (ev.pointerType !== 'mouse') this.handlePointerLeave();
             });
             // This is for desktop
             // If the mouse leave the window, we need to terminate
             // all animations and clean up the canvas.
             window.addEventListener('pointerleave', (ev) => {
-                if (ev.type === 'mouse') this.handlePointerLeave();
+                if (ev.pointerType === 'mouse') this.handlePointerLeave();
             });
         }
     }
@@ -34,6 +34,8 @@ export class RevealStateManager {
 
     handlePointerLeave = () => {
         if (this.pointerLeaveScheduled) return;
+
+        this.pointerLeaveScheduled = true;
 
         window.requestAnimationFrame(() => {
             for (let i = 0; i < this._storage.length; i++) {

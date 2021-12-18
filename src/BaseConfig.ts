@@ -68,10 +68,10 @@ export class BaseConfig<T extends Element> {
     animationDirty: boolean = false;
 
     /**
-     * If is cleaned up by `RevealBoundaryStore` during animation duration
-     * checkup.
+     * If is cleaned up by `RevealBoundaryStore` during animation
+     * duration checkup.
      */
-    cleanedUp: boolean = false;
+    cleanedUpForAnimation: boolean = false;
 
     mouseUpClientX: number | null = null;
     mouseUpClientY: number | null = null;

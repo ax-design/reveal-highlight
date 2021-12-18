@@ -287,7 +287,13 @@ export class SvgConfig extends BaseConfig<SVGSVGElement> {
         }
     };
 
-    clear = () => {
+    clear = (forAnimation: boolean) => {
+        if (!forAnimation) {
+            this.internalClear();
+        }
+    }
+
+    private internalClear = () => {
         if (!this.dirty) return false;
 
         const paths = this.cachedImg.cachedPath;
@@ -295,7 +301,12 @@ export class SvgConfig extends BaseConfig<SVGSVGElement> {
         paths.borderReveal.style.fill = 'transparent';
         paths.fillReveal.style.fill = 'transparent';
         paths.rippleReveal.style.fill = 'transparent';
+
+        this.dirty = false;
+        return true;
     }
+
+    relativePositionLog: any[] = [];
 
     paint = (skipSamePointerPositionCheck?: boolean): boolean => {
         const store = this._store;
@@ -307,15 +318,11 @@ export class SvgConfig extends BaseConfig<SVGSVGElement> {
             return false;
         }
 
+
         if (!store.mouseInBoundary && !animationPlaying) {
+            this.internalClear();
             return false;
         }
-
-        if (!this.cachedImg.cachedReveal) {
-            return false;
-        }
-
-        this.dirty = true;
 
         this.syncSizeToElement(this.element);
         this.cacheBoundingRect();
@@ -335,7 +342,14 @@ export class SvgConfig extends BaseConfig<SVGSVGElement> {
         this.paintedWidth = b.width;
         this.paintedHeight = b.height;
 
-        const maxRadius = c.trueFillRadius[1];
+        const grads = this.cachedImg.cachedGradient;
+        const maxRadius = Math.max(
+            grads.borderReveal.r.baseVal.value,
+            grads.fillReveal.r.baseVal.value
+        );
+
+        this._store.updateMaxRadius(maxRadius);
+        this.relativePositionLog.push([relativeX, relativeY]);
 
         const inLeftBound = relativeX + maxRadius > 0;
         const inRightBound = relativeX - maxRadius < b.width;
@@ -345,8 +359,11 @@ export class SvgConfig extends BaseConfig<SVGSVGElement> {
         const mouseInRenderArea = inLeftBound && inRightBound && inTopBound && inBottomBound;
 
         if (!mouseInRenderArea && !animationPlaying) {
+            this.internalClear();
             return false;
         }
+
+        this.dirty = true;
 
         this.cacheCanvasPaintingStyle();
 

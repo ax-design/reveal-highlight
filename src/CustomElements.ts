@@ -81,7 +81,7 @@ export class AxRevealBoundary extends PatchedHTMLElement {
      * Update the position of your pointer.
      * @param ev Pointer event from the listener.
      */
-    updatePointerPosition = (ev: MouseEvent) => {
+    updatePointerPosition = (ev: PointerEvent) => {
         this.waitForStorage(storage => {
             storage.clientX = ev.clientX;
             storage.clientY = ev.clientY;
@@ -90,12 +90,12 @@ export class AxRevealBoundary extends PatchedHTMLElement {
 
     handlePointerEnter = () => this.waitForStorage(storage => storage.onPointerEnterBoundary());
     handlePointerLeave = () => this.waitForStorage(storage => storage.onPointerLeaveBoundary());
-    handlePointerMove = (ev: MouseEvent) => this.updatePointerPosition(ev);
+    handlePointerMove = this.updatePointerPosition;
     handlePointerUp = (ev: PointerEvent) => {
         if (ev.pointerType === 'mouse') {
             this.waitForStorage(storage => storage.switchAnimation());
         } else {
-            this.waitForStorage(storage => storage.clearAll());
+            this.waitForStorage(storage => storage.clearAll(false));
         }
     };
     handlePointerDown = (ev: PointerEvent) => this.waitForStorage(storage => {

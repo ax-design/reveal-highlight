@@ -74,7 +74,7 @@ export class RevealBoundaryStore {
 
         this.animationFrame = window.requestAnimationFrame((frame) => {
             this.requestedAnimationFrame = false;
-            this.paintAll(cleanup ? 0 : frame, true);
+            this.paintAll(cleanup ? -1 : frame, true);
         });
     };
 
@@ -115,7 +115,8 @@ export class RevealBoundaryStore {
 
     /**
      * The painting method that draw everything on your screen.
-     * @param frame current frame index.
+     * @param frame current frame index, if this value is 0, it means all canvas
+     *  should be cleaned.
      * @param skipSamePointerPositionCheck Literally. 
      */
     private paintAll = (frame: number, skipSamePointerPositionCheck?: boolean) => {
@@ -133,16 +134,22 @@ export class RevealBoundaryStore {
 
             config.currentFrameId = frame;
 
+            // Initialize the animation parameter
             if (config.mouseDownAnimateStartFrame === null) {
                 config.mouseDownAnimateStartFrame = frame;
             }
 
+            // Calculate how long the animation has been playing
             const relativeFrame = frame - config.mouseDownAnimateStartFrame;
             config.mouseDownAnimateCurrentFrame = relativeFrame;
 
             const speed = config.cachedStyle.pressAnimationSpeed;
             const accelerateRate = config.cachedStyle.releaseAnimationAccelerateRate;
 
+            // We assume that Ripple is a one-way linear process from
+            // no diffusion to fully diffused, 
+            // and Logic Frame represents the progress of the animation
+            // in this process.
             let unitLogicFrame = relativeFrame;
             if (config.mouseReleased && config.mouseDownAnimateReleasedFrame) {
                 unitLogicFrame += (relativeFrame - config.mouseDownAnimateReleasedFrame) * accelerateRate;
@@ -150,24 +157,27 @@ export class RevealBoundaryStore {
             config.mouseDownAnimateLogicFrame = unitLogicFrame / speed;
 
             if (config.mouseDownAnimateLogicFrame > 1) {
-                // The `config.paint` is implicitly called here.
-                this.cleanUpAnimationUnit(config);
-                config.cleanedUp = true;
+                // It will be cleaned later
+                config.cleanedUpForAnimation = true;
             }
         }
 
+        // Paint the canvas one by one
         for (let i = 0; i < this.canvasList.length; i++) {
             const config = this.canvasList[i];
             config.currentFrameId = frame;
 
-            if (config.cleanedUp) {
-                config.cleanedUp = false;
-            } else if (this.mouseInBoundary) {
-                config.paint(skipSamePointerPositionCheck);
-            } else if (this.animationQueue.indexOf(config) === -1) {
-                config.clear();
+            if (config.cleanedUpForAnimation) {
+                this.cleanUpAnimationUnit(config, false);
+                config.cleanedUpForAnimation = false;
             } else {
-                config.paint(skipSamePointerPositionCheck);
+                const isPlayingAnimation = this.animationQueue.indexOf(config) === -1;
+
+                if (this.mouseInBoundary || isPlayingAnimation) {
+                    config.paint(skipSamePointerPositionCheck);
+                } else {
+                    config.clear(false);
+                }
             }
         }
 
@@ -184,13 +194,8 @@ export class RevealBoundaryStore {
     /**
      * Clear all canvas.
      */
-    clearAll = () => {
-        this.cleanupAnimation(true);
-
-        for (let i = 0; i < this.canvasList.length; i++) {
-            const config = this.canvasList[i];
-            config.clear();
-        }
+    clearAll = (forAnimation: boolean) => {
+        this.cleanupAnimation(forAnimation, true);
     };
 
     /**
@@ -244,6 +249,8 @@ export class RevealBoundaryStore {
     /**
      * Clean up the config of an animation, but the canvas won't cleaned up.
      * @param config The config to be cleaned up.
+     * @param skipPaint Skip painting.
+     * @param forceClean Force clear the painting.
      */
     cleanUpAnimationUnit = (config: Config, skipPaint?: boolean, forceClean?: boolean) => {
         config.mouseUpClientX = null;
@@ -262,11 +269,11 @@ export class RevealBoundaryStore {
 
         if (!skipPaint) {
             if (forceClean) {
-                config.clear();
+                config.clear(false);
             } else if (this.mouseInBoundary) {
                 config.paint(true);
             } else {
-                config.clear();
+                config.clear(true);
             }
         }
     };
