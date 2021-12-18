@@ -63,9 +63,9 @@ export class BaseConfig<T extends Element> {
 
     dirty: boolean = false;
 
-    shapeDirty: boolean = false;
-    fillDirty: boolean = false;
-    animationDirty: boolean = false;
+    shapeDirty: boolean = true;
+    fillDirty: boolean = true;
+    animationDirty: boolean = true;
 
     /**
      * If is cleaned up by `RevealBoundaryStore` during animation

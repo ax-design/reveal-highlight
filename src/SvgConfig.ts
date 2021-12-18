@@ -306,8 +306,6 @@ export class SvgConfig extends BaseConfig<SVGSVGElement> {
         return true;
     }
 
-    relativePositionLog: any[] = [];
-
     paint = (skipSamePointerPositionCheck?: boolean): boolean => {
         const store = this._store;
 
@@ -317,7 +315,6 @@ export class SvgConfig extends BaseConfig<SVGSVGElement> {
         if (samePosition && !skipSamePointerPositionCheck && !animationPlaying) {
             return false;
         }
-
 
         if (!store.mouseInBoundary && !animationPlaying) {
             this.internalClear();
@@ -349,13 +346,16 @@ export class SvgConfig extends BaseConfig<SVGSVGElement> {
         );
 
         this._store.updateMaxRadius(maxRadius);
-        this.relativePositionLog.push([relativeX, relativeY]);
+        this.cacheCanvasPaintingStyle();
+
+        if (this.fillDirty) {
+            this.updateCachedReveal();
+        }
 
         const inLeftBound = relativeX + maxRadius > 0;
         const inRightBound = relativeX - maxRadius < b.width;
         const inTopBound = relativeY + maxRadius > 0;
         const inBottomBound = relativeY - maxRadius < b.height;
-
         const mouseInRenderArea = inLeftBound && inRightBound && inTopBound && inBottomBound;
 
         if (!mouseInRenderArea && !animationPlaying) {
@@ -364,12 +364,6 @@ export class SvgConfig extends BaseConfig<SVGSVGElement> {
         }
 
         this.dirty = true;
-
-        this.cacheCanvasPaintingStyle();
-
-        if (this.fillDirty) {
-            this.updateCachedReveal();
-        }
 
         this.updateGradientPosition(relativeX, relativeY);
 
