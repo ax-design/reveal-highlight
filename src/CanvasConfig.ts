@@ -58,6 +58,8 @@ export class CanvasConfig extends BaseConfig<HTMLCanvasElement> {
         const { borderReveal, fillReveal } = this.cachedImg.cachedCanvas;
         const { borderReveal: borderRevealCtx, fillReveal: fillRevealCtx } = this.cachedImg.cachedCtx;
 
+        this._store.updateMaxRadius(c.trueFillRadius[1] * c.borderFillRadius);
+
         for (let i = 0; i < 2; i++) {
             // 0 means border, 1 means hover light.
             //-----------------------------------------
