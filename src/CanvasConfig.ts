@@ -68,7 +68,6 @@ export class CanvasConfig extends BaseConfig<HTMLCanvasElement> {
 
             const doNotNeedUpdateReveal =
                 color === ls.color && c.opacity === ls.opacity && fillRadiusFactor === ls.radiusFactor;
-            if (doNotNeedUpdateReveal) return;
 
             if (doNotNeedUpdateReveal) continue;
 
