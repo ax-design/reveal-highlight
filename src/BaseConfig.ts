@@ -127,8 +127,6 @@ export class BaseConfig<T extends Element> {
                 );
         }
 
-        this._store.updateMaxRadius(Math.max(trueFillRadius[0], trueFillRadius[1]));
-
         return trueFillRadius;
     };
 
@@ -257,7 +255,7 @@ export class BaseConfig<T extends Element> {
         c.borderDecorationType = nextBorderDecorationType;
         c.borderWidth = nextBorderWidth;
 
-        c.withLeftBorderFactor = nextWithBottomBorderFactor;
+        c.withLeftBorderFactor = nextWithLeftBorderFactor;
         c.withRightBorderFactor = nextWithRightBorderFactor;
         c.withTopBorderFactor = nextWithTopBorderFactor;
         c.withBottomBorderFactor = nextWithBottomBorderFactor;
