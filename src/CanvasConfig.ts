@@ -49,6 +49,8 @@ export class CanvasConfig extends BaseConfig<HTMLCanvasElement> {
     }
 
     updateCachedReveal = () => {
+        if (!this.fillDirty) return;
+
         const c = this.cachedStyle;
         const radius = c.trueFillRadius[1] * this.pxRatio;
         const size = radius * 2;
@@ -102,6 +104,8 @@ export class CanvasConfig extends BaseConfig<HTMLCanvasElement> {
             if (!this.ctx) continue;
             ls.pattern = this.ctx.createPattern(reveal, 'no-repeat');
         }
+
+        this.fillDirty = false;
     };
 
     updateCachedBitmap = () => {
