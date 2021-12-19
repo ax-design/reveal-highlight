@@ -176,12 +176,12 @@ export class BaseConfig<T extends Element> {
         const nextBorderWidth = this.computedStyle.getNumber('--reveal-border-width');
 
         const nextWithLeftBorderFactor =
-            this.getPropFromMultipleSource('leftBorder', '--reveal-border-left') === 'line' ? 1 : 0;
+            this.getPropFromMultipleSource('leftBorder', '--reveal-border-left-type') === 'line' ? 1 : 0;
         const nextWithRightBorderFactor =
-            this.getPropFromMultipleSource('rightBorder', '--reveal-border-right') === 'line' ? 1 : 0;
-        const nextWithTopBorderFactor = this.getPropFromMultipleSource('topBorder', '--reveal-border-top') === 'line' ? 1 : 0;
+            this.getPropFromMultipleSource('rightBorder', '--reveal-border-right-type') === 'line' ? 1 : 0;
+        const nextWithTopBorderFactor = this.getPropFromMultipleSource('topBorder', '--reveal-border-top-type') === 'line' ? 1 : 0;
         const nextWithBottomBorderFactor =
-            this.getPropFromMultipleSource('bottomBorder', '--reveal-border-bottom') === 'line' ? 1 : 0;
+            this.getPropFromMultipleSource('bottomBorder', '--reveal-border-bottom-type') === 'line' ? 1 : 0;
 
         // Hover light related configurations
         const nextHoverLight = this.computedStyle.get('--reveal-hover-light') === 'true';

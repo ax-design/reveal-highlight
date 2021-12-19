@@ -97,25 +97,25 @@ export function register({
             inherits: true,
         });
         window.CSS.registerProperty({
-            name: '--reveal-border-left',
+            name: '--reveal-border-left-type',
             syntax: '<custom-ident>',
             initialValue: 'line',
             inherits: true,
         });
         window.CSS.registerProperty({
-            name: '--reveal-border-right',
+            name: '--reveal-border-right-type',
             syntax: '<custom-ident>',
             initialValue: 'line',
             inherits: true,
         });
         window.CSS.registerProperty({
-            name: '--reveal-border-top',
+            name: '--reveal-border-top-type',
             syntax: '<custom-ident>',
             initialValue: 'line',
             inherits: true,
         });
         window.CSS.registerProperty({
-            name: '--reveal-border-bottom',
+            name: '--reveal-border-bottom-type',
             syntax: '<custom-ident>',
             initialValue: 'line',
             inherits: true,
@@ -196,10 +196,10 @@ export function register({
         root.style.setProperty('--reveal-border-decoration-top-right-radius', '-1');
         root.style.setProperty('--reveal-border-decoration-bottom-left-radius', '-1');
         root.style.setProperty('--reveal-border-decoration-bottom-right-radius', '-1');
-        root.style.setProperty('--reveal-border-left', 'line');
-        root.style.setProperty('--reveal-border-right', 'line');
-        root.style.setProperty('--reveal-border-top', 'line');
-        root.style.setProperty('--reveal-border-bottom', 'line');
+        root.style.setProperty('--reveal-border-left-type', 'line');
+        root.style.setProperty('--reveal-border-right-type', 'line');
+        root.style.setProperty('--reveal-border-top-type', 'line');
+        root.style.setProperty('--reveal-border-bottom-type', 'line');
         root.style.setProperty('--reveal-hover-light', 'true');
         root.style.setProperty('--reveal-hover-light-color', MAGIC_DEFAULT_COLOR);
         root.style.setProperty('--reveal-hover-light-fill-radius', '1.5');
