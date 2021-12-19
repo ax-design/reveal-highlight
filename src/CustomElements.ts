@@ -160,7 +160,7 @@ export class AxReveal extends PatchedHTMLElement {
 </div>
 <style>
     .ax-reveal { display: content; }
-    .ax-design * { user-drag: none; touch-action: none; }
+    .ax-reveal * { user-drag: none; touch-action: none; user-select: none; }
     .content { position: relative; }
     canvas { top: 0; left: 0; pointer-events: none; width: 100%; height: 100%; position: absolute; }
     :host { display: inline-block; position: relative; }
@@ -228,7 +228,7 @@ export class AxRevealNg extends PatchedHTMLElement {
 </div>
 <style>
     .ax-reveal { display: content; }
-    .ax-design * { user-drag: none; touch-action: none; }
+    .ax-reveal * { user-drag: none; touch-action: none; user-select: none; }
     .content { position: relative; }
     svg { top: 0; left: 0; pointer-events: none; width: 100%; height: 100%; position: absolute; }
     :host { display: inline-block; position: relative; }
