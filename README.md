@@ -37,7 +37,10 @@ require('@ax-design/reveal-highlight').register();
 
 //ESModule
 import { register } from '@ax-design/reveal-highlight';
-register();
+register({
+  compat: true,
+  borderDetectionMode: 'experimentalAutoFit',
+});
 ```
 
 ## Usage
@@ -66,162 +69,8 @@ Here's an example:
 
 ## Style Controlling
 
-reveal-highlight use custom properties to manage the style of highlights
-
-### Overall control
-
-#### --reveal-color
-
-**Type:** `<color>`
-
-**Default:** `rgb(0, 0, 0)`
-
-**Description:** The color of the reveal highlight, could RGB value or hex value.
-
-#### --reveal-diffuse
-
-**Type:** `<boolean>`
-
-**Default:** `true`
-
-**Description:** Control the behavior while pointer not in the reveal highlight element, if setted to `false`, nothing will be rendered; if setted to `true`, border will be rendered.
-
-### Border
-
-#### --reveal-border-color
-
-**Type:** `<color>`
-
-**Default:** `rgb(-1, -1, -1)`
-
-**Description:** The color of the hover light.
-
-**Magic Number:** If the value equals to `rgb(-1, -1, -1)`, the value of `--reveal-color`. It looks weired, but it is constrained by the CSS Typed OM specification.
-
-#### --reveal-border-fill-radius
-
-**Type:** `<number>`
-
-**Default:** `1.5`
-
-**Description:** Radius of the border gradient, please notice that this value is a number but not length.
-
-#### --reveal-border-width
-
-**Type:** `<number>`
-
-**Default:** `1`
-
-**Description:** Border width in `px`.
-
-#### --reveal-border-decoration-type
-
-**Type:** `'miter' | 'round' | bevel`
-
-**Default:** `miter`
-
-**Description:** The shape of border radius, the same as possible values of `lineJoin`, checkout [this document](https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/lineJoin).
-
-#### --reveal-border-decoration-radius
-
-**Type:** `<length>`
-
-**Default:** `4px`
-
-**Description:** The radius of border radius, if `--reveal-border-decoration-type` is `miter`, nothing would happen.
-
-**Note:** To control each corner, use `--reveal-border-decoration-top-left-radius`, `--reveal-border-decoration-top-right-radius`, `--reveal-border-decoration-bottom-left-radius`, `--reveal-border-decoration-bottom-right-radius`, if the value of these values are negative, `--reveal-border-decoration-radius` would be used.
-
-### Hover light
-
-Hover light is the light effect shown up when you hover on the reveal element, it will fill the whole element.
-
-#### --reveal-hover-light
-
-**Type:** `<boolean>`
-
-**Default:** `true`
-
-**Description:** Enable the hover light or not.
-
-#### --reveal-hover-light-color
-
-**Type:** `<color>`
-
-**Default:** `rgb(-1, -1, -1)`
-
-**Description:** The color of the hover light.
-
-**Magic Number:** If the value equals to `rgb(-1, -1, -1)`, the value of `--reveal-color`.
-
-#### --reveal-hover-light-fill-radius
-
-**Type:** `<number>`
-
-**Default:** `1.5`
-
-**Description:** Radius of the highlight gradient, please notice that this value is a number but not length.
-
-#### --reveal-hover-light-fill-radius-mode
-
-**Type:** `'relative' | 'absolute'`
-
-**Default:** `relative`
-
-**Description:** How the program calculating the radius of gradient, if `relative` provided, gradient radius will be:
-
--   `r(border) = min(width, height) * fillRadius`
--   `r(fill) = max(width, height) * fillRadius`
-
-If `absolute` provided, gradient will be:
-
--   `r(border) = fillRadius`
--   `r(fill) = fillRadius`
-
-the unit is pixel.
-
-### Animation
-
-When you pressed on the reveal highlight element, a ripple will show up.
-
-#### --reveal-press-animation
-
-**Type:** `<boolean>`
-
-**Default:** `true`
-
-**Description:** Enable the pressed animation or not.
-
-#### --reveal-press-animation-color
-
-**Type:** `<color>`
-
-**Default:** `rgb(-1, -1, -1)`
-
-**Description:** The color of the hover light, could be rgb value or hex.
-
-**Magic Number:** If the value equals to `rgb(-1, -1, -1)`, the value of `--reveal-color`.
-
-#### --reveal-press-animation-fill-mode
-
-**Type:** `'cover' | 'constrained'`
-
-**Default:** `cover`
-
-**Description:** The filling mode of pressed animation, when using `cover`, the radius of pressed animation would be `max(width, height)`, when using `constrained`, it would be the radius of the hover light.
-
-#### --reveal-press-animation-speed
-
-**Type:** `<number>`
-
-**Default:** `2000`
-
-**Description:** The duration of the animation being played when the mouse is held down by the element.
-
-#### --reveal-release-animation-accelerate-rate
-
-**Type:** `<number>`
-
-**Default:** `6`
-
-**Description:** The acceleration rate of the animation when the mouse is released.
+* Checkout this living example for detailed usage:
+https://ax-design.github.io/playground/?path=/story/components-fundamental-elements-reveal-highlight--basic
+
+* And here're the source code:
+https://github.com/ax-design/ax-design.github.io/blob/master/stories/templates/RevealHighlight.ts
