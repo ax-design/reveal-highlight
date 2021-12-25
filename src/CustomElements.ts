@@ -99,7 +99,6 @@ export class AxRevealBoundary extends PatchedHTMLElement {
         }
     };
     handlePointerDown = (ev: PointerEvent) => this.waitForStorage(storage => {
-        this.setPointerCapture(ev.pointerId);
         this.updatePointerPosition(ev);
         storage.initializeAnimation();
     });
@@ -139,6 +138,10 @@ export class AxReveal extends PatchedHTMLElement {
         this.connectedCallback();
     }
 
+    handlePointerDown = (ev: PointerEvent) => {
+        this.setPointerCapture(ev.pointerId);
+    }
+
     disconnectedCallback() {
         this.boundary && this.boundary.waitForStorage(storage => storage.removeReveal(this.canvas));
     }
@@ -149,6 +152,7 @@ export class AxReveal extends PatchedHTMLElement {
             throw new SyntaxError('You must use ' + AxRevealBoundary.ElementName + ' as the boundary of reveal highlight!');
 
         this.boundary.waitForStorage(storage => setTimeout(() => storage.addReveal(this.canvas, this), 0));
+        this.addEventListener('pointerdown', this.handlePointerDown);
     }
 
     constructor() {
@@ -160,7 +164,7 @@ export class AxReveal extends PatchedHTMLElement {
 </div>
 <style>
     .ax-reveal { display: content; }
-    .ax-reveal * { user-drag: none; touch-action: none; user-select: none; }
+    .ax-reveal * { user-drag: none; -webkit-user-drag: none; touch-action: none; user-select: none; }
     .content { position: relative; }
     canvas { top: 0; left: 0; pointer-events: none; width: 100%; height: 100%; position: absolute; }
     :host { display: inline-block; position: relative; }
@@ -170,7 +174,7 @@ export class AxReveal extends PatchedHTMLElement {
     :host([inline-flex]) { display: inline-flex; }
     :host([grid]) { display: grid; }
     :host([inline-grid]) { display: inline-grid; }
-    ::slotted(*) { user-drag: none; touch-action: none; }
+    ::slotted(*) { user-drag: none; -webkit-user-drag: none; touch-action: none; user-select: none; }
     ::slotted(button) { outline:none; }
 </style>`;
         this.canvas = this.root.querySelector('canvas')!;
@@ -188,6 +192,10 @@ export class AxRevealNg extends PatchedHTMLElement {
         this.connectedCallback();
     }
 
+    handlePointerDown = (ev: PointerEvent) => {
+        this.setPointerCapture(ev.pointerId);
+    }
+
     disconnectedCallback() {
         this.boundary && this.boundary.waitForStorage(storage => storage.removeReveal(this.svg));
     }
@@ -198,6 +206,7 @@ export class AxRevealNg extends PatchedHTMLElement {
             throw new SyntaxError('You must use ' + AxRevealBoundary.ElementName + ' as the boundary of reveal highlight!');
 
         this.boundary.waitForStorage(storage => setTimeout(() => storage.addReveal(this.svg, this), 0));
+        this.addEventListener('pointerdown', this.handlePointerDown);
     }
 
     constructor() {
@@ -228,7 +237,7 @@ export class AxRevealNg extends PatchedHTMLElement {
 </div>
 <style>
     .ax-reveal { display: content; }
-    .ax-reveal * { user-drag: none; touch-action: none; user-select: none; }
+    .ax-reveal * { user-drag: none; -webkit-user-drag: none; touch-action: none; user-select: none; }
     .content { position: relative; }
     svg { top: 0; left: 0; pointer-events: none; width: 100%; height: 100%; position: absolute; }
     :host { display: inline-block; position: relative; }
@@ -238,7 +247,7 @@ export class AxRevealNg extends PatchedHTMLElement {
     :host([inline-flex]) { display: inline-flex; }
     :host([grid]) { display: grid; }
     :host([inline-grid]) { display: inline-grid; }
-    ::slotted(*) { user-drag: none; touch-action: none; }
+    ::slotted(*) { user-drag: none; -webkit-user-drag: none; touch-action: none; user-select: none; }
     ::slotted(button) { outline:none; }
 </style>`;
         this.svg = this.root.querySelector('svg')!;
