@@ -859,6 +859,33 @@
 
     <section class="demo-block">
       <div class="demo">
+        <ax-reveal-bound>
+          <div class="ax-reveal-container" id="shadow">
+            Welcome
+          </div>
+        </ax-reveal-bound>
+      </div>
+      <div class="code">
+        <h2>Nested ShadowRoot</h2>
+        <script>document.querySelector('#shadow').attachShadow({ mode: 'open' }).innerHTML = `
+        <style>
+          .ax-reveal-button {
+            min-width: 120px;
+            padding: 15px 25px;
+            border: none;
+            background: none;
+            user-select: none;
+          }
+        </style>
+        <ax-reveal>
+          <button class="ax-reveal-button"><slot /></button>
+        </ax-reveal>
+        `</script>
+      </div>
+    </section>
+
+    <section class="demo-block">
+      <div class="demo">
         <ax-reveal-bound class="dynamic-size">
           <div class="ax-reveal-container">
             <ax-reveal>
@@ -891,7 +918,7 @@
       </style>
       <div class="code">
         <h2>Dynamic size</h2>
-        <button 
+        <button
           onclick="document.querySelector('.dynamic-size')?.classList.toggle('large')"
         >
           Click here
@@ -981,12 +1008,11 @@
     </section>
   </ax-reveal-provider>
   <script type="module">
-    // For package developer.
-    import { register } from '../../../es/index.js';
-    // import { register } from 'https://unpkg.com/@ax-design/reveal-highlight/es/index.js';
-    register({
+    import('../../../es/index.js').catch(() => import('https://unpkg.com/@ax-design/reveal-highlight/es/index.js')).then(({ register }) => {
+      register({
       compat: true,
       borderDetectionMode: 'experimentalAutoFit',
     });
+    })
   </script>
 </body>

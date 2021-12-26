@@ -2,19 +2,29 @@ import { RevealStateManager } from './RevealStateManager.js';
 import { RevealBoundaryStore } from './RevealBoundryStore.js';
 import { config } from './config.js';
 
+function closest(dom: Element, selector: string): Element | null {
+    const r = dom.closest(selector);
+    if (r) return r;
+    const host = findParentShadowRoot(dom)?.host;
+    if (!host) return null;
+    return closest(host, selector)
+}
+function findParentShadowRoot(x: Node | undefined | null): ShadowRoot | null {
+    if (!x) return null;
+    if (x.parentNode && x.parentNode.nodeType === document.DOCUMENT_FRAGMENT_NODE) return x.parentNode as ShadowRoot;
+    return findParentShadowRoot(x.parentNode);
+}
 class ServerSideHTMLElement {
     root = {
         innerHTML: '',
         querySelector: (_x: string) => null,
-    }
+    };
 
     attachShadow = () => null;
 }
 
 const PatchedHTMLElement =
-    typeof globalThis.Window === 'undefined'
-        ? ServerSideHTMLElement as unknown as typeof HTMLElement
-        : HTMLElement;
+    typeof globalThis.Window === 'undefined' ? ((ServerSideHTMLElement as unknown) as typeof HTMLElement) : HTMLElement;
 
 export class AxRevealProvider extends PatchedHTMLElement {
     static readonly ElementName = 'ax-reveal-provider';
@@ -52,9 +62,11 @@ export class AxRevealBoundary extends PatchedHTMLElement {
         }
 
         if (oldStorage && newStorage) {
-            this.dispatchEvent(new CustomEvent(AxRevealBoundary.replaceStorageEvent, {
-                detail: { old: oldStorage, new: newStorage },
-            }));
+            this.dispatchEvent(
+                new CustomEvent(AxRevealBoundary.replaceStorageEvent, {
+                    detail: { old: oldStorage, new: newStorage },
+                })
+            );
         }
     }
 
@@ -71,7 +83,7 @@ export class AxRevealBoundary extends PatchedHTMLElement {
             return;
         }
 
-        const parent = this.closest(AxRevealProvider.ElementName) as AxRevealProvider;
+        const parent = closest(this, AxRevealProvider.ElementName) as AxRevealProvider;
         const stateManager = parent ? parent.stateManager : AxRevealBoundary.stateManager;
 
         this.storage = stateManager.newBoundary(this);
@@ -82,26 +94,27 @@ export class AxRevealBoundary extends PatchedHTMLElement {
      * @param ev Pointer event from the listener.
      */
     updatePointerPosition = (ev: PointerEvent) => {
-        this.waitForStorage(storage => {
+        this.waitForStorage((storage) => {
             storage.clientX = ev.clientX;
             storage.clientY = ev.clientY;
         });
     };
 
-    handlePointerEnter = () => this.waitForStorage(storage => storage.onPointerEnterBoundary());
-    handlePointerLeave = () => this.waitForStorage(storage => storage.onPointerLeaveBoundary());
+    handlePointerEnter = () => this.waitForStorage((storage) => storage.onPointerEnterBoundary());
+    handlePointerLeave = () => this.waitForStorage((storage) => storage.onPointerLeaveBoundary());
     handlePointerMove = this.updatePointerPosition;
     handlePointerUp = (ev: PointerEvent) => {
         if (ev.pointerType === 'mouse') {
-            this.waitForStorage(storage => storage.switchAnimation());
+            this.waitForStorage((storage) => storage.switchAnimation());
         } else {
-            this.waitForStorage(storage => storage.clearAll(false));
+            this.waitForStorage((storage) => storage.clearAll(false));
         }
     };
-    handlePointerDown = (ev: PointerEvent) => this.waitForStorage(storage => {
-        this.updatePointerPosition(ev);
-        storage.initializeAnimation();
-    });
+    handlePointerDown = (ev: PointerEvent) =>
+        this.waitForStorage((storage) => {
+            this.updatePointerPosition(ev);
+            storage.initializeAnimation();
+        });
 
     connectedCallback() {
         this.appendStorage(true);
@@ -123,7 +136,7 @@ export class AxRevealBoundary extends PatchedHTMLElement {
         this.root.innerHTML = `
 <div>
     <slot></slot>
-</div>`
+</div>`;
     }
 }
 
@@ -140,18 +153,20 @@ export class AxReveal extends PatchedHTMLElement {
 
     handlePointerDown = (ev: PointerEvent) => {
         this.setPointerCapture(ev.pointerId);
-    }
+    };
 
     disconnectedCallback() {
-        this.boundary && this.boundary.waitForStorage(storage => storage.removeReveal(this.canvas));
+        this.boundary && this.boundary.waitForStorage((storage) => storage.removeReveal(this.canvas));
     }
 
     connectedCallback() {
-        this.boundary = this.closest(AxRevealBoundary.ElementName) as AxRevealBoundary;
+        this.boundary = closest(this, AxRevealBoundary.ElementName) as AxRevealBoundary;
         if (!this.boundary)
-            throw new SyntaxError('You must use ' + AxRevealBoundary.ElementName + ' as the boundary of reveal highlight!');
+            throw new SyntaxError(
+                'You must use ' + AxRevealBoundary.ElementName + ' as the boundary of reveal highlight!'
+            );
 
-        this.boundary.waitForStorage(storage => setTimeout(() => storage.addReveal(this.canvas, this), 0));
+        this.boundary.waitForStorage((storage) => setTimeout(() => storage.addReveal(this.canvas, this), 0));
         this.addEventListener('pointerdown', this.handlePointerDown);
     }
 
@@ -194,18 +209,20 @@ export class AxRevealNg extends PatchedHTMLElement {
 
     handlePointerDown = (ev: PointerEvent) => {
         this.setPointerCapture(ev.pointerId);
-    }
+    };
 
     disconnectedCallback() {
-        this.boundary && this.boundary.waitForStorage(storage => storage.removeReveal(this.svg));
+        this.boundary && this.boundary.waitForStorage((storage) => storage.removeReveal(this.svg));
     }
 
     connectedCallback() {
-        this.boundary = this.closest(AxRevealBoundary.ElementName) as AxRevealBoundary;
+        this.boundary = closest(this, AxRevealBoundary.ElementName) as AxRevealBoundary;
         if (!this.boundary)
-            throw new SyntaxError('You must use ' + AxRevealBoundary.ElementName + ' as the boundary of reveal highlight!');
+            throw new SyntaxError(
+                'You must use ' + AxRevealBoundary.ElementName + ' as the boundary of reveal highlight!'
+            );
 
-        this.boundary.waitForStorage(storage => setTimeout(() => storage.addReveal(this.svg, this), 0));
+        this.boundary.waitForStorage((storage) => setTimeout(() => storage.addReveal(this.svg, this), 0));
         this.addEventListener('pointerdown', this.handlePointerDown);
     }
 
@@ -236,7 +253,7 @@ export class AxRevealNg extends PatchedHTMLElement {
     <div class="content"><slot></slot></div>
 </div>
 <style>
-    .ax-reveal { display: content; }
+    .ax-reveal { display: contents; }
     .ax-reveal * { user-drag: none; -webkit-user-drag: none; touch-action: none; user-select: none; }
     .content { position: relative; }
     svg { top: 0; left: 0; pointer-events: none; width: 100%; height: 100%; position: absolute; }
@@ -253,4 +270,3 @@ export class AxRevealNg extends PatchedHTMLElement {
         this.svg = this.root.querySelector('svg')!;
     }
 }
-
