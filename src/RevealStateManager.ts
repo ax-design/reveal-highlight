@@ -27,6 +27,14 @@ export class RevealStateManager {
             window.addEventListener('pointerleave', (ev) => {
                 if (ev.pointerType === 'mouse') this.handlePointerLeave();
             });
+            // Handles boundary conditions such as the user scrolling
+            // the page, dragging the image, which can cause mouse events
+            // to fail, when Reveal should disappear to prevent the 
+            // image from getting stuck.
+            window.addEventListener('pointercancel', (ev) => {
+                console.log('pointer cancel');
+                this.handlePointerLeave();
+            });
         }
     }
 
