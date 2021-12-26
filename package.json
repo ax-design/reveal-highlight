@@ -26,5 +26,6 @@
         "build-rollup": "rollup -c",
         "clean": "rimraf ./es ./build",
         "prepublishOnly": "npm run build"
-    }
+    },
+    "files": ["build", "es", "src"]
 }
