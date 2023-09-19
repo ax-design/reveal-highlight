@@ -107,14 +107,14 @@
       <style>
         .round-corner {
           --reveal-border-decoration-type: round;
-          --reveal-border-decoration-size: 8px;
+          --reveal-border-decoration-radius: 8px;
         }
       </style>
       <div class="code">
         <h2>Round Corner</h2>
         <pre>.my-reveal-container{
   --reveal-border-decoration-type: round;
-  --reveal-border-decoration-size: 4px;
+  --reveal-border-decoration-radius: 4px;
 }</pre>
       </div>
     </section>
@@ -184,14 +184,14 @@
       <style>
         .bevel-corner {
           --reveal-border-decoration-type: bevel;
-          --reveal-border-decoration-size: 16px;
+          --reveal-border-decoration-radius: 16px;
         }
       </style>
       <div class="code">
         <h2>Even more fancy</h2>
         <pre>.my-reveal-container{
   --reveal-border-decoration-type: bevel;
-  --reveal-border-decoration-size: 16px;
+  --reveal-border-decoration-radius: 16px;
 }</pre>
       </div>
     </section>
@@ -886,7 +886,7 @@
 
     <section class="demo-block">
       <div class="demo">
-        <ax-reveal-bound class="dynamic-size">
+        <ax-reveal-bound class="dynamic-radius">
           <div class="ax-reveal-container">
             <ax-reveal>
               <button class="ax-reveal-button">Welcome</button>
@@ -906,12 +906,12 @@
         </ax-reveal-bound>
       </div>
       <style>
-        .dynamic-size.large ax-reveal {
+        .dynamic-radius.large ax-reveal {
           width: 160px;
           height: 160px;
         }
 
-        .dynamic-size.large .ax-reveal-button {
+        .dynamic-radius.large .ax-reveal-button {
           min-width: 160px;
           height: 160px;
         }
@@ -919,7 +919,7 @@
       <div class="code">
         <h2>Dynamic size</h2>
         <button
-          onclick="document.querySelector('.dynamic-size')?.classList.toggle('large')"
+          onclick="document.querySelector('.dynamic-radius')?.classList.toggle('large')"
         >
           Click here
         </button>
@@ -991,7 +991,7 @@
 
       <style>
         .benchmark {
-          font-size: 0;
+          font-radius: 0;
         }
 
         .benchmark ax-reveal {
@@ -999,7 +999,7 @@
           height: 40px;
           margin: 4px;
           padding: 8px;
-          font-size: 24px;
+          font-radius: 24px;
           text-align: center;
           line-height: 40px;
           cursor: default;
