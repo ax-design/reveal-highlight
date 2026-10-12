@@ -31,10 +31,7 @@ export class RevealStateManager {
             // the page, dragging the image, which can cause mouse events
             // to fail, when Reveal should disappear to prevent the 
             // image from getting stuck.
-            window.addEventListener('pointercancel', (ev) => {
-                console.log('pointer cancel');
-                this.handlePointerLeave();
-            });
+            window.addEventListener('pointercancel', this.handlePointerLeave);
         }
     }
 

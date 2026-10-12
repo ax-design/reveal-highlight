@@ -110,6 +110,9 @@ export class AxRevealBoundary extends PatchedHTMLElement {
             this.waitForStorage((storage) => storage.clearAll(false));
         }
     };
+    // Fired when the browser takes over the touch for scrolling or zooming,
+    // `pointerup` will never come, so the pressed ripple must be cleaned here.
+    handlePointerCancel = () => this.waitForStorage((storage) => storage.clearAll(false));
     handlePointerDown = (ev: PointerEvent) =>
         this.waitForStorage((storage) => {
             this.updatePointerPosition(ev);
@@ -125,6 +128,7 @@ export class AxRevealBoundary extends PatchedHTMLElement {
         }
         this.addEventListener('pointerdown', this.handlePointerDown);
         this.addEventListener('pointerup', this.handlePointerUp);
+        this.addEventListener('pointercancel', this.handlePointerCancel);
     }
 
     disconnectedCallback() {
@@ -179,7 +183,7 @@ export class AxReveal extends PatchedHTMLElement {
 </div>
 <style>
     .ax-reveal { display: content; }
-    .ax-reveal * { user-drag: none; -webkit-user-drag: none; touch-action: none; user-select: none; }
+    .ax-reveal * { user-drag: none; -webkit-user-drag: none; touch-action: var(--reveal-touch-action, manipulation); user-select: none; }
     .content { position: relative; }
     canvas { top: 0; left: 0; pointer-events: none; width: 100%; height: 100%; position: absolute; }
     :host { display: inline-block; position: relative; }
@@ -189,7 +193,7 @@ export class AxReveal extends PatchedHTMLElement {
     :host([inline-flex]) { display: inline-flex; }
     :host([grid]) { display: grid; }
     :host([inline-grid]) { display: inline-grid; }
-    ::slotted(*) { user-drag: none; -webkit-user-drag: none; touch-action: none; user-select: none; }
+    ::slotted(*) { user-drag: none; -webkit-user-drag: none; touch-action: var(--reveal-touch-action, manipulation); user-select: none; }
     ::slotted(button) { outline:none; }
 </style>`;
         this.canvas = this.root.querySelector('canvas')!;
@@ -254,7 +258,7 @@ export class AxRevealNg extends PatchedHTMLElement {
 </div>
 <style>
     .ax-reveal { display: contents; }
-    .ax-reveal * { user-drag: none; -webkit-user-drag: none; touch-action: none; user-select: none; }
+    .ax-reveal * { user-drag: none; -webkit-user-drag: none; touch-action: var(--reveal-touch-action, manipulation); user-select: none; }
     .content { position: relative; }
     svg { top: 0; left: 0; pointer-events: none; width: 100%; height: 100%; position: absolute; }
     :host { display: inline-block; position: relative; }
@@ -264,7 +268,7 @@ export class AxRevealNg extends PatchedHTMLElement {
     :host([inline-flex]) { display: inline-flex; }
     :host([grid]) { display: grid; }
     :host([inline-grid]) { display: inline-grid; }
-    ::slotted(*) { user-drag: none; -webkit-user-drag: none; touch-action: none; user-select: none; }
+    ::slotted(*) { user-drag: none; -webkit-user-drag: none; touch-action: var(--reveal-touch-action, manipulation); user-select: none; }
     ::slotted(button) { outline:none; }
 </style>`;
         this.svg = this.root.querySelector('svg')!;
