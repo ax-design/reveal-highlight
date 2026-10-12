@@ -65,8 +65,9 @@ export class AxRevealBoundary extends PatchedHTMLElement {
             this.ownerStateManager?.removeBoundary(oldStorage);
         }
 
+        this._storage = newStorage;
+
         if (newStorage) {
-            this._storage = newStorage;
             this.dispatchEvent(new CustomEvent(AxRevealBoundary.attachStorageEvent, { detail: newStorage }));
         }
 
@@ -167,6 +168,7 @@ export class AxRevealBoundary extends PatchedHTMLElement {
 
     disconnectedCallback() {
         this.storage = undefined;
+        this.ownerStateManager = undefined;
     }
 
     constructor() {
@@ -183,6 +185,9 @@ export class AxReveal extends PatchedHTMLElement {
     private root = this.attachShadow({ mode: 'open' });
     private canvas: HTMLCanvasElement;
     private boundary!: AxRevealBoundary;
+    // The storage this element was added to, the boundary may have dropped it already.
+    private storage: RevealBoundaryStore | undefined;
+    private connection = 0;
 
     adoptedCallback() {
         this.disconnectedCallback();
@@ -194,7 +199,9 @@ export class AxReveal extends PatchedHTMLElement {
     };
 
     disconnectedCallback() {
-        this.boundary && this.boundary.waitForStorage((storage) => storage.removeReveal(this.canvas));
+        this.connection++;
+        this.storage && this.storage.removeReveal(this.canvas);
+        this.storage = undefined;
     }
 
     connectedCallback() {
@@ -204,7 +211,15 @@ export class AxReveal extends PatchedHTMLElement {
                 'You must use ' + AxRevealBoundary.ElementName + ' as the boundary of reveal highlight!'
             );
 
-        this.boundary.waitForStorage((storage) => setTimeout(() => storage.addReveal(this.canvas, this), 0));
+        const connection = ++this.connection;
+        this.boundary.waitForStorage((storage) =>
+            setTimeout(() => {
+                // Disconnected or reconnected before the timer fired.
+                if (connection !== this.connection) return;
+                this.storage = storage;
+                storage.addReveal(this.canvas, this);
+            }, 0)
+        );
         this.addEventListener('pointerdown', this.handlePointerDown);
     }
 
@@ -239,6 +254,9 @@ export class AxRevealNg extends PatchedHTMLElement {
     private root = this.attachShadow({ mode: 'open' });
     private svg: SVGElement;
     private boundary!: AxRevealBoundary;
+    // The storage this element was added to, the boundary may have dropped it already.
+    private storage: RevealBoundaryStore | undefined;
+    private connection = 0;
 
     adoptedCallback() {
         this.disconnectedCallback();
@@ -250,7 +268,9 @@ export class AxRevealNg extends PatchedHTMLElement {
     };
 
     disconnectedCallback() {
-        this.boundary && this.boundary.waitForStorage((storage) => storage.removeReveal(this.svg));
+        this.connection++;
+        this.storage && this.storage.removeReveal(this.svg);
+        this.storage = undefined;
     }
 
     connectedCallback() {
@@ -260,7 +280,15 @@ export class AxRevealNg extends PatchedHTMLElement {
                 'You must use ' + AxRevealBoundary.ElementName + ' as the boundary of reveal highlight!'
             );
 
-        this.boundary.waitForStorage((storage) => setTimeout(() => storage.addReveal(this.svg, this), 0));
+        const connection = ++this.connection;
+        this.boundary.waitForStorage((storage) =>
+            setTimeout(() => {
+                // Disconnected or reconnected before the timer fired.
+                if (connection !== this.connection) return;
+                this.storage = storage;
+                storage.addReveal(this.svg, this);
+            }, 0)
+        );
         this.addEventListener('pointerdown', this.handlePointerDown);
     }
 
