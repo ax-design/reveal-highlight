@@ -40,7 +40,13 @@ export class AxRevealBoundary extends PatchedHTMLElement {
 
     private root = this.attachShadow({ mode: 'open' });
 
-    static readonly stateManager = new RevealStateManager();
+    // Created lazily, the border detection mode is not configured until `register` is called.
+    private static _stateManager: RevealStateManager | undefined;
+
+    static get stateManager() {
+        if (!AxRevealBoundary._stateManager) AxRevealBoundary._stateManager = new RevealStateManager();
+        return AxRevealBoundary._stateManager;
+    }
 
     private _storage!: RevealBoundaryStore | undefined;
 
