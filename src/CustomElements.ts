@@ -131,12 +131,18 @@ export class AxRevealBoundary extends PatchedHTMLElement {
     // Fired when the browser takes over the touch for scrolling or zooming,
     // `pointerup` will never come, so the pressed ripple must be cleaned here.
     handlePointerCancel = (ev: PointerEvent) => {
-        if (ev.pointerType === 'touch') this.touchScrolling = true;
-        this.waitForStorage((storage) => storage.clearAll(false));
+        this.waitForStorage((storage) => {
+            if (ev.pointerType === 'touch') {
+                this.touchScrolling = true;
+                storage.anchorPointer();
+            }
+            storage.clearAll(false);
+        });
     };
     handleTouchMove = (ev: TouchEvent) => {
         if (!this.touchScrolling || !ev.targetTouches.length) return;
         this.updatePointerPosition(ev.targetTouches[0]);
+        this.waitForStorage((storage) => storage.anchorPointer());
     };
     handleTouchEnd = (ev: TouchEvent) => {
         if (!this.touchScrolling || ev.targetTouches.length) return;

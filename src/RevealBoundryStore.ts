@@ -94,6 +94,26 @@ export class RevealBoundaryStore {
         this.mouseInBoundary = mouseInBoundary;
     }
 
+    // While the browser scrolls under a finger, the finger stays on the same
+    // spot of the content, but touch events are throttled (~200ms in Chromium).
+    // The pointer is kept relative to the container and re-derived on every
+    // frame, otherwise it stays still on the screen while the content moves.
+    private anchorOffsetX: number | null = null;
+    private anchorOffsetY: number | null = null;
+
+    anchorPointer = () => {
+        const boundingBox = this.container.getBoundingClientRect();
+        this.anchorOffsetX = this.clientX - boundingBox.left;
+        this.anchorOffsetY = this.clientY - boundingBox.top;
+    };
+
+    private followAnchor = () => {
+        if (this.anchorOffsetX === null || this.anchorOffsetY === null) return;
+        const boundingBox = this.container.getBoundingClientRect();
+        this.clientX = boundingBox.left + this.anchorOffsetX;
+        this.clientY = boundingBox.top + this.anchorOffsetY;
+    };
+
     onPointerMoveOnScreen = (x: number, y: number) => {
         this.updatePointerPosition(x, y);
         if (!this.mouseInBoundary) return;
@@ -116,6 +136,8 @@ export class RevealBoundaryStore {
      * Clear all canvas while user's pointer leave the bounary.
      */
     onPointerLeaveBoundary = () => {
+        this.anchorOffsetX = null;
+        this.anchorOffsetY = null;
         this.mouseInBoundary = false;
         this.requestPaintAll(true);
     };
@@ -130,6 +152,8 @@ export class RevealBoundaryStore {
         if (!skipSamePointerPositionCheck && !this.mouseInBoundary && this.animationQueue.length === 0) {
             return;
         }
+
+        this.followAnchor();
 
         // Animation duration checkup
         for (let i = 0; i < this.animationQueue.length; i++) {

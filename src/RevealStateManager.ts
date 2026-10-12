@@ -38,6 +38,9 @@ export class RevealStateManager {
                 // the finger with touch events until it leaves the screen.
                 if (ev.pointerType === 'touch') {
                     this.touchScrolling = true;
+                    for (let i = 0; i < this._storage.length; i++) {
+                        this._storage[i].anchorPointer();
+                    }
                 } else {
                     this.handlePointerLeave();
                 }
@@ -87,6 +90,7 @@ export class RevealStateManager {
         this.requestedTraverseBoundaries = false;
         for (let i = 0; i < this._storage.length; i++) {
             this._storage[i].onPointerMoveOnScreen(this.cachedMouseX, this.cachedMouseY);
+            if (this.touchScrolling) this._storage[i].anchorPointer();
         }
     };
 
