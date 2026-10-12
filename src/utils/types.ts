@@ -57,25 +57,17 @@ interface CachedReveal {
     radiusFactor: number;
     color: string;
     opacity: number;
-    pattern: CanvasPattern | null;
+    pattern: CanvasGradient | null;
 }
 
 /**
- * Cached border and body pattern, for faster painting on the canvas.
+ * Cached border and body gradient, for faster painting on the canvas.
  * @interface CachedRevealBitmap
  */
 export interface CachedRevealBitmap {
     cachedReveal: {
         borderReveal: CachedReveal;
         fillReveal: CachedReveal;
-    };
-    cachedCanvas: {
-        borderReveal: HTMLCanvasElement;
-        fillReveal: HTMLCanvasElement;
-    };
-    cachedCtx: {
-        borderReveal: CanvasRenderingContext2D | null;
-        fillReveal: CanvasRenderingContext2D | null;
     };
 }
 

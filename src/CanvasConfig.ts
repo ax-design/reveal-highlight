@@ -4,8 +4,6 @@ import type { CachedRevealBitmap } from './utils/types.js';
 
 import { BaseConfig } from './BaseConfig.js';
 
-const createEmptyCanvas = () => document.createElement('canvas') as HTMLCanvasElement;
-
 export class CanvasConfig extends BaseConfig<HTMLCanvasElement> {
     ctx: CanvasRenderingContext2D | null;
 
@@ -15,16 +13,6 @@ export class CanvasConfig extends BaseConfig<HTMLCanvasElement> {
         super(store, $canvas, $container);
 
         this.ctx = $canvas.getContext('2d');
-
-        const cachedCanvas = {
-            borderReveal: createEmptyCanvas(),
-            fillReveal: createEmptyCanvas(),
-        };
-
-        const cachedCtx = {
-            borderReveal: cachedCanvas.borderReveal.getContext('2d'),
-            fillReveal: cachedCanvas.fillReveal.getContext('2d'),
-        };
 
         this.cachedImg = {
             cachedReveal: {
@@ -43,22 +31,17 @@ export class CanvasConfig extends BaseConfig<HTMLCanvasElement> {
                     pattern: null,
                 },
             },
-            cachedCanvas,
-            cachedCtx,
         };
     }
 
     updateCachedReveal = () => {
         if (!this.fillDirty) return;
+        if (!this.ctx) return;
 
         const c = this.cachedStyle;
         const radius = c.trueFillRadius[1] * this.pxRatio;
-        const size = radius * 2;
 
         const lastStyle = this.cachedImg.cachedReveal;
-
-        const { borderReveal, fillReveal } = this.cachedImg.cachedCanvas;
-        const { borderReveal: borderRevealCtx, fillReveal: fillRevealCtx } = this.cachedImg.cachedCtx;
 
         this._store.updateMaxRadius(c.trueFillRadius[1] * c.borderFillRadius);
 
@@ -69,40 +52,31 @@ export class CanvasConfig extends BaseConfig<HTMLCanvasElement> {
             const ls = i === 0 ? lastStyle.borderReveal : lastStyle.fillReveal;
             const color = i === 0 ? c.borderColor : c.hoverLightColor;
             const fillRadiusFactor = i === 0 ? c.borderFillRadius : c.hoverLightFillRadius;
+            const trueRadius = radius * fillRadiusFactor;
 
             const doNotNeedUpdateReveal =
-                color === ls.color && c.opacity === ls.opacity && fillRadiusFactor === ls.radiusFactor;
+                color === ls.color &&
+                c.opacity === ls.opacity &&
+                fillRadiusFactor === ls.radiusFactor &&
+                trueRadius === ls.radius;
 
             if (doNotNeedUpdateReveal) continue;
 
-            const reveal = i === 0 ? borderReveal : fillReveal;
-            const ctx = i === 0 ? borderRevealCtx : fillRevealCtx;
-
-            this.syncSizeToRevealRadius(reveal, fillRadiusFactor);
-
-            if (!ctx) continue;
-
-            ctx.clearRect(0, 0, reveal.width, reveal.height);
-
+            // The gradient is centered at (trueRadius, trueRadius), painting
+            // translates it to the pointer. A gradient is used instead of a
+            // pre-rendered bitmap, which takes `(4 * radius) ^ 2` pixels per
+            // element and is enough to exhaust the memory of mobile browsers.
             const fillAlpha = i === 0 ? c.opacity : c.opacity * 0.5;
-            const trueRadius = radius * fillRadiusFactor;
-            const grd = ctx.createRadialGradient(trueRadius, trueRadius, 0, trueRadius, trueRadius, trueRadius);
+            const grd = this.ctx.createRadialGradient(trueRadius, trueRadius, 0, trueRadius, trueRadius, trueRadius);
 
             grd.addColorStop(0, `rgba(${color}, ${fillAlpha})`);
             grd.addColorStop(1, `rgba(${color}, 0.0)`);
-
-            const trueSize = size * fillRadiusFactor;
-            ctx.fillStyle = grd;
-            ctx.clearRect(0, 0, trueSize, trueSize);
-            ctx.fillRect(0, 0, trueSize, trueSize);
 
             ls.radius = trueRadius;
             ls.radiusFactor = fillRadiusFactor;
             ls.color = color;
             ls.opacity = c.opacity;
-
-            if (!this.ctx) continue;
-            ls.pattern = this.ctx.createPattern(reveal, 'no-repeat');
+            ls.pattern = grd;
         }
 
         this.fillDirty = false;

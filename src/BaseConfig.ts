@@ -330,16 +330,4 @@ export class BaseConfig<T extends Element> {
 
         return relativeX > 0 && relativeY > 0 && relativeX < b.width && relativeY < b.height;
     };
-
-    syncSizeToRevealRadius = (x: HTMLCanvasElement, factor: number) => {
-        const { trueFillRadius } = this.cachedStyle;
-
-        const radius = trueFillRadius[1] || 1;
-        const size = radius * 2 * this.pxRatio * factor;
-
-        if (x.width !== size || x.height !== size) {
-            x.width = size;
-            x.height = size;
-        }
-    };
 }
