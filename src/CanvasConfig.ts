@@ -262,13 +262,27 @@ export class CanvasConfig extends BaseConfig<HTMLCanvasElement> {
     syncSizeToElement = (x: HTMLCanvasElement) => {
         const b = this.cachedBoundingRect;
 
-        if (x.width !== b.width || x.height !== b.height) {
-            x.width = b.width * this.pxRatio;
-            x.height = b.height * this.pxRatio;
+        // Compare against the backing store size; assigning `width` or
+        // `height` resets the bitmap even when the value is unchanged.
+        const width = Math.floor(b.width * this.pxRatio);
+        const height = Math.floor(b.height * this.pxRatio);
+
+        if (x.width !== width || x.height !== height) {
+            x.width = width;
+            x.height = height;
             x.style.width = `${b.width}px`;
             x.style.height = `${b.height}px`;
         }
     };
+
+    // Inputs of the last painted frame, a frame with identical inputs is
+    // skipped and the canvas keeps its content.
+    private paintedRelativeX = NaN;
+    private paintedRelativeY = NaN;
+    private paintedRectWidth = -1;
+    private paintedRectHeight = -1;
+    private paintedStyleVersion = -1;
+    private paintedAnimation = false;
 
     clear = () => {
         if (!this.ctx) return false;
@@ -287,27 +301,15 @@ export class CanvasConfig extends BaseConfig<HTMLCanvasElement> {
         return true;
     }
 
-    paint = (skipSamePointerPositionCheck?: boolean): boolean => {
+    paint = (_skipSamePointerPositionCheck?: boolean): boolean => {
         const store = this._store;
-
-        const animationPlaying = store.animationQueue.includes(this);
-        const samePosition = store.clientX === store.paintedClientX && store.clientY === store.paintedClientY;
-
-        if (samePosition && !skipSamePointerPositionCheck && !animationPlaying) {
-            return false;
-        }
 
         if (!this.ctx) return false;
 
-        this.dirty = true;
-        this.ctx.setTransform(1, 0, 0, 1, 0, 0);
-        this.ctx.clearRect(
-            0, 0,
-            this.paintedWidth,
-            this.paintedHeight
-        );
+        const animationPlaying = store.animationQueue.includes(this);
 
         if (!store.mouseInBoundary && !animationPlaying) {
+            this.clear();
             return false;
         }
 
@@ -315,7 +317,8 @@ export class CanvasConfig extends BaseConfig<HTMLCanvasElement> {
             return false;
         }
 
-        this.syncSizeToElement(this.element);
+        // Read layout before any write to the canvas, so the read never
+        // forces a synchronous layout.
         this.cacheBoundingRect();
 
         const b = this.cachedBoundingRect;
@@ -330,9 +333,6 @@ export class CanvasConfig extends BaseConfig<HTMLCanvasElement> {
         const c = this.cachedStyle;
         this.getTrueFillRadius(c.trueFillRadius);
 
-        this.paintedWidth = b.width * this.pxRatio;
-        this.paintedHeight = b.height * this.pxRatio;
-
         const maxRadius = c.trueFillRadius[1];
 
         const inLeftBound = relativeX + maxRadius > 0;
@@ -343,11 +343,42 @@ export class CanvasConfig extends BaseConfig<HTMLCanvasElement> {
         const mouseInRenderArea = inLeftBound && inRightBound && inTopBound && inBottomBound;
 
         if (!mouseInRenderArea && !animationPlaying) {
+            this.clear();
             return false;
         }
 
         this.cacheCanvasPaintingStyle();
+
+        const unchanged =
+            this.dirty &&
+            !animationPlaying &&
+            !this.paintedAnimation &&
+            relativeX === this.paintedRelativeX &&
+            relativeY === this.paintedRelativeY &&
+            b.width === this.paintedRectWidth &&
+            b.height === this.paintedRectHeight &&
+            this.styleVersion === this.paintedStyleVersion;
+
+        if (unchanged) {
+            return false;
+        }
+
+        this.syncSizeToElement(this.element);
         this.updateCachedBitmap();
+
+        this.dirty = true;
+        this.ctx.setTransform(1, 0, 0, 1, 0, 0);
+        this.ctx.clearRect(0, 0, this.paintedWidth, this.paintedHeight);
+
+        this.paintedWidth = b.width * this.pxRatio;
+        this.paintedHeight = b.height * this.pxRatio;
+
+        this.paintedRelativeX = relativeX;
+        this.paintedRelativeY = relativeY;
+        this.paintedRectWidth = b.width;
+        this.paintedRectHeight = b.height;
+        this.paintedStyleVersion = this.styleVersion;
+        this.paintedAnimation = animationPlaying;
 
         if (store.mouseInBoundary) {
             const mouseInCanvas = relativeX > 0 && relativeY > 0 && relativeX < b.width && relativeY < b.height;

@@ -62,6 +62,12 @@ export class BaseConfig<T extends Element> {
 
     dirty: boolean = false;
 
+    /**
+     * Bumped whenever `cacheCanvasPaintingStyle` sees any value change, so
+     * painters can tell whether the last painted frame is still valid.
+     */
+    styleVersion: number = 0;
+
     shapeDirty: boolean = true;
     fillDirty: boolean = true;
     animationDirty: boolean = true;
@@ -220,6 +226,34 @@ export class BaseConfig<T extends Element> {
         const nextBottomRightBorderDecorationRadius = br >= 0 ? br : r;
 
         const c = this.cachedStyle;
+
+        const styleChanged =
+            c.color !== nextColor ||
+            c.opacity !== nextOpacity ||
+            c.borderColor !== nextBorderColor ||
+            c.borderFillRadius !== nextBorderFillRadius ||
+            c.borderDecorationType !== nextBorderDecorationType ||
+            c.borderWidth !== nextBorderWidth ||
+            c.withLeftBorderFactor !== nextWithLeftBorderFactor ||
+            c.withRightBorderFactor !== nextWithRightBorderFactor ||
+            c.withTopBorderFactor !== nextWithTopBorderFactor ||
+            c.withBottomBorderFactor !== nextWithBottomBorderFactor ||
+            c.hoverLight !== nextHoverLight ||
+            c.hoverLightColor !== nextHoverLightColor ||
+            c.hoverLightFillRadius !== nextHoverLightFillRadius ||
+            c.hoverLightFillMode !== nextHoverLightFillMode ||
+            c.diffuse !== nextDiffuse ||
+            c.pressAnimation !== nextPressAnimation ||
+            c.pressAnimationFillMode !== nextPressAnimationFillMode ||
+            c.pressAnimationColor !== nextPressAnimationColor ||
+            c.pressAnimationSpeed !== nextPressAnimationSpeed ||
+            c.releaseAnimationAccelerateRate !== nextReleaseAnimationAccelerateRate ||
+            c.topLeftBorderDecorationRadius !== nextTopLeftBorderDecorationRadius ||
+            c.topRightBorderDecorationRadius !== nextTopRightBorderDecorationRadius ||
+            c.bottomLeftBorderDecorationRadius !== nextBottomLeftBorderDecorationRadius ||
+            c.bottomRightBorderDecorationRadius !== nextBottomRightBorderDecorationRadius;
+
+        if (styleChanged) this.styleVersion++;
 
         this.fillDirty = this.fillDirty || c.color !== nextColor;
         this.fillDirty = this.fillDirty || c.opacity !== nextOpacity;
