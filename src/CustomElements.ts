@@ -50,6 +50,9 @@ export class AxRevealBoundary extends PatchedHTMLElement {
 
     private _storage!: RevealBoundaryStore | undefined;
 
+    // The state manager that owns current storage, a provider's or the default one.
+    private ownerStateManager: RevealStateManager | undefined;
+
     private get storage() {
         return this._storage;
     }
@@ -59,7 +62,7 @@ export class AxRevealBoundary extends PatchedHTMLElement {
 
         if (oldStorage) {
             this.dispatchEvent(new CustomEvent(AxRevealBoundary.removeStorageEvent, { detail: oldStorage }));
-            AxRevealBoundary.stateManager.removeBoundary(oldStorage);
+            this.ownerStateManager?.removeBoundary(oldStorage);
         }
 
         if (newStorage) {
@@ -93,6 +96,7 @@ export class AxRevealBoundary extends PatchedHTMLElement {
         const stateManager = parent ? parent.stateManager : AxRevealBoundary.stateManager;
 
         this.storage = stateManager.newBoundary(this);
+        this.ownerStateManager = stateManager;
     }
 
     /**
