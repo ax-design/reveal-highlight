@@ -15,6 +15,8 @@ export class RevealStateManager {
             if (typeof Window === 'undefined') return;
 
             window.addEventListener('pointermove', this.handlePointerMove);
+            // A finger landing on the screen without moving fires no `pointermove`.
+            window.addEventListener('pointerdown', this.handlePointerMove);
             // This is for touch screen
             // Window.pointerleave won't be triggered if the finger
             // leave the screen, so we use pointer up here.
