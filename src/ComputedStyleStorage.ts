@@ -11,6 +11,8 @@ export interface ComputedStyleStorage {
 class ComputedStyleCompat implements ComputedStyleStorage {
     protected static colorParser: HTMLDivElement;
     protected static colorParserStyle: CSSStyleDeclaration;
+    // Parsing a color forces a style recalc, so cache the result by the raw value
+    protected static colorCache = new Map<string, string>();
 
     el: HTMLElement;
     style: CSSStyleDeclaration;
@@ -18,7 +20,7 @@ class ComputedStyleCompat implements ComputedStyleStorage {
     constructor(el: HTMLElement) {
         if (!ComputedStyleCompat.colorParser) {
             const el = document.createElement('div');
-            el.style.display = 'none !important';
+            el.style.setProperty('display', 'none', 'important');
             document.body.appendChild(el);
 
             ComputedStyleCompat.colorParser = el;
@@ -38,8 +40,16 @@ class ComputedStyleCompat implements ComputedStyleStorage {
     }
 
     getColor(propertyName: string) {
-        ComputedStyleCompat.colorParser.style.color = this.get(propertyName);
-        return ComputedStyleCompat.colorParserStyle.color || 'rgb(0, 0, 0)';
+        const value = this.get(propertyName);
+        let color = ComputedStyleCompat.colorCache.get(value);
+
+        if (color === undefined) {
+            ComputedStyleCompat.colorParser.style.color = value;
+            color = ComputedStyleCompat.colorParserStyle.color || 'rgb(0, 0, 0)';
+            ComputedStyleCompat.colorCache.set(value, color);
+        }
+
+        return color;
     }
 
     getNumber(propertyName: string) {
@@ -82,8 +92,11 @@ class ComputedStyleExperimental implements ComputedStyleStorage {
     }
 }
 
+// Firefox supports `CSS.registerProperty` but not `computedStyleMap`
+const supportsTypedOM = typeof Element !== 'undefined' && 'computedStyleMap' in Element.prototype;
+
 export function createStorage(el: HTMLElement): ComputedStyleStorage {
-    return config.compat
+    return config.compat || !supportsTypedOM
         ? new ComputedStyleCompat(el)
         : new ComputedStyleExperimental(el);
 }
