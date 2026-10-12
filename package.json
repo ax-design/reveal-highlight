@@ -5,7 +5,10 @@
     "main": "build/main.js",
     "module": "es/index.js",
     "typings": "es/index.d.ts",
-    "repository": "https://github.com/ax-design/reveal-highlight",
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/ax-design/reveal-highlight.git"
+    },
     "license": "MIT",
     "sideEffects": false,
     "devDependencies": {
