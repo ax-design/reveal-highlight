@@ -91,17 +91,24 @@ export class AxRevealBoundary extends PatchedHTMLElement {
 
     /**
      * Update the position of your pointer.
-     * @param ev Pointer event from the listener.
+     * @param ev Pointer event or touch point from the listener.
      */
-    updatePointerPosition = (ev: PointerEvent) => {
+    updatePointerPosition = (ev: { clientX: number; clientY: number }) => {
         this.waitForStorage((storage) => {
             storage.clientX = ev.clientX;
             storage.clientY = ev.clientY;
         });
     };
 
+    // Once the browser starts scrolling, pointer events stop (`pointercancel`)
+    // but touch events keep coming, so we follow the finger with them instead.
+    private touchScrolling = false;
+
     handlePointerEnter = () => this.waitForStorage((storage) => storage.onPointerEnterBoundary());
-    handlePointerLeave = () => this.waitForStorage((storage) => storage.onPointerLeaveBoundary());
+    handlePointerLeave = () => {
+        if (this.touchScrolling) return;
+        this.waitForStorage((storage) => storage.onPointerLeaveBoundary());
+    };
     handlePointerMove = this.updatePointerPosition;
     handlePointerUp = (ev: PointerEvent) => {
         if (ev.pointerType === 'mouse') {
@@ -112,7 +119,19 @@ export class AxRevealBoundary extends PatchedHTMLElement {
     };
     // Fired when the browser takes over the touch for scrolling or zooming,
     // `pointerup` will never come, so the pressed ripple must be cleaned here.
-    handlePointerCancel = () => this.waitForStorage((storage) => storage.clearAll(false));
+    handlePointerCancel = (ev: PointerEvent) => {
+        if (ev.pointerType === 'touch') this.touchScrolling = true;
+        this.waitForStorage((storage) => storage.clearAll(false));
+    };
+    handleTouchMove = (ev: TouchEvent) => {
+        if (!this.touchScrolling || !ev.targetTouches.length) return;
+        this.updatePointerPosition(ev.targetTouches[0]);
+    };
+    handleTouchEnd = (ev: TouchEvent) => {
+        if (!this.touchScrolling || ev.targetTouches.length) return;
+        this.touchScrolling = false;
+        this.handlePointerLeave();
+    };
     handlePointerDown = (ev: PointerEvent) =>
         this.waitForStorage((storage) => {
             this.updatePointerPosition(ev);
@@ -129,6 +148,11 @@ export class AxRevealBoundary extends PatchedHTMLElement {
         this.addEventListener('pointerdown', this.handlePointerDown);
         this.addEventListener('pointerup', this.handlePointerUp);
         this.addEventListener('pointercancel', this.handlePointerCancel);
+        if (config.borderDetectionMode === 'strictEdge') {
+            this.addEventListener('touchmove', this.handleTouchMove, { passive: true });
+            this.addEventListener('touchend', this.handleTouchEnd, { passive: true });
+            this.addEventListener('touchcancel', this.handleTouchEnd, { passive: true });
+        }
     }
 
     disconnectedCallback() {

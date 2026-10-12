@@ -31,9 +31,29 @@ export class RevealStateManager {
             // the page, dragging the image, which can cause mouse events
             // to fail, when Reveal should disappear to prevent the 
             // image from getting stuck.
-            window.addEventListener('pointercancel', this.handlePointerLeave);
+            window.addEventListener('pointercancel', (ev) => {
+                // The browser took over the touch for scrolling, keep following
+                // the finger with touch events until it leaves the screen.
+                if (ev.pointerType === 'touch') {
+                    this.touchScrolling = true;
+                } else {
+                    this.handlePointerLeave();
+                }
+            });
+            window.addEventListener('touchmove', (ev) => {
+                if (this.touchScrolling && ev.touches.length) this.handlePointerMove(ev.touches[0]);
+            }, { passive: true });
+            const handleTouchEnd = (ev: TouchEvent) => {
+                if (!this.touchScrolling || ev.touches.length) return;
+                this.touchScrolling = false;
+                this.handlePointerLeave();
+            };
+            window.addEventListener('touchend', handleTouchEnd, { passive: true });
+            window.addEventListener('touchcancel', handleTouchEnd, { passive: true });
         }
     }
+
+    touchScrolling = false;
 
     pointerLeaveScheduled = false;
 
@@ -51,7 +71,7 @@ export class RevealStateManager {
         });
     }
 
-    handlePointerMove = (event: PointerEvent) => {
+    handlePointerMove = (event: { clientX: number; clientY: number }) => {
         this.cachedMouseX = event.clientX;
         this.cachedMouseY = event.clientY;
 
