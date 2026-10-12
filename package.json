@@ -31,5 +31,6 @@
         "build",
         "es",
         "src"
-    ]
+    ],
+    "packageManager": "yarn@3.8.7"
 }
