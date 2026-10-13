@@ -3,6 +3,8 @@ import { RevealBoundaryStore } from './RevealBoundryStore.js';
 import type { CachedRevealBitmap } from './utils/types.js';
 
 import { BaseConfig } from './BaseConfig.js';
+import { drawReveal, updateRevealGradients } from './painter.js';
+import type { ShapeKind } from './painter.js';
 
 export class CanvasConfig extends BaseConfig<HTMLCanvasElement> {
     ctx: CanvasRenderingContext2D | null;
@@ -39,45 +41,8 @@ export class CanvasConfig extends BaseConfig<HTMLCanvasElement> {
         if (!this.ctx) return;
 
         const c = this.cachedStyle;
-        const radius = c.trueFillRadius[1] * this.pxRatio;
-
-        const lastStyle = this.cachedImg.cachedReveal;
-
         this._store.updateMaxRadius(c.trueFillRadius[1] * c.borderFillRadius);
-
-        for (let i = 0; i < 2; i++) {
-            // 0 means border, 1 means hover light.
-            //-----------------------------------------
-            // Last rendered style.
-            const ls = i === 0 ? lastStyle.borderReveal : lastStyle.fillReveal;
-            const color = i === 0 ? c.borderColor : c.hoverLightColor;
-            const fillRadiusFactor = i === 0 ? c.borderFillRadius : c.hoverLightFillRadius;
-            const trueRadius = radius * fillRadiusFactor;
-
-            const doNotNeedUpdateReveal =
-                color === ls.color &&
-                c.opacity === ls.opacity &&
-                fillRadiusFactor === ls.radiusFactor &&
-                trueRadius === ls.radius;
-
-            if (doNotNeedUpdateReveal) continue;
-
-            // The gradient is centered at (trueRadius, trueRadius), painting
-            // translates it to the pointer. A gradient is used instead of a
-            // pre-rendered bitmap, which takes `(4 * radius) ^ 2` pixels per
-            // element and is enough to exhaust the memory of mobile browsers.
-            const fillAlpha = i === 0 ? c.opacity : c.opacity * 0.5;
-            const grd = this.ctx.createRadialGradient(trueRadius, trueRadius, 0, trueRadius, trueRadius, trueRadius);
-
-            grd.addColorStop(0, `rgba(${color}, ${fillAlpha})`);
-            grd.addColorStop(1, `rgba(${color}, 0.0)`);
-
-            ls.radius = trueRadius;
-            ls.radiusFactor = fillRadiusFactor;
-            ls.color = color;
-            ls.opacity = c.opacity;
-            ls.pattern = grd;
-        }
+        updateRevealGradients(this.ctx, this.cachedImg.cachedReveal, c, this.pxRatio);
 
         this.fillDirty = false;
     };
@@ -87,22 +52,15 @@ export class CanvasConfig extends BaseConfig<HTMLCanvasElement> {
         this.updateCachedReveal();
     };
 
-    private updateAnimateGrd = (frame: number, grd: CanvasGradient) => {
-        const { pressAnimationColor, opacity } = this.cachedStyle;
-
-        const _innerAlpha = opacity * (0.2 - frame);
-        const _outerAlpha = opacity * (0.1 - frame * 0.07);
-        const _outerBorder = 0.1 + frame * 0.8;
-
-        const innerAlpha = _innerAlpha < 0 ? 0 : _innerAlpha;
-        const outerAlpha = _outerAlpha < 0 ? 0 : _outerAlpha;
-        let outerBorder = 0;
-        outerBorder = _outerBorder > 1 ? 1 : _outerBorder;
-        outerBorder = _outerBorder < 0 ? 0 : _outerBorder;
-
-        grd.addColorStop(0, `rgba(${pressAnimationColor},${innerAlpha})`);
-        grd.addColorStop(outerBorder * 0.55, `rgba(${pressAnimationColor},${outerAlpha})`);
-        grd.addColorStop(outerBorder, `rgba(${pressAnimationColor}, 0)`);
+    // Same sequence the legacy painter used inline: identity transform, shape path, translate
+    // the gradient to the pointer, fill.
+    private paintShape = (kind: ShapeKind, pattern: CanvasGradient, tx: number, ty: number) => {
+        if (!this.ctx) return;
+        this.ctx.setTransform(1, 0, 0, 1, 0, 0);
+        this.drawShape(kind === 'ring');
+        this.ctx.translate(tx, ty);
+        this.ctx.fillStyle = pattern;
+        this.ctx.fill();
     };
 
     private drawShape = (hollow: boolean) => {
@@ -354,66 +312,30 @@ export class CanvasConfig extends BaseConfig<HTMLCanvasElement> {
         this.paintedStyleVersion = this.styleVersion;
         this.paintedAnimation = animationPlaying;
 
-        if (store.mouseInBoundary) {
-            const mouseInCanvas = relativeX > 0 && relativeY > 0 && relativeX < b.width && relativeY < b.height;
-
-            const fillPattern = this.cachedImg.cachedReveal.fillReveal.pattern;
-            if (c.hoverLight && mouseInCanvas && fillPattern) {
-                // draw fill.
-                const radius = this.cachedImg.cachedReveal.fillReveal.radius;
-                const putX = Math.floor(relativeX * this.pxRatio - radius);
-                const putY = Math.floor(relativeY * this.pxRatio - radius);
-                this.ctx.setTransform(1, 0, 0, 1, 0, 0);
-                this.drawShape(false);
-                this.ctx.translate(putX, putY);
-                this.ctx.fillStyle = fillPattern;
-                this.ctx.fill();
-            }
-
-            const diffuse = (c.diffuse && mouseInRenderArea) || mouseInCanvas;
-            const borderPattern = this.cachedImg.cachedReveal.borderReveal.pattern;
-            if (c.borderWidth !== 0 && borderPattern && diffuse) {
-                // Draw border.
-                const radius = this.cachedImg.cachedReveal.borderReveal.radius;
-                const putX = Math.floor(relativeX * this.pxRatio - radius);
-                const putY = Math.floor(relativeY * this.pxRatio - radius);
-                this.ctx.setTransform(1, 0, 0, 1, 0, 0);
-                this.drawShape(true);
-                this.ctx.translate(putX, putY);
-                this.ctx.fillStyle = borderPattern;
-                this.ctx.fill();
-            }
-        }
-
-        if (c.pressAnimation && this.mousePressed && this.mouseDownAnimateLogicFrame) {
-            this.ctx.setTransform(1, 0, 0, 1, 0, 0);
-            const grdRadius =
-                c.pressAnimationFillMode === 'constrained' ? c.trueFillRadius[1] : Math.max(b.width, b.height);
-            // prettier-ignore
-            const animateGrd =
-                this.mouseReleased && this.mouseUpClientX && this.mouseUpClientY
-                    ? this.ctx.createRadialGradient(
-                        (this.mouseUpClientX - b.left) * this.pxRatio,
-                        (this.mouseUpClientY - b.top) * this.pxRatio,
-                        0,
-                        (this.mouseUpClientX - b.left) * this.pxRatio,
-                        (this.mouseUpClientY - b.top) * this.pxRatio,
-                        grdRadius * this.pxRatio
-                    )
-                    : this.ctx.createRadialGradient(
-                        relativeX * this.pxRatio,
-                        relativeY * this.pxRatio,
-                        0,
-                        relativeX * this.pxRatio,
-                        relativeY * this.pxRatio,
-                        grdRadius * this.pxRatio
-                    );
-            this.updateAnimateGrd(this.mouseDownAnimateLogicFrame, animateGrd);
-
-            this.drawShape(false);
-            this.ctx.fillStyle = animateGrd;
-            this.ctx.fill();
-        }
+        drawReveal({
+            ctx: this.ctx,
+            pxRatio: this.pxRatio,
+            width: b.width,
+            height: b.height,
+            relativeX,
+            relativeY,
+            originX: 0,
+            originY: 0,
+            mouseInBoundary: store.mouseInBoundary,
+            mouseInRenderArea,
+            style: c,
+            gradients: this.cachedImg.cachedReveal,
+            press: {
+                mousePressed: this.mousePressed,
+                mouseReleased: this.mouseReleased,
+                hasMouseUp: !!(this.mouseUpClientX && this.mouseUpClientY),
+                mouseUpX: (this.mouseUpClientX || 0) - b.left,
+                mouseUpY: (this.mouseUpClientY || 0) - b.top,
+                mouseDownAnimateLogicFrame: this.mouseDownAnimateLogicFrame,
+            },
+            hasBorder: c.borderWidth !== 0,
+            paintShape: this.paintShape,
+        });
 
         return true;
     };

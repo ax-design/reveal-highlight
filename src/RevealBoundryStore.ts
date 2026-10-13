@@ -1,5 +1,6 @@
 import { CanvasConfig } from './CanvasConfig.js';
 import { SvgConfig } from './SvgConfig.js';
+import { advancePressAnimation } from './painter.js';
 
 type Config = CanvasConfig | SvgConfig;
 
@@ -165,29 +166,10 @@ export class RevealBoundaryStore {
 
             config.currentFrameId = frame;
 
-            // Initialize the animation parameter
-            if (config.mouseDownAnimateStartFrame === null) {
-                config.mouseDownAnimateStartFrame = frame;
-            }
-
-            // Calculate how long the animation has been playing
-            const relativeFrame = frame - config.mouseDownAnimateStartFrame;
-            config.mouseDownAnimateCurrentFrame = relativeFrame;
-
             const speed = config.cachedStyle.pressAnimationSpeed;
             const accelerateRate = config.cachedStyle.releaseAnimationAccelerateRate;
 
-            // We assume that Ripple is a one-way linear process from
-            // no diffusion to fully diffused, 
-            // and Logic Frame represents the progress of the animation
-            // in this process.
-            let unitLogicFrame = relativeFrame;
-            if (config.mouseReleased && config.mouseDownAnimateReleasedFrame) {
-                unitLogicFrame += (relativeFrame - config.mouseDownAnimateReleasedFrame) * accelerateRate;
-            }
-            config.mouseDownAnimateLogicFrame = unitLogicFrame / speed;
-
-            if (config.mouseDownAnimateLogicFrame > 1) {
+            if (advancePressAnimation(config, frame, speed, accelerateRate)) {
                 // It will be cleaned later
                 config.cleanedUpForAnimation = true;
             }
