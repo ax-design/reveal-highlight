@@ -124,22 +124,8 @@ export function createRevealLayer(): SurfaceLayer {
             ctx.fill();
             return;
         }
-        if (frame.uniformBorder !== null) {
-            // Equal sides on a flat surface: a stroke of twice the width clipped to the outline.
-            ctx.save();
-            ctx.clip();
-            ctx.beginPath();
-            traceContour(ctx, shape.outline);
-            ctx.setTransform(1, 0, 0, 1, tx, ty);
-            ctx.lineWidth = frame.uniformBorder * 2 * pxRatio;
-            ctx.lineJoin = 'miter';
-            ctx.miterLimit = 1000;
-            ctx.strokeStyle = pattern;
-            ctx.stroke();
-            ctx.restore();
-            return;
-        }
-        traceInner(ctx, frame.borderInner);
+        // The ring as outline plus inner edge, filled even-odd, like the legacy canvas did.
+        traceInner(ctx, frame.ringInner());
         ctx.setTransform(1, 0, 0, 1, tx, ty);
         ctx.fillStyle = pattern;
         ctx.fill('evenodd');
@@ -148,6 +134,11 @@ export function createRevealLayer(): SurfaceLayer {
     return {
         schema: REVEAL_SCHEMA,
         tracksPointer: true,
+        // The render area test of CanvasConfig.paint: nothing is drawn farther than the larger
+        // side from the element.
+        reach(width: number, height: number) {
+            return Math.max(width, height);
+        },
         attach(container) {
             canvas = document.createElement('canvas');
             canvas.setAttribute('aria-hidden', 'true');
@@ -174,10 +165,8 @@ export function createRevealLayer(): SurfaceLayer {
                 dirty = false;
                 painted.x = NaN;
             }
-            if (!style || f.changed.style || f.changed.size) {
-                style = styleFrom(f);
-                updateRevealGradients(ctx, gradients, style, pxRatio);
-            }
+            // Style and gradients are built lazily: most surfaces never get the pointer close.
+            if (f.changed.style || f.changed.size) style = null;
 
             // Press edges, with the legacy semantics: a mouse release accelerates the ripple
             // (switchAnimation), a touch release or a cancel clears it (clearAll).
@@ -199,6 +188,15 @@ export function createRevealLayer(): SurfaceLayer {
                 }
             }
             wasPressed = pressed;
+
+            if (!pointer && !timeline.pressed) {
+                clear();
+                return false;
+            }
+            if (!style) {
+                style = styleFrom(f);
+                updateRevealGradients(ctx, gradients, style, pxRatio);
+            }
 
             let animationPlaying = timeline.pressed && style.pressAnimation;
             if (animationPlaying && advancePressAnimation(timeline, f.now, style.pressAnimationSpeed, style.releaseAnimationAccelerateRate)) {
