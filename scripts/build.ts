@@ -1,5 +1,5 @@
 // Release build. Needs the dist/ output of @ax-design/shape, typed-om and surface.
-//   es/            ES2017 modules and declarations (tsc), dependencies imported
+//   es/            ES2017 modules and declarations (tsc), dependencies imported, marked as ESM
 //   build/index.mjs one self-contained ES module (demos, CDN)
 //   build/main.js   the same as UMD: require() or the AxRevealHighlight global
 // The bundles take the ES2017 output of tsc as input and are minified without syntax rewrites,
@@ -10,6 +10,8 @@ import { join } from 'node:path';
 const root = join(import.meta.dir, '..');
 await $`rm -rf ${join(root, 'es')} ${join(root, 'build')}`;
 await $`bunx tsc -p ${join(root, 'tsconfig.json')}`;
+// es/ holds ES modules while the package stays CommonJS for build/main.js; Node reads this.
+await Bun.write(join(root, 'es/package.json'), JSON.stringify({ type: 'module' }) + '\n');
 
 const minify = { whitespace: true, identifiers: true, syntax: false };
 const bundle = async (format: 'esm') => {

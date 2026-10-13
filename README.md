@@ -108,6 +108,7 @@ https://github.com/ax-design/ax-design.github.io/blob/master/stories/templates/R
 * The border light on `bevel` corners has the full border width now, it used to be thinner on the diagonal.
 * `ax-reveal-ng` uses your colors now, it used to draw everything in black.
 * `ax-reveal` doesn't need an `ax-reveal-bound` anymore.
+* 0.6.1: Inside a tilted `ax-pressure`, the highlight stays under your pointer. `build/main.js` works together with the `build/` files of `@ax-design/acrylic` and `@ax-design/pressure` on the same page, and `import` in Node gives you every export.
 
 ## Development
 
