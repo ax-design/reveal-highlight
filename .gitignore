@@ -78,3 +78,4 @@ typings/
 !.yarn/sdks
 !.yarn/versions
 .pnp.*
+test-browser/dist/

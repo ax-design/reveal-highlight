@@ -1,9 +1,11 @@
 language: node_js
-node_js: "11"
-cache: yarn
+node_js: "22"
+before_install:
+  - curl -fsSL https://bun.sh/install | bash
+  - export PATH="$HOME/.bun/bin:$PATH"
 before_script:
-  - yarn
-script: yarn build
+  - bun install
+script: bun run build
 
 before_deploy:
   - tar czvf umd.tar.gz -C build .

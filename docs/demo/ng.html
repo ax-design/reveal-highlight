@@ -982,10 +982,9 @@
   </ax-reveal-provider>
   <script type="module">
     // For package developer.
-    import { register } from '../../../es/index.js';
-    // import { register } from 'https://unpkg.com/@ax-design/reveal-highlight/es/index.js';
+    import { register } from '../../build/index.mjs';
+    // import { register } from 'https://unpkg.com/@ax-design/reveal-highlight/build/index.mjs';
     register({
-      compat: true,
       borderDetectionMode: 'experimentalAutoFit',
     });
   </script>

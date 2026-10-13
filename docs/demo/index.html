@@ -1008,9 +1008,8 @@
     </section>
   </ax-reveal-provider>
   <script type="module">
-    import('../../../es/index.js').catch(() => import('https://unpkg.com/@ax-design/reveal-highlight/es/index.js')).then(({ register }) => {
+    import('../../build/index.mjs').catch(() => import('https://unpkg.com/@ax-design/reveal-highlight/build/index.mjs')).then(({ register }) => {
       register({
-      compat: true,
       borderDetectionMode: 'experimentalAutoFit',
     });
     })

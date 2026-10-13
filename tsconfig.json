@@ -1,18 +1,16 @@
 {
     "compilerOptions": {
-        "target": "es2018",
-        "lib": ["dom", "dom.iterable", "esnext"],
-        "esModuleInterop": true,
-        "allowSyntheticDefaultImports": true,
+        "target": "ES2017",
+        "lib": ["ES2017", "DOM", "DOM.Iterable"],
+        "module": "ES2015",
+        "moduleResolution": "bundler",
         "strict": true,
-        "forceConsistentCasingInFileNames": true,
-        "module": "esnext",
         "declaration": true,
         "declarationMap": true,
         "sourceMap": true,
-        "incremental": true,
         "outDir": "es",
-        "importHelpers": false
+        "rootDir": "src",
+        "skipLibCheck": true
     },
     "include": ["src"]
 }
