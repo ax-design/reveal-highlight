@@ -109,6 +109,7 @@ https://github.com/ax-design/ax-design.github.io/blob/master/stories/templates/R
 * `ax-reveal-ng` uses your colors now, it used to draw everything in black.
 * `ax-reveal` doesn't need an `ax-reveal-bound` anymore.
 * 0.6.1: Inside a tilted `ax-pressure`, the highlight stays under your pointer. `build/main.js` works together with the `build/` files of `@ax-design/acrylic` and `@ax-design/pressure` on the same page, and `import` in Node gives you every export.
+* 0.6.2: Built on Surface 0.2, with the shared edge properties and the `cusp` edge of `ax-surface`.
 
 ## Development
 
