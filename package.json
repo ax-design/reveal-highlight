@@ -1,7 +1,7 @@
 {
     "name": "@ax-design/reveal-highlight",
-    "version": "0.5.3",
-    "description": "Web component that implement Reveal Highlight of Axiom Design System.",
+    "version": "0.6.0",
+    "description": "Web component that implements Reveal Highlight of Axiom Design System.",
     "main": "build/main.js",
     "module": "es/index.js",
     "typings": "es/index.d.ts",
@@ -18,7 +18,8 @@
     "scripts": {
         "build": "bun scripts/build.ts",
         "check": "tsc -p tsconfig.json --noEmit",
-        "test:browser": "bun test-browser/run.ts"
+        "test:browser": "bun test-browser/run.ts",
+        "prepublishOnly": "bun run build"
     },
     "files": [
         "build",
@@ -26,8 +27,12 @@
         "src"
     ],
     "dependencies": {
-        "@ax-design/shape": "link:@ax-design/shape",
-        "@ax-design/surface": "link:@ax-design/surface",
-        "@ax-design/typed-om": "link:@ax-design/typed-om"
+        "@ax-design/shape": "^0.1.0",
+        "@ax-design/surface": "^0.1.0",
+        "@ax-design/typed-om": "^0.1.0"
+    },
+    "homepage": "https://github.com/ax-design/reveal-highlight#readme",
+    "bugs": {
+        "url": "https://github.com/ax-design/reveal-highlight/issues"
     }
 }

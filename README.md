@@ -3,12 +3,12 @@
 </h1>
 
 <p align="center">
-  React component that implements Reveal Highlight of Axiom Design System.
+  Web component that implements Reveal Highlight of Axiom Design System.
 </p>
 
 <p align="center">
   <a href="https://www.npmjs.com/package/@ax-design/reveal-highlight"><img src="https://img.shields.io/npm/v/@ax-design/reveal-highlight.svg" alt="npm version"></a>
-  <a href="https://travis-ci.com/ax-design/reveal-highlight"><img src="https://travis-ci.com/ax-design/reveal-highlight.svg?branch=master" alt="CI status"></a>
+  <a href="https://github.com/ax-design/reveal-highlight/actions/workflows/ci.yml"><img src="https://github.com/ax-design/reveal-highlight/actions/workflows/ci.yml/badge.svg" alt="CI status"></a>
   <a href="https://deepscan.io/dashboard#view=project&tid=4412&pid=6185&bid=50120"><img src="https://deepscan.io/api/teams/4412/projects/6185/branches/50120/badge/grade.svg" alt="DeepScan grade"></a>
   <a href="https://t.me/axiom_chat"><img src="https://img.shields.io/badge/chat-on%20Telegram-%230088cc.svg" alt="Telegram chat group" /></a>
   <img src="https://img.shields.io/badge/license-MIT-green.svg" alt="MIT Licence" />
@@ -22,38 +22,35 @@
 ## Installation
 
 ```bash
+// with npm
 npm install @ax-design/reveal-highlight
-# or
-bun add @ax-design/reveal-highlight
+
+// with yarn
+yarn add @ax-design/reveal-highlight
 ```
 
-and register the elements once:
+and import it:
 
 ```javascript
-// CommonJS
+//CommonJS
 require('@ax-design/reveal-highlight').register();
 
-// ES modules
+//ESModule
 import { register } from '@ax-design/reveal-highlight';
 register({
   borderDetectionMode: 'experimentalAutoFit',
 });
 ```
 
-Without a bundler, load `build/main.js` (exposes `AxRevealHighlight`) or import `build/index.mjs`.
-
-### Options
-
-* `borderDetectionMode`: `'strictEdge'` (default) lights reveals only while the pointer is over
-  their `ax-reveal-bound`. `'experimentalAutoFit'` also lights them when the pointer is near the
-  boundary, within the light radius.
-* `compat`: deprecated, no effect. Properties that the browser cannot register fall back to their
-  initial values on their own.
+If you don't use a bundler, load `build/main.js` (it exposes `AxRevealHighlight`) or import `build/index.mjs`.
 
 ## Usage
 
-Wrap the content that should light up in `ax-reveal` (canvas) or `ax-reveal-ng` (SVG), and group
-them with `ax-reveal-bound`:
+To add a reveal effect on your web application, you need to wrap a `ax-reveal` component with `ax-reveal-bound`.
+
+`ax-reveal-bound` will manage the rendering behavior of `ax-reveal` components, while your mouse enters the boundary, the highlight components will get started to rendering, while your mouse leaves the boundary component, all highlight effect will disappear.
+
+Here's an example:
 
 ```html
 <ax-reveal-bound>
@@ -66,21 +63,20 @@ them with `ax-reveal-bound`:
 </ax-reveal-bound>
 ```
 
-`ax-reveal-bound` decides when its reveals react to the pointer (see `borderDetectionMode`). A
-reveal outside any boundary follows the pointer everywhere.
+`ax-reveal-ng` works the same way, but draws with SVG instead of a canvas.
 
-`ax-reveal-provider` is still accepted so existing markup keeps working, but it no longer does
-anything: all reveals on a page share one engine.
+`ax-reveal-provider` from older versions still works in your markup, but it doesn't do anything now, all the reveal components on the page share one engine.
 
-## Engine
+### Options
 
-`ax-reveal` and `ax-reveal-ng` run on `@ax-design/surface`: one frame scheduler for
-every surface on the page, style reads only after a style change, work only for visible
-elements, and lower frame rates for far and small elements when the page is measured to drop
-frames. The shape comes from `@ax-design/shape`.
+`register` accepts these options:
 
-The same effect is available as a layer of `ax-surface`, combined with the surface shapes, tilt
-and other layers:
+* `borderDetectionMode`: `strictEdge` (default) only lights up the components while your pointer is inside their `ax-reveal-bound`. `experimentalAutoFit` also lights them up while your pointer is close to the boundary.
+* `compat`: deprecated, it doesn't do anything now. Custom properties which can't be registered fall back to their default values automatically.
+
+### With Surface
+
+Reveal Highlight runs on [Surface](https://github.com/ax-design/surface). You can also use it as a layer of `ax-surface`, together with the shapes, the tilt and the other layers of Surface:
 
 ```javascript
 import { register } from '@ax-design/surface';
@@ -91,20 +87,14 @@ register();
 ```
 
 ```html
-<ax-surface layers="reveal">…</ax-surface>      <!-- canvas -->
-<ax-surface layers="reveal-svg">…</ax-surface>  <!-- SVG -->
+<ax-surface layers="reveal">
+  <button class="ax-reveal-button">Button 1</button>
+</ax-surface>
 ```
 
-### Changes from 0.5
-
-* The border light on bevel corners now has the full border width (it used to be about 0.7 of it
-  on the diagonal).
-* `ax-reveal-ng` now uses the reveal colors (it used to draw every gradient in black).
-* `ax-reveal` no longer requires an `ax-reveal-bound` ancestor.
+Use `layers="reveal-svg"` for the SVG version.
 
 ## Style Controlling
-
-All `--reveal-*` custom properties keep their names, values and defaults.
 
 * Checkout this living example for detailed usage:
 https://ax-design.github.io/playground/?path=/story/components-fundamental-elements-reveal-highlight--basic
@@ -112,14 +102,20 @@ https://ax-design.github.io/playground/?path=/story/components-fundamental-eleme
 * And here're the source code:
 https://github.com/ax-design/ax-design.github.io/blob/master/stories/templates/RevealHighlight.ts
 
+## Changes in 0.6
+
+* The highlight runs on Surface, it only works for visible components and draws much less while you move your pointer.
+* The border light on `bevel` corners has the full border width now, it used to be thinner on the diagonal.
+* `ax-reveal-ng` uses your colors now, it used to draw everything in black.
+* `ax-reveal` doesn't need an `ax-reveal-bound` anymore.
+
 ## Development
 
-The package depends on `@ax-design/shape`, `@ax-design/typed-om` and `@ax-design/surface`. Build
-those first (their `dist/` holds the ES2017 output and the type declarations), then:
+This package depends on `@ax-design/shape`, `@ax-design/typed-om` and `@ax-design/surface`, build them first, then:
 
 ```bash
 bun install
-bun run build         # es/, build/index.mjs, build/main.js (all ES2017)
+bun run build         # es/, build/index.mjs, build/main.js
 bun run check         # type check
-bun run test:browser  # browser tests (Playwright), both border detection modes
+bun run test:browser  # browser tests
 ```
