@@ -1,9 +1,11 @@
-// Entry for <ax-surface> users: `import { registerRevealLayer } from '@ax-design/reveal-highlight/surface'`.
-// Kept apart from the main entry so legacy <ax-reveal> users do not load the surface stack.
+// Reveal layers for <ax-surface>: `layers="reveal"` (canvas) and `layers="reveal-svg"` (SVG).
 import { registerLayer } from '@ax-design/surface';
 import { createRevealLayer } from './surfaceLayer.js';
+import { createRevealSvgLayer } from './svgLayer.js';
 
-export { REVEAL_SCHEMA, createRevealLayer } from './surfaceLayer.js';
+export { createRevealLayer } from './surfaceLayer.js';
+export { createRevealSvgLayer } from './svgLayer.js';
+export { REVEAL_SCHEMA } from './revealStyle.js';
 
 let registered = false;
 
@@ -11,4 +13,5 @@ export function registerRevealLayer(): void {
     if (registered) return;
     registered = true;
     registerLayer('reveal', createRevealLayer);
+    registerLayer('reveal-svg', createRevealSvgLayer);
 }

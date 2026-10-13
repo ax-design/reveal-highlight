@@ -22,55 +22,104 @@
 ## Installation
 
 ```bash
-// with npm
 npm install @ax-design/reveal-highlight
-
-// with yarn
-yarn add @ax-design/reveal-highlight
+# or
+bun add @ax-design/reveal-highlight
 ```
 
-and import it:
+and register the elements once:
 
 ```javascript
-//CommonJS
+// CommonJS
 require('@ax-design/reveal-highlight').register();
 
-//ESModule
+// ES modules
 import { register } from '@ax-design/reveal-highlight';
 register({
-  compat: true,
   borderDetectionMode: 'experimentalAutoFit',
 });
 ```
 
+Without a bundler, load `build/main.js` (exposes `AxRevealHighlight`) or import `build/index.mjs`.
+
+### Options
+
+* `borderDetectionMode`: `'strictEdge'` (default) lights reveals only while the pointer is over
+  their `ax-reveal-bound`. `'experimentalAutoFit'` also lights them when the pointer is near the
+  boundary, within the light radius.
+* `compat`: deprecated, no effect. Properties that the browser cannot register fall back to their
+  initial values on their own.
+
 ## Usage
 
-To add a reveal effect on your web application, you need to wrap a `ax-reveal` component with `ax-reveal-provider` and `ax-reveal-bound`.
-
-`ax-reveal-provider` will manage the global reveal style, and cache the rendered highlight bitmap for better performance (WIP).
-
-`ax-reveal-bound` will manage the rendering behavior of `ax-reveal` components, while your mouse enters the boundary, the highlight components will get started to rendering, while your mouse leaves the boundary component, all highlight effect will disappear.
-
-Here's an example:
+Wrap the content that should light up in `ax-reveal` (canvas) or `ax-reveal-ng` (SVG), and group
+them with `ax-reveal-bound`:
 
 ```html
-<ax-reveal-provider>
-  <h1>Welcome to project Axiom!</h1>
-  <ax-reveal-bound>
-    <ax-reveal>
-      <button class="ax-reveal-button">Button 1</button>
-    </ax-reveal>
-    <ax-reveal>
-      <button class="ax-reveal-button">Button 2</button>
-    </ax-reveal>
-  </ax-reveal-bound>
-<ax-reveal-provider>
+<ax-reveal-bound>
+  <ax-reveal>
+    <button class="ax-reveal-button">Button 1</button>
+  </ax-reveal>
+  <ax-reveal>
+    <button class="ax-reveal-button">Button 2</button>
+  </ax-reveal>
+</ax-reveal-bound>
 ```
 
+`ax-reveal-bound` decides when its reveals react to the pointer (see `borderDetectionMode`). A
+reveal outside any boundary follows the pointer everywhere.
+
+`ax-reveal-provider` is still accepted so existing markup keeps working, but it no longer does
+anything: all reveals on a page share one engine.
+
+## Engine
+
+`ax-reveal` and `ax-reveal-ng` run on `@ax-design/surface`: one frame scheduler for
+every surface on the page, style reads only after a style change, work only for visible
+elements, and lower frame rates for far and small elements when the page is measured to drop
+frames. The shape comes from `@ax-design/shape`.
+
+The same effect is available as a layer of `ax-surface`, combined with the surface shapes, tilt
+and other layers:
+
+```javascript
+import { register } from '@ax-design/surface';
+import { registerRevealLayer } from '@ax-design/reveal-highlight';
+
+registerRevealLayer();
+register();
+```
+
+```html
+<ax-surface layers="reveal">…</ax-surface>      <!-- canvas -->
+<ax-surface layers="reveal-svg">…</ax-surface>  <!-- SVG -->
+```
+
+### Changes from 0.5
+
+* The border light on bevel corners now has the full border width (it used to be about 0.7 of it
+  on the diagonal).
+* `ax-reveal-ng` now uses the reveal colors (it used to draw every gradient in black).
+* `ax-reveal` no longer requires an `ax-reveal-bound` ancestor.
+
 ## Style Controlling
+
+All `--reveal-*` custom properties keep their names, values and defaults.
 
 * Checkout this living example for detailed usage:
 https://ax-design.github.io/playground/?path=/story/components-fundamental-elements-reveal-highlight--basic
 
 * And here're the source code:
 https://github.com/ax-design/ax-design.github.io/blob/master/stories/templates/RevealHighlight.ts
+
+## Development
+
+The package depends on `@ax-design/shape`, `@ax-design/typed-om` and `@ax-design/surface`. Build
+those first (their `dist/` holds the ES2017 output and the type declarations), then:
+
+```bash
+bun install
+bun run build         # es/, build/index.mjs, build/main.js (all ES2017)
+bun run check         # type check
+bun run test:browser  # browser tests (Playwright), both border detection modes
+```
