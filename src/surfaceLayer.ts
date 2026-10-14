@@ -9,6 +9,9 @@ import type { RevealStyle, ShapeKind } from './painter.js';
 import { RevealInteraction } from './interaction.js';
 import { REVEAL_SCHEMA, styleFrom } from './revealStyle.js';
 
+// -moz-appearance exists in Gecko only.
+const gecko = typeof CSS !== 'undefined' && typeof CSS.supports === 'function' && CSS.supports('-moz-appearance', 'none');
+
 export function createRevealLayer(): SurfaceLayer {
     let canvas: HTMLCanvasElement;
     let ctx: CanvasRenderingContext2D | null = null;
@@ -16,6 +19,8 @@ export function createRevealLayer(): SurfaceLayer {
     const gradients = emptyGradients();
     let pxRatio = 1;
     let frame: SurfaceFrame;
+    // Gecko: when the freeze after a press ends (see write).
+    let resumeAt = 0;
 
     const interaction = new RevealInteraction();
     let dirty = false;
@@ -94,6 +99,17 @@ export function createRevealLayer(): SurfaceLayer {
                 updateRevealGradients(ctx, gradients, style, pxRatio);
             }
             const { playing: animationPlaying, cleared } = interaction.update(pointer, f.now, style);
+            // Gecko: any touch of the canvas through a press, and for a beat after the
+            // release — paint or clear — turns the backdrop of an acrylic layer below clear
+            // for those frames. The light and the ripple freeze for that window; the state
+            // machine still advances, so the first frame after it shows the current state at
+            // once, and a plain hover paints as usual.
+            if (gecko) {
+                if (interaction.pressed || (pointer && pointer.pressed)) resumeAt = f.now + 400;
+                if (f.now < resumeAt) {
+                    return animationPlaying || !!(pointer && pointer.pressed) || f.changed.style || f.changed.size;
+                }
+            }
             if (cleared) clear();
             if (!style) {
                 clear();
