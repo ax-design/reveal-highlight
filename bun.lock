@@ -18,7 +18,7 @@
   "packages": {
     "@ax-design/shape": ["@ax-design/shape@0.2.0", "", {}, "sha512-gN9MfjgJvvS3EXkvz+CSSCUHHleCJ/TbZRLYlhOnj39kr0tujVoFOE063cCn9w7pfNJHLJc63kbuRDT4sYdClA=="],
 
-    "@ax-design/surface": ["@ax-design/surface@0.2.0", "", { "dependencies": { "@ax-design/shape": "^0.2.0", "@ax-design/typed-om": "^0.1.0" } }, "sha512-2TSvy6cAvZDhu7IQ30TZSeaON6WtaExLqmtDUpnIapIfaKCWLySN/tiZXtp1pJ83pyNIH09731ISClHXCDq2bg=="],
+    "@ax-design/surface": ["@ax-design/surface@0.2.1", "", { "dependencies": { "@ax-design/shape": "^0.2.0", "@ax-design/typed-om": "^0.1.0" } }, "sha512-rMu0iqxwWnssBg/jYuFFJt5TiKlTqiH8elXBoEHGNugboFzI9R7RyyTZE0tJWW/RDi52dCvX5Z+UEE6iGG2Sow=="],
 
     "@ax-design/typed-om": ["@ax-design/typed-om@0.1.0", "", {}, "sha512-v3I8wDLMFbWDN9cZkDpy9qYonMQfqUU0DIL9DOChTO3dBRzWUk/taZZBUgmNTkA0kvn+g5NbB7pGcSuQAbz9cA=="],
 
