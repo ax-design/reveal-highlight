@@ -80,7 +80,7 @@ function closestBoundary(node: Node): AxRevealBoundary | null {
 
 const REVEAL_STYLE = `
 .content, ::slotted(*) { user-drag: none; -webkit-user-drag: none; touch-action: var(--reveal-touch-action, manipulation); user-select: none; -webkit-user-select: none; }
-::slotted(button) { outline: none; }
+::slotted(button:focus:not(:focus-visible)) { outline: none; }
 `;
 
 abstract class RevealElement extends AxSurface {
