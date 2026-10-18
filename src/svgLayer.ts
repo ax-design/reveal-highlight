@@ -3,6 +3,7 @@
 // paths of the surface shape. Fixes one bug of the original: gradient stop colors were set to
 // bare "r, g, b" strings, which are not colors, so every stop rendered black.
 import { innerToSvgPath, toSvgPath } from '@ax-design/shape';
+import { useFallback } from '@ax-design/surface';
 import type { SurfaceFrame, SurfaceLayer } from '@ax-design/surface';
 import { RevealInteraction } from './interaction.js';
 import type { RevealStyle } from './painter.js';
@@ -140,6 +141,15 @@ export function createRevealSvgLayer(): SurfaceLayer {
                 painted = { x: NaN, y: NaN };
             }
             if (f.changed.style || f.changed.size) style = null;
+
+            // The geometry above is kept current in fallback too, so the paths are right when it
+            // ends. Like WinUI's RevealBrush, the fallback is a solid color with no light: the
+            // paths stay transparent, and the press is dropped so no ripple resumes.
+            if (f.appearance && useFallback(f.appearance)) {
+                clear();
+                interaction.reset();
+                return false;
+            }
 
             const pointer = f.pointer;
             if (!style && (pointer || interaction.pressed)) {

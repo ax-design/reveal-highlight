@@ -3,6 +3,7 @@
 // wires it to the surface: shape from the surface outline and border, pointer in local
 // coordinates (through the tilt), frames from the surface scheduler.
 import { traceContour, traceInner } from '@ax-design/shape';
+import { useFallback } from '@ax-design/surface';
 import type { SurfaceFrame, SurfaceLayer } from '@ax-design/surface';
 import { drawReveal, emptyGradients, updateRevealGradients } from './painter.js';
 import type { RevealStyle, ShapeKind } from './painter.js';
@@ -87,6 +88,16 @@ export function createRevealLayer(): SurfaceLayer {
             }
             // Style and gradients are built lazily: most surfaces never get the pointer close.
             if (f.changed.style || f.changed.size) style = null;
+
+            // Like WinUI's RevealBrush, the fallback is a solid color with no light: nothing is
+            // drawn in forced colors, with reduced transparency or with setAlwaysUseFallback. The
+            // press is dropped, so no ripple resumes when the fallback ends. Leaving it leaves
+            // dirty false, so the next frame draws.
+            if (f.appearance && useFallback(f.appearance)) {
+                clear();
+                interaction.reset();
+                return false;
+            }
 
             const pointer = f.pointer;
             if (!style && (pointer || interaction.pressed)) {

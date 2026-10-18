@@ -97,6 +97,8 @@ register();
 
 Use `layers="reveal-svg"` for the SVG version.
 
+As Reveal on Windows, the highlight is not drawn in forced colors mode, with reduced transparency, or after `setAlwaysUseFallback(true)` from `@ax-design/surface`. Reduced motion leaves it on, as on Windows.
+
 ## Style Controlling
 
 * Checkout this living example for detailed usage:

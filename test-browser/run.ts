@@ -23,12 +23,16 @@ interface Driver {
     move(x: number, y: number): Promise<void>;
     down(): Promise<void>;
     up(): Promise<void>;
+    // Playwright only: emulates media features such as forcedColors. Absent on Safari.
+    emulateMedia?(features: Record<string, string>): Promise<void>;
     close(): Promise<void>;
 }
 
 async function playwright(name: string, url: string): Promise<Driver> {
     const pw = (await import('playwright')) as any;
-    const browser = await pw[name].launch();
+    // AX_BROWSER_PATH points the run at a system build instead.
+    const executablePath = process.env.AX_BROWSER_PATH;
+    const browser = await pw[name].launch(executablePath ? { executablePath } : {});
     const page = await browser.newPage({ viewport: { width: 700, height: 400 } });
     await page.goto(url);
     return {
@@ -36,6 +40,7 @@ async function playwright(name: string, url: string): Promise<Driver> {
         move: (x, y) => page.mouse.move(x, y),
         down: () => page.mouse.down(),
         up: () => page.mouse.up(),
+        emulateMedia: (features) => page.emulateMedia(features),
         close: () => browser.close(),
     };
 }
@@ -90,6 +95,13 @@ async function drive(d: Driver) {
             } else if (state.step === 'hover-ng') {
                 const r = await rect('ng');
                 await d.move(r.x + 30, r.y + 20);
+            } else if (state.step.startsWith('media:')) {
+                // 'media:forcedColors=active' sets one media feature; window.__media tells the page
+                // whether the driver could do it.
+                const [feature, value] = state.step.slice('media:'.length).split('=');
+                const supported = !!d.emulateMedia;
+                if (d.emulateMedia) await d.emulateMedia({ [feature]: value });
+                await d.eval(`(window.__media = ${supported})`);
             }
             await d.eval(`(window.__ack = ${JSON.stringify(state.step)})`);
         }
