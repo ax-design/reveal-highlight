@@ -2,10 +2,11 @@
 // from the original SVG renderer: three radial gradients (border light, hover fill, ripple) on
 // paths of the surface shape. Fixes one bug of the original: gradient stop colors were set to
 // bare "r, g, b" strings, which are not colors, so every stop rendered black.
-import { innerToSvgPath, toSvgPath } from '@ax-design/shape';
+import { apply, innerToSvgPath, projectContour, toSvgPath } from '@ax-design/shape';
 import { appearance, useFallback } from '@ax-design/surface';
 import type { SurfaceFrame, SurfaceLayer } from '@ax-design/surface';
 import { RevealInteraction } from './interaction.js';
+import { drawnArea, drawnPoint } from './painter.js';
 import type { RevealStyle } from './painter.js';
 import { REVEAL_SCHEMA, styleFrom } from './revealStyle.js';
 
@@ -135,11 +136,19 @@ export function createRevealSvgLayer(): SurfaceLayer {
         },
         write(f: SurfaceFrame) {
             if (!svg) return false;
-            if (f.changed.style || f.changed.size || f.changed.tilt) {
+            // The fade of a motion, on the SVG itself (see SurfaceFrame.opacity). Surfaces from
+            // before motion() give no opacity.
+            const alpha = f.opacity === undefined || f.opacity >= 1 ? '1' : String(f.opacity);
+            if (svg.style.opacity !== alpha) svg.style.opacity = alpha;
+            if (f.changed.style || f.changed.size || f.changed.tilt || f.changed.motion) {
                 const { paint } = f;
                 svg.setAttribute('viewBox', `${paint.left} ${paint.top} ${paint.width} ${paint.height}`);
-                const outline = toSvgPath(f.shape.outline);
-                border.setAttribute('d', `${outline} ${innerToSvgPath(f.ringInner())}`);
+                // A projected frame (Firefox during a 3D motion) has flat containers: the shape is
+                // drawn through the tilt, as closed polylines (innerToSvgPath writes one).
+                const tilt = f.projected ? f.tilt : null;
+                const outline = tilt ? innerToSvgPath(projectContour(f.shape.outline, tilt)) : toSvgPath(f.shape.outline);
+                const inner = tilt ? innerToSvgPath(f.ringInner().map((p) => apply(tilt, p))) : innerToSvgPath(f.ringInner());
+                border.setAttribute('d', `${outline} ${inner}`);
                 fill.setAttribute('d', outline);
                 ripple.setAttribute('d', outline);
                 painted = { x: NaN, y: NaN };
@@ -175,8 +184,14 @@ export function createRevealSvgLayer(): SurfaceLayer {
             const relativeY = pointer ? pointer.y : NaN;
             if (!playing && relativeX === painted.x && relativeY === painted.y) return false;
             const maxRadius = Math.max(borderGrad.grad.r.baseVal.value, fillGrad.grad.r.baseVal.value);
+            // The light is drawn where the shape is: the render area is tested there too.
+            const light = drawnPoint(f, relativeX, relativeY);
+            const area = drawnArea(f);
             const mouseInRenderArea =
-                relativeX + maxRadius > 0 && relativeX - maxRadius < f.width && relativeY + maxRadius > 0 && relativeY - maxRadius < f.height;
+                light.x + maxRadius > area.left &&
+                light.x - maxRadius < area.left + area.width &&
+                light.y + maxRadius > area.top &&
+                light.y - maxRadius < area.top + area.height;
             if (!mouseInRenderArea && !playing) {
                 clear();
                 return false;
@@ -185,8 +200,8 @@ export function createRevealSvgLayer(): SurfaceLayer {
             painted = { x: relativeX, y: relativeY };
 
             if (hovering) {
-                borderGrad.grad.cx.baseVal.value = fillGrad.grad.cx.baseVal.value = relativeX;
-                borderGrad.grad.cy.baseVal.value = fillGrad.grad.cy.baseVal.value = relativeY;
+                borderGrad.grad.cx.baseVal.value = fillGrad.grad.cx.baseVal.value = light.x;
+                borderGrad.grad.cy.baseVal.value = fillGrad.grad.cy.baseVal.value = light.y;
                 const inside = relativeX > 0 && relativeY > 0 && relativeX < f.width && relativeY < f.height;
                 setFill(fill, c.hoverLight && inside ? `url(#${id}-fill)` : 'transparent');
                 const diffuse = (c.diffuse && mouseInRenderArea) || inside;
@@ -200,9 +215,8 @@ export function createRevealSvgLayer(): SurfaceLayer {
             const press = interaction.press;
             if (c.pressAnimation && press.mousePressed && press.mouseDownAnimateLogicFrame) {
                 const radius = c.pressAnimationFillMode === 'constrained' ? c.trueFillRadius[1] : Math.max(f.width, f.height);
-                const x = press.mouseReleased && press.hasMouseUp ? press.mouseUpX : relativeX;
-                const y = press.mouseReleased && press.hasMouseUp ? press.mouseUpY : relativeY;
-                updateRipple(c, press.mouseDownAnimateLogicFrame, x, y, radius);
+                const at = press.mouseReleased && press.hasMouseUp ? drawnPoint(f, press.mouseUpX, press.mouseUpY) : light;
+                updateRipple(c, press.mouseDownAnimateLogicFrame, at.x, at.y, radius);
                 setFill(ripple, `url(#${id}-ripple)`);
             } else {
                 setFill(ripple, 'transparent');

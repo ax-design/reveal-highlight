@@ -2,10 +2,10 @@
 // The effect is the shared painter, moved verbatim from the original canvas renderer; this file
 // wires it to the surface: shape from the surface outline and border, pointer in local
 // coordinates (through the tilt), frames from the surface scheduler.
-import { traceContour, traceInner } from '@ax-design/shape';
+import { apply, projectContour, traceContour, traceInner } from '@ax-design/shape';
 import { appearance, useFallback } from '@ax-design/surface';
 import type { SurfaceFrame, SurfaceLayer } from '@ax-design/surface';
-import { drawReveal, emptyGradients, updateRevealGradients } from './painter.js';
+import { drawReveal, drawnArea, drawnPoint, emptyGradients, updateRevealGradients } from './painter.js';
 import type { RevealStyle, ShapeKind } from './painter.js';
 import { RevealInteraction } from './interaction.js';
 import { REVEAL_SCHEMA, styleFrom } from './revealStyle.js';
@@ -38,7 +38,12 @@ export function createRevealLayer(): SurfaceLayer {
         const toDevice = () => ctx!.setTransform(pxRatio, 0, 0, pxRatio, -paint.left * pxRatio, -paint.top * pxRatio);
         toDevice();
         ctx.beginPath();
-        traceContour(ctx, shape.outline);
+        // A projected frame (Firefox during a 3D motion) has flat containers: the outline is drawn
+        // through the tilt, as a closed polyline on screen (traceInner walks any closed polyline).
+        // Points are in the same local space as the paint box, so the device mapping above holds.
+        const tilt = frame.projected ? frame.tilt : null;
+        if (tilt) traceInner(ctx, projectContour(shape.outline, tilt));
+        else traceContour(ctx, shape.outline);
         if (kind === 'fill') {
             ctx.setTransform(1, 0, 0, 1, tx, ty);
             ctx.fillStyle = pattern;
@@ -46,7 +51,7 @@ export function createRevealLayer(): SurfaceLayer {
             return;
         }
         // The ring as outline plus inner edge, filled even-odd, like the legacy canvas did.
-        traceInner(ctx, frame.ringInner());
+        traceInner(ctx, tilt ? frame.ringInner().map((p) => apply(tilt, p)) : frame.ringInner());
         ctx.setTransform(1, 0, 0, 1, tx, ty);
         ctx.fillStyle = pattern;
         ctx.fill('evenodd');
@@ -78,6 +83,11 @@ export function createRevealLayer(): SurfaceLayer {
         write(f: SurfaceFrame) {
             frame = f;
             if (!ctx) return false;
+
+            // The fade of a motion, on the canvas itself: an ancestor's opacity would make it the
+            // backdrop root of acrylic. Surfaces from before motion() give no opacity.
+            const alpha = f.opacity === undefined || f.opacity >= 1 ? '1' : String(f.opacity);
+            if (canvas.style.opacity !== alpha) canvas.style.opacity = alpha;
 
             // Size and style.
             const ratio = window.devicePixelRatio || 1;
@@ -125,9 +135,15 @@ export function createRevealLayer(): SurfaceLayer {
             const hovering = !!pointer && pointer.pointerType !== 'keyboard';
             const relativeX = pointer ? pointer.x : NaN;
             const relativeY = pointer ? pointer.y : NaN;
+            // The light is drawn where the shape is: the render area is tested there too.
             const maxRadius = style.trueFillRadius[1];
+            const light = drawnPoint(f, relativeX, relativeY);
+            const area = drawnArea(f);
             const mouseInRenderArea =
-                relativeX + maxRadius > 0 && relativeX - maxRadius < f.width && relativeY + maxRadius > 0 && relativeY - maxRadius < f.height;
+                light.x + maxRadius > area.left &&
+                light.x - maxRadius < area.left + area.width &&
+                light.y + maxRadius > area.top &&
+                light.y - maxRadius < area.top + area.height;
             if (!mouseInRenderArea && !animationPlaying) {
                 clear();
                 return false;
@@ -142,7 +158,8 @@ export function createRevealLayer(): SurfaceLayer {
                 f.height === painted.h &&
                 style === painted.style &&
                 f.shape === painted.shape &&
-                !f.changed.tilt;
+                !f.changed.tilt &&
+                !f.changed.motion;
             if (unchanged) return false;
 
             ctx.setTransform(1, 0, 0, 1, 0, 0);
@@ -166,6 +183,7 @@ export function createRevealLayer(): SurfaceLayer {
                 press: interaction.press,
                 hasBorder: f.borderWidths.some((w) => w > 0),
                 paintShape,
+                project: (x, y) => drawnPoint(f, x, y),
             });
             return animationPlaying;
         },

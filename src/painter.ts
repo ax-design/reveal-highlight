@@ -4,6 +4,9 @@
 //
 // The code is moved verbatim from CanvasConfig.paint, CanvasConfig.updateCachedReveal,
 // CanvasConfig.updateAnimateGrd and the press timeline in RevealBoundaryStore.paintAll.
+import { apply } from '@ax-design/shape';
+import type { Point } from '@ax-design/shape';
+import type { PaintBox, SurfaceFrame } from '@ax-design/surface';
 
 export interface RevealStyle {
     // "r, g, b" strings.
@@ -136,6 +139,19 @@ export interface PressState {
 
 export type ShapeKind = 'fill' | 'ring';
 
+// Where a point of the untilted surface is drawn. Only a projected frame (Firefox during a 3D
+// motion, see SurfaceFrame.projected) moves the light with the shape: its containers are flat,
+// so the layer draws the shape and the light through `tilt`. Otherwise the container carries the
+// tilt and the point is drawn where it is.
+export function drawnPoint(frame: SurfaceFrame, x: number, y: number): Point {
+    return frame.projected && frame.tilt ? apply(frame.tilt, { x, y }) : { x, y };
+}
+
+// The box the light can reach: the element's box, or the paint box that holds the projected shape.
+export function drawnArea(frame: SurfaceFrame): PaintBox {
+    return frame.projected && frame.tilt ? frame.paint : { left: 0, top: 0, width: frame.width, height: frame.height };
+}
+
 export interface RevealPaintInput {
     ctx: CanvasRenderingContext2D;
     pxRatio: number;
@@ -158,6 +174,9 @@ export interface RevealPaintInput {
     hasBorder: boolean;
     // Builds the shape path in device px, then fills it with `pattern` translated by (tx, ty).
     paintShape(kind: ShapeKind, pattern: CanvasGradient, tx: number, ty: number): void;
+    // Where a point of the untilted surface is drawn (drawnPoint). The light and the ripple are
+    // centered there.
+    project(x: number, y: number): Point;
 }
 
 // From the drawing part of CanvasConfig.paint.
@@ -172,8 +191,9 @@ export function drawReveal(p: RevealPaintInput): void {
         if (c.hoverLight && mouseInCanvas && fillPattern) {
             // draw fill.
             const radius = p.gradients.fillReveal.radius;
-            const putX = Math.floor(relativeX * pxRatio - radius) + p.originX;
-            const putY = Math.floor(relativeY * pxRatio - radius) + p.originY;
+            const at = p.project(relativeX, relativeY);
+            const putX = Math.floor(at.x * pxRatio - radius) + p.originX;
+            const putY = Math.floor(at.y * pxRatio - radius) + p.originY;
             p.paintShape('fill', fillPattern, putX, putY);
         }
 
@@ -182,8 +202,9 @@ export function drawReveal(p: RevealPaintInput): void {
         if (p.hasBorder && borderPattern && diffuse) {
             // Draw border.
             const radius = p.gradients.borderReveal.radius;
-            const putX = Math.floor(relativeX * pxRatio - radius) + p.originX;
-            const putY = Math.floor(relativeY * pxRatio - radius) + p.originY;
+            const at = p.project(relativeX, relativeY);
+            const putX = Math.floor(at.x * pxRatio - radius) + p.originX;
+            const putY = Math.floor(at.y * pxRatio - radius) + p.originY;
             p.paintShape('ring', borderPattern, putX, putY);
         }
     }
@@ -191,25 +212,10 @@ export function drawReveal(p: RevealPaintInput): void {
     const press = p.press;
     if (c.pressAnimation && press.mousePressed && press.mouseDownAnimateLogicFrame) {
         const grdRadius = c.pressAnimationFillMode === 'constrained' ? c.trueFillRadius[1] : Math.max(p.width, p.height);
-        // prettier-ignore
-        const animateGrd =
-            press.mouseReleased && press.hasMouseUp
-                ? p.ctx.createRadialGradient(
-                    press.mouseUpX * pxRatio + p.originX,
-                    press.mouseUpY * pxRatio + p.originY,
-                    0,
-                    press.mouseUpX * pxRatio + p.originX,
-                    press.mouseUpY * pxRatio + p.originY,
-                    grdRadius * pxRatio
-                )
-                : p.ctx.createRadialGradient(
-                    relativeX * pxRatio + p.originX,
-                    relativeY * pxRatio + p.originY,
-                    0,
-                    relativeX * pxRatio + p.originX,
-                    relativeY * pxRatio + p.originY,
-                    grdRadius * pxRatio
-                );
+        const at = press.mouseReleased && press.hasMouseUp ? p.project(press.mouseUpX, press.mouseUpY) : p.project(relativeX, relativeY);
+        const cx = at.x * pxRatio + p.originX;
+        const cy = at.y * pxRatio + p.originY;
+        const animateGrd = p.ctx.createRadialGradient(cx, cy, 0, cx, cy, grdRadius * pxRatio);
         updateAnimateGrd(c, press.mouseDownAnimateLogicFrame, animateGrd);
         p.paintShape('fill', animateGrd, 0, 0);
     }
