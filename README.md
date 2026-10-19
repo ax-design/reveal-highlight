@@ -99,6 +99,17 @@ Use `layers="reveal-svg"` for the SVG version.
 
 As Reveal on Windows, the highlight is not drawn in forced colors mode, with reduced transparency, or after `setAlwaysUseFallback(true)` from `@ax-design/surface`. Reduced motion leaves it on, as on Windows.
 
+### Keyboard presses and waiting for the press
+
+`press()` from `@ax-design/surface` plays the press ripple, as a pointer press does. Called without a point (or with `'center'`), it is a keyboard press: the ripple is centered, and no hover or border light is drawn, as WinUI does. `press({ x, y })` presses that point like a pointer.
+
+`pressRemaining()` returns the milliseconds until the press ripple has finished, or 0 when nothing is drawn. A tile can use it to delay its click until the press feedback is over, as the planned `@ax-design/tile` does:
+
+```javascript
+surface.press();
+requestAnimationFrame(() => setTimeout(activate, surface.pressRemaining()));
+```
+
 ## High contrast
 
 In Windows High Contrast the light is gone, so the button needs a solid border of its own. On Windows, the Reveal resources of WinUI draw that border as `ButtonText` at rest and `Highlight` on hover and press. Copy the same rules to get the same look on the web:
