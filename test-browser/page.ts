@@ -172,6 +172,19 @@ async function run() {
     const center = (c: HTMLCanvasElement) =>
         litIn(c, Math.floor(c.width / 2) - 6, Math.floor(c.height / 2) - 6, Math.floor(c.width / 2) + 6, Math.floor(c.height / 2) + 6);
     check('keyboard press: canvas ripple is lit at the center', center(kbCanvas) > 0, `lit=${center(kbCanvas)}`);
+    // A boundary holds back the light of a pointer that is away from it; a keyboard press has no
+    // pointer, so a reveal inside a boundary still plays its ripple.
+    {
+        const bounded = document.getElementById('r1') as any;
+        bounded.press();
+        await frames(2);
+        const boundedCanvas = canvasOf(bounded);
+        check('keyboard press inside a boundary, pointer away: the ripple plays', center(boundedCanvas) > 0, `lit=${center(boundedCanvas)}`);
+        bounded.release();
+        await frames(1);
+        check('keyboard press inside a boundary: pressRemaining is positive', bounded.pressRemaining() > 0, `ms=${bounded.pressRemaining()}`);
+        await settle(bounded);
+    }
     check('keyboard press: no border or hover light at the edges', edgeLit(kbCanvas) === 0, `lit=${edgeLit(kbCanvas)}`);
     const held = kb.pressRemaining();
     check('pressRemaining: a held press counts as released now', held > 0, `ms=${held}`);
