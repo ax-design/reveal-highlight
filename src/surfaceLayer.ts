@@ -3,7 +3,7 @@
 // wires it to the surface: shape from the surface outline and border, pointer in local
 // coordinates (through the tilt), frames from the surface scheduler.
 import { traceContour, traceInner } from '@ax-design/shape';
-import { useFallback } from '@ax-design/surface';
+import { appearance, useFallback } from '@ax-design/surface';
 import type { SurfaceFrame, SurfaceLayer } from '@ax-design/surface';
 import { drawReveal, emptyGradients, updateRevealGradients } from './painter.js';
 import type { RevealStyle, ShapeKind } from './painter.js';
@@ -59,6 +59,10 @@ export function createRevealLayer(): SurfaceLayer {
         // side from the element.
         reach(width: number, height: number) {
             return Math.max(width, height);
+        },
+        // The fallback is read live: the ripple stops as soon as it is set, before the next frame.
+        pressRemaining(now: number) {
+            return interaction.pressRemaining(now, useFallback(appearance()) ? null : style);
         },
         attach(container) {
             canvas = document.createElement('canvas');

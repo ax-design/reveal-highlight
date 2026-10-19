@@ -3,7 +3,7 @@
 // paths of the surface shape. Fixes one bug of the original: gradient stop colors were set to
 // bare "r, g, b" strings, which are not colors, so every stop rendered black.
 import { innerToSvgPath, toSvgPath } from '@ax-design/shape';
-import { useFallback } from '@ax-design/surface';
+import { appearance, useFallback } from '@ax-design/surface';
 import type { SurfaceFrame, SurfaceLayer } from '@ax-design/surface';
 import { RevealInteraction } from './interaction.js';
 import type { RevealStyle } from './painter.js';
@@ -104,6 +104,10 @@ export function createRevealSvgLayer(): SurfaceLayer {
         tracksPointer: true,
         reach(width: number, height: number) {
             return Math.max(width, height);
+        },
+        // The fallback is read live, as in write.
+        pressRemaining(now: number) {
+            return interaction.pressRemaining(now, useFallback(appearance()) ? null : style);
         },
         attach(container) {
             svg = el('svg', { 'aria-hidden': 'true' });

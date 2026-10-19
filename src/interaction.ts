@@ -1,9 +1,16 @@
 // Press handling and the ripple timeline, shared by the canvas and SVG reveal layers. Same
 // semantics as the legacy RevealBoundaryStore: a press on the element starts the ripple, a mouse
 // release accelerates it (switchAnimation), a touch release or a cancel clears it (clearAll).
+// Presses from press() (keyboard and api) release like a mouse press: their click is delayed by
+// pressRemaining, so the ripple must play out after the release.
 import type { LocalPointer } from '@ax-design/surface';
 import { advancePressAnimation } from './painter.js';
 import type { PressState, PressTimeline, RevealStyle } from './painter.js';
+
+// Pointer types whose release lets the ripple play out, accelerated.
+function releasesWithRipple(pointerType: string): boolean {
+    return pointerType === 'mouse' || pointerType === 'keyboard' || pointerType === 'api';
+}
 
 export class RevealInteraction implements PressTimeline {
     mouseDownAnimateStartFrame: number | null = null;
@@ -56,6 +63,25 @@ export class RevealInteraction implements PressTimeline {
             playing = false;
         }
         return { playing, cleared };
+    }
+
+    // Milliseconds from `now` (performance.now(), like the frames) until the ripple has finished.
+    // Mirrors advancePressAnimation: a release accelerates the progress after it. A press still
+    // held counts as released now, because its click is the release. `style` is null while the
+    // layer draws nothing (fallback), and then there is no ripple to wait for.
+    pressRemaining(now: number, style: RevealStyle | null): number {
+        if (!style || !style.pressAnimation || !this.pressed || !(style.pressAnimationSpeed > 0)) return 0;
+        const speed = style.pressAnimationSpeed;
+        // The ripple starts with the first frame after the press; before that it starts now.
+        const start = this.mouseDownAnimateStartFrame === null ? now : this.mouseDownAnimateStartFrame;
+        const elapsed = now - start;
+        // Same condition as advancePressAnimation, which needs a non-zero release frame.
+        const releasedAt = this.mouseReleased ? this.mouseDownAnimateReleasedFrame : null;
+        const progress = releasedAt
+            ? (elapsed + (elapsed - releasedAt) * style.releaseAnimationAccelerateRate) / speed
+            : elapsed / speed;
+        // After the release the progress grows at (1 + rate) / speed per ms.
+        return Math.max(0, ((1 - progress) * speed) / (1 + style.releaseAnimationAccelerateRate));
     }
 
     get press(): PressState {
