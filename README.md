@@ -110,6 +110,10 @@ surface.press();
 requestAnimationFrame(() => setTimeout(activate, surface.pressRemaining()));
 ```
 
+### Motion
+
+Reveal follows `motion()` of `ax-surface`: the fade of a motion is set on the layer's own canvas or SVG, never on an ancestor, and the light and the ripple turn with the shape. In Firefox, where a 3D motion is drawn in flat containers, the layers draw the projected outline themselves and center the light on it, so the highlight stays on the shape while it moves; elsewhere the container carries the transform and nothing changes.
+
 ## High contrast
 
 In Windows High Contrast the light is gone, so the button needs a solid border of its own. On Windows, the Reveal resources of WinUI draw that border as `ButtonText` at rest and `Highlight` on hover and press. Copy the same rules to get the same look on the web:
