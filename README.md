@@ -99,6 +99,32 @@ Use `layers="reveal-svg"` for the SVG version.
 
 As Reveal on Windows, the highlight is not drawn in forced colors mode, with reduced transparency, or after `setAlwaysUseFallback(true)` from `@ax-design/surface`. Reduced motion leaves it on, as on Windows.
 
+## High contrast
+
+In Windows High Contrast the light is gone, so the button needs a solid border of its own. On Windows, the Reveal resources of WinUI draw that border as `ButtonText` at rest and `Highlight` on hover and press. Copy the same rules to get the same look on the web:
+
+```css
+@media (forced-colors: active) {
+  .ax-reveal-button { border: 1px solid ButtonText; }
+  .ax-reveal-button:hover, .ax-reveal-button:active { border-color: Highlight; }
+}
+```
+
+For a shape that is not a rectangle, the border of a CSS box can't follow it. Use the `fill` layer of Surface instead (`<ax-surface layers="fill reveal">`): its border is drawn in `CanvasText` by itself in forced colors, so it follows the shape with no CSS.
+
+### Higher contrast
+
+`prefers-contrast: more` (for example macOS "Increase contrast") changes nothing by itself: Windows has no such setting, so Reveal keeps its look. To make the light stronger for those users, raise its opacity and, if you want, its border color inside the media query:
+
+```css
+@media (prefers-contrast: more) {
+  ax-reveal, ax-surface {
+    --reveal-opacity: 0.5;
+    --reveal-border-color: rgb(0, 0, 0);
+  }
+}
+```
+
 ## Style Controlling
 
 * Checkout this living example for detailed usage:
