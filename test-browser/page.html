@@ -20,5 +20,10 @@
 </ax-reveal-provider>
 <div style="height: 30px"></div>
 <ax-reveal-bound><ax-reveal-ng id="ng" class="round"><button class="ax-reveal-button">ng</button></ax-reveal-ng></ax-reveal-bound>
+<!-- Outside any boundary: a press from press() needs no pointer over the element. -->
+<div style="height: 30px"></div>
+<ax-reveal id="free" class="round"><button class="ax-reveal-button">free</button></ax-reveal>
+<ax-reveal-ng id="free-ng" class="round"><button class="ax-reveal-button">free ng</button></ax-reveal-ng>
+<ax-surface id="surface" layers="reveal" style="display: block; width: 160px; height: 60px; margin-top: 20px;"></ax-surface>
 <script type="module" src="./page.ts"></script>
 </body></html>
