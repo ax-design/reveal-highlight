@@ -108,8 +108,21 @@ async function run() {
         check('forced colors: canvas draws no light', lit('r1') === 0, `lit=${lit('r1')}`);
         await ask('hover-ng');
         check('forced colors: svg draws no light', drawnPaths('ng') === 0, `paths=${drawnPaths('ng')}`);
+        // The button at rest, with the pointer away from it: the border is ButtonText, resolved
+        // through a probe that keeps the system color.
+        await ask('far');
+        const probe = document.createElement('div');
+        probe.style.cssText = 'color: ButtonText; forced-color-adjust: none;';
+        document.body.appendChild(probe);
+        const buttonText = getComputedStyle(probe).color;
+        probe.remove();
+        const button = document.querySelector('#r1 .ax-reveal-button') as HTMLElement;
+        const border = getComputedStyle(button);
+        check('forced colors: button border at rest is ButtonText', border.borderTopColor === buttonText, `border=${border.borderTopColor} ButtonText=${buttonText}`);
+        check('forced colors: button has a border', parseFloat(border.borderTopWidth) > 0, `width=${border.borderTopWidth}`);
         await ask('media:forcedColors=none');
         await frames(6);
+        await ask('hover-ng');
         const fill = (ng.querySelectorAll('path')[1] as SVGPathElement).style.fill;
         check('forced colors off: svg lights up again', fill.indexOf('url(') === 0, fill);
         await ask('hover-r1');

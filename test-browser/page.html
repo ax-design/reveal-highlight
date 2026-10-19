@@ -6,15 +6,19 @@
   ax-reveal, ax-reveal-ng { --reveal-color: rgb(255, 0, 0); --reveal-opacity: 0.8; --reveal-border-width: 2px; }
   #bound { display: inline-block; padding: 0; }
   .round { --reveal-border-decoration-type: round; --reveal-border-decoration-radius: 6px; }
+  @media (forced-colors: active) {
+    .ax-reveal-button { border: 1px solid ButtonText; }
+    .ax-reveal-button:hover, .ax-reveal-button:active { border-color: Highlight; }
+  }
 </style></head>
 <body>
 <ax-reveal-provider>
   <ax-reveal-bound id="bound">
-    <ax-reveal id="r1" class="round"><button>one</button></ax-reveal>
-    <ax-reveal id="r2" class="round" data-top-left-border-radius="16"><button>two</button></ax-reveal>
+    <ax-reveal id="r1" class="round"><button class="ax-reveal-button">one</button></ax-reveal>
+    <ax-reveal id="r2" class="round" data-top-left-border-radius="16"><button class="ax-reveal-button">two</button></ax-reveal>
   </ax-reveal-bound>
 </ax-reveal-provider>
 <div style="height: 30px"></div>
-<ax-reveal-bound><ax-reveal-ng id="ng" class="round"><button>ng</button></ax-reveal-ng></ax-reveal-bound>
+<ax-reveal-bound><ax-reveal-ng id="ng" class="round"><button class="ax-reveal-button">ng</button></ax-reveal-ng></ax-reveal-bound>
 <script type="module" src="./page.ts"></script>
 </body></html>
