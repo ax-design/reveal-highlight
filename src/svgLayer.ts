@@ -169,6 +169,8 @@ export function createRevealSvgLayer(): SurfaceLayer {
             const c = style;
 
             // From SvgConfig.paint.
+            // A keyboard press has no pointer to light: only its ripple, at the center, is drawn.
+            const hovering = !!pointer && pointer.pointerType !== 'keyboard';
             const relativeX = pointer ? pointer.x : NaN;
             const relativeY = pointer ? pointer.y : NaN;
             if (!playing && relativeX === painted.x && relativeY === painted.y) return false;
@@ -182,7 +184,7 @@ export function createRevealSvgLayer(): SurfaceLayer {
             dirty = true;
             painted = { x: relativeX, y: relativeY };
 
-            if (pointer) {
+            if (hovering) {
                 borderGrad.grad.cx.baseVal.value = fillGrad.grad.cx.baseVal.value = relativeX;
                 borderGrad.grad.cy.baseVal.value = fillGrad.grad.cy.baseVal.value = relativeY;
                 const inside = relativeX > 0 && relativeY > 0 && relativeX < f.width && relativeY < f.height;

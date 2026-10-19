@@ -121,6 +121,8 @@ export function createRevealLayer(): SurfaceLayer {
             }
 
             // From CanvasConfig.paint: render area test and the unchanged-frame skip.
+            // A keyboard press has no pointer to light: only its ripple, at the center, is drawn.
+            const hovering = !!pointer && pointer.pointerType !== 'keyboard';
             const relativeX = pointer ? pointer.x : NaN;
             const relativeY = pointer ? pointer.y : NaN;
             const maxRadius = style.trueFillRadius[1];
@@ -157,7 +159,7 @@ export function createRevealLayer(): SurfaceLayer {
                 relativeY,
                 originX: -f.paint.left * pxRatio,
                 originY: -f.paint.top * pxRatio,
-                mouseInBoundary: !!pointer,
+                mouseInBoundary: hovering,
                 mouseInRenderArea,
                 style,
                 gradients,

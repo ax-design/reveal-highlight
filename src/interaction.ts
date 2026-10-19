@@ -43,7 +43,7 @@ export class RevealInteraction implements PressTimeline {
             this.reset();
             this.pressed = true;
         } else if (!pressed && this.wasPressed && this.pressed) {
-            if (pointer && pointer.pointerType === 'mouse') {
+            if (pointer && releasesWithRipple(pointer.pointerType)) {
                 this.mouseReleased = true;
                 this.mouseDownAnimateReleasedFrame = this.mouseDownAnimateCurrentFrame;
                 this.upX = pointer.x;
