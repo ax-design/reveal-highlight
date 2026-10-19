@@ -1,5 +1,6 @@
 // Browser checks for the <ax-reveal> adapters. Pointer input comes from the driver
 // (window.__step / window.__ack), the border detection mode from ?mode=.
+import { apply, projectContour, toSvgPath } from '@ax-design/shape';
 import { setAlwaysUseFallback } from '@ax-design/surface';
 import { register } from '../src/index.js';
 
@@ -63,6 +64,44 @@ const edgeLit = (c: HTMLCanvasElement) => {
         litIn(c, 0, h - 3, 3, h) +
         litIn(c, w - 3, h - 3, w, h)
     );
+};
+// The lit pixels of an element's canvas in local px (the paint box maps to the canvas): their
+// bounding box, how many there are, their centroid, and how many lie right of `right`.
+const litLocal = (el: any, right = Infinity) => {
+    const c = canvasOf(el);
+    const box = el.debugState.paint;
+    const ratio = c.width / box.width;
+    const d = c.getContext('2d')!.getImageData(0, 0, c.width, c.height).data;
+    const out = { n: 0, minX: Infinity, minY: Infinity, maxX: -Infinity, maxY: -Infinity, cx: 0, cy: 0, beyond: 0 };
+    for (let y = 0; y < c.height; y++) {
+        for (let x = 0; x < c.width; x++) {
+            if (!d[(y * c.width + x) * 4 + 3]) continue;
+            const lx = x / ratio + box.left;
+            const ly = y / ratio + box.top;
+            out.n++;
+            out.cx += lx;
+            out.cy += ly;
+            out.minX = Math.min(out.minX, lx);
+            out.minY = Math.min(out.minY, ly);
+            out.maxX = Math.max(out.maxX, lx);
+            out.maxY = Math.max(out.maxY, ly);
+            if (lx > right) out.beyond++;
+        }
+    }
+    if (out.n) {
+        out.cx /= out.n;
+        out.cy /= out.n;
+    }
+    return out;
+};
+// The projected outline of a motion in local px: its bounding box, and the projected center.
+const projectedBox = (el: any) => {
+    const { shape, homography, width, height } = el.debugState;
+    const pts = projectContour(shape.outline, homography);
+    const xs = pts.map((p: { x: number }) => p.x);
+    const ys = pts.map((p: { y: number }) => p.y);
+    const c = apply(homography, { x: width / 2, y: height / 2 });
+    return { minX: Math.min(...xs), maxX: Math.max(...xs), minY: Math.min(...ys), maxY: Math.max(...ys), cx: c.x, cy: c.y };
 };
 // Waits for `ms` on frames. Past the 50 ms tilt tween of a press, which element.pressRemaining()
 // also reports, but well before the ripple (about 290 ms after a release) has finished.
@@ -259,6 +298,150 @@ async function run() {
     setAlwaysUseFallback(false);
     check('AlwaysUseFallback: pressRemaining is 0', fallbackDuring === 0 && fallbackAfter === 0, `during=${fallbackDuring} after=${fallbackAfter}`);
     check('AlwaysUseFallback: no ripple pixels', fallbackPixels === 0, `lit=${fallbackPixels}`);
+
+    // Motion: the layers fade themselves, and in Firefox (where a 3D motion is drawn in flat
+    // containers) draw the projected shape and the light with it.
+    {
+        const gecko = CSS.supports('-moz-appearance', 'none');
+        const mo = document.getElementById('mo-r') as any;
+        const mong = document.getElementById('mo-ng') as any;
+        const moCanvas = canvasOf(mo);
+        const moSvg = mong.shadowRoot.querySelector('svg') as SVGSVGElement;
+        const moFill = moSvg.querySelectorAll('path')[1] as SVGPathElement;
+        const ripple = mong.shadowRoot.querySelector('radialGradient[id$="-ripple"]') as SVGRadialGradientElement;
+        const { width: w, height: h } = mo.debugState;
+        const turn = { rotateY: 30, originX: -150, originY: h / 2 };
+
+        // Opacity: the canvas and the svg fade themselves, the hosts never do.
+        mo.motion({ opacity: 0.4 });
+        mong.motion({ opacity: 0.4 });
+        await frames(4);
+        check('motion opacity: the canvas fades itself', getComputedStyle(moCanvas).opacity === '0.4', getComputedStyle(moCanvas).opacity);
+        check('motion opacity: the svg fades itself', getComputedStyle(moSvg).opacity === '0.4', getComputedStyle(moSvg).opacity);
+        check('motion opacity: the hosts do not', getComputedStyle(mo).opacity === '1' && getComputedStyle(mong).opacity === '1', `${getComputedStyle(mo).opacity} ${getComputedStyle(mong).opacity}`);
+        mo.motion(null);
+        mong.motion(null);
+        await frames(4);
+        check('motion(null): the canvas and the svg are opaque again', getComputedStyle(moCanvas).opacity === '1' && getComputedStyle(moSvg).opacity === '1', `${getComputedStyle(moCanvas).opacity} ${getComputedStyle(moSvg).opacity}`);
+
+        // A 3D motion around an origin outside the element, with a centered keyboard press. The
+        // ripple is still growing after 900 ms.
+        mo.motion(turn);
+        mong.motion(turn);
+        mo.press();
+        mong.press();
+        await wait(900);
+        const flatLit = litLocal(mo);
+        if (gecko) {
+            const pb = projectedBox(mo);
+            const lit = litLocal(mo, pb.maxX + 2);
+            check('motion (Firefox): the projected outline is shifted left of the flat box', pb.minX < 0 && pb.maxX < w, JSON.stringify(pb));
+            check(
+                'motion (Firefox): the ripple lies inside the projected outline',
+                lit.n > 0 && lit.minX >= pb.minX - 2 && lit.maxX <= pb.maxX + 2 && lit.minY >= pb.minY - 2 && lit.maxY <= pb.maxY + 2,
+                JSON.stringify({ lit, pb })
+            );
+            check('motion (Firefox): no ripple in the flat right edge outside the projection', lit.beyond === 0, `beyond=${lit.beyond} maxX=${pb.maxX}`);
+            check('motion (Firefox): the ripple is centered on the projected center', Math.abs(lit.cx - pb.cx) < 3 && Math.abs(lit.cy - pb.cy) < 3, `lit=${lit.cx.toFixed(1)},${lit.cy.toFixed(1)} projected=${pb.cx.toFixed(1)},${pb.cy.toFixed(1)}`);
+            check('motion (Firefox): the layer containers carry no transform', moCanvas.parentElement!.style.transform === '', moCanvas.parentElement!.style.transform);
+            const d = moFill.getAttribute('d') || '';
+            const nums = (d.match(/-?\d+(\.\d+)?/g) || []).map(Number);
+            const xs = nums.filter((_, i) => i % 2 === 0);
+            const ys = nums.filter((_, i) => i % 2 === 1);
+            const near = (a: number, b: number) => Math.abs(a - b) < 0.01;
+            check(
+                'motion (Firefox): the svg fill is the projected polyline',
+                d.indexOf('A') < 0 && d.indexOf('C') < 0 && near(Math.min(...xs), pb.minX) && near(Math.max(...xs), pb.maxX) && near(Math.min(...ys), pb.minY) && near(Math.max(...ys), pb.maxY),
+                d.slice(0, 80)
+            );
+            check('motion (Firefox): the svg ripple is centered on the projected center', near(ripple.cx.baseVal.value, pb.cx) && near(ripple.cy.baseVal.value, pb.cy), `${ripple.cx.baseVal.value},${ripple.cy.baseVal.value}`);
+            // The ring (outline and inner edge) lies inside the projected outline, all of it.
+            const ring = (moSvg.querySelectorAll('path')[0] as SVGPathElement).getAttribute('d') || '';
+            const rn = (ring.match(/-?\d+(\.\d+)?/g) || []).map(Number);
+            const rx = rn.filter((_, i) => i % 2 === 0);
+            const ry = rn.filter((_, i) => i % 2 === 1);
+            check(
+                'motion (Firefox): the svg ring is inside the projected outline',
+                ring.indexOf('A') < 0 && ring.indexOf('C') < 0 && Math.min(...rx) >= pb.minX - 0.01 && Math.max(...rx) <= pb.maxX + 0.01 && Math.min(...ry) >= pb.minY - 0.01 && Math.max(...ry) <= pb.maxY + 0.01,
+                `x=${Math.min(...rx)}..${Math.max(...rx)} projected=${pb.minX}..${pb.maxX}`
+            );
+        } else {
+            const ring = (moSvg.querySelectorAll('path')[0] as SVGPathElement).getAttribute('d') || '';
+            check('motion: the svg ring starts with the plain outline', ring.indexOf(`${toSvgPath(mong.debugState.shape.outline)} M`) === 0, ring.slice(0, 60));
+            check('motion: the layer containers turn', moCanvas.parentElement!.style.transform.indexOf('rotateY(30deg)') >= 0, moCanvas.parentElement!.style.transform);
+            check('motion: the ripple is drawn flat, centered in the element', Math.abs(flatLit.cx - w / 2) < 3 && Math.abs(flatLit.cy - h / 2) < 3, `lit=${flatLit.cx.toFixed(1)},${flatLit.cy.toFixed(1)}`);
+            check('motion: the svg fill is the plain outline', moFill.getAttribute('d') === toSvgPath(mong.debugState.shape.outline), (moFill.getAttribute('d') || '').slice(0, 60));
+            check('motion: the svg ripple is centered in the element', Math.abs(ripple.cx.baseVal.value - w / 2) < 0.01, `${ripple.cx.baseVal.value}`);
+        }
+        if (gecko) {
+            // The svg hover light: a held press with a point, after the ripple, under the motion.
+            mong.press({ x: w / 2, y: h / 2 });
+            await settle(mong);
+            mong.motion(turn);
+            await frames(4);
+            const pb = projectedBox(mong);
+            const hoverGrad = mong.shadowRoot.querySelector('radialGradient[id$="-fill"]') as SVGRadialGradientElement;
+            const hoverFill = moSvg.querySelectorAll('path')[1] as SVGPathElement;
+            check(
+                'motion (Firefox): the svg hover light is centered on the projected center',
+                hoverFill.style.fill.indexOf('url(') === 0 && Math.abs(hoverGrad.cx.baseVal.value - pb.cx) < 0.01 && Math.abs(hoverGrad.cy.baseVal.value - pb.cy) < 0.01,
+                `${hoverFill.style.fill} ${hoverGrad.cx.baseVal.value},${hoverGrad.cy.baseVal.value} projected=${pb.cx},${pb.cy}`
+            );
+            mong.release();
+            await settle(mong);
+        }
+        mo.release();
+        mong.release();
+        await settle(mo);
+        await settle(mong);
+        mo.motion(null);
+        mong.motion(null);
+        await frames(4);
+
+        // A held press that has finished its ripple keeps its light. A motion alone, with no style
+        // change, repaints it: projected in Firefox, and flat in Chromium.
+        mo.press({ x: w / 2, y: h / 2 });
+        await settle(mo);
+        await frames(3);
+        const before = litLocal(mo);
+        mo.motion(turn);
+        await frames(4);
+        const after = litLocal(mo);
+        if (gecko) {
+            const pb = projectedBox(mo);
+            check(
+                'motion repaints the held light (Firefox): projected, moved',
+                after.n > 0 && Math.abs(after.cx - pb.cx) < 3 && Math.abs(after.cy - pb.cy) < 3 && Math.abs(after.cx - before.cx) > 5,
+                `before=${before.cx.toFixed(1)} after=${after.cx.toFixed(1)} projected=${pb.cx.toFixed(1)}`
+            );
+            check(
+                'motion (Firefox): the held light and its ring stay inside the projected outline',
+                after.minX >= pb.minX - 2 && after.maxX <= pb.maxX + 2 && after.minY >= pb.minY - 2 && after.maxY <= pb.maxY + 2,
+                `lit=${after.minX.toFixed(1)}..${after.maxX.toFixed(1)} projected=${pb.minX.toFixed(1)}..${pb.maxX.toFixed(1)}`
+            );
+            // A shrink inside the flat paint box: the paint does not change, so only the motion and
+            // the tilt of the frame tell the layer to repaint its light, clipped to the smaller shape.
+            mo.motion(null);
+            await settle(mo);
+            await frames(3);
+            const paintFlat = JSON.stringify(mo.debugState.paint);
+            const flat = litLocal(mo);
+            mo.motion({ translateZ: -200 });
+            await frames(4);
+            const shrunk = litLocal(mo);
+            check(
+                'motion alone repaints the held light (Firefox): the shrink is clipped to the smaller shape',
+                JSON.stringify(mo.debugState.paint) === paintFlat && shrunk.n > 0 && shrunk.n < flat.n * 0.9,
+                `paint ${paintFlat} -> ${JSON.stringify(mo.debugState.paint)}, lit ${flat.n} -> ${shrunk.n}`
+            );
+        } else {
+            check('motion: the held light stays flat in Chromium', after.n > 0 && Math.abs(after.cx - before.cx) < 1, `before=${before.cx.toFixed(1)} after=${after.cx.toFixed(1)}`);
+        }
+        mo.release();
+        await settle(mo);
+        mo.motion(null);
+        await frames(4);
+    }
 
     return { userAgent: navigator.userAgent, checks };
 }
