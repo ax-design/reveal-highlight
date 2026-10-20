@@ -6,7 +6,7 @@
       "name": "@ax-design/reveal-highlight",
       "dependencies": {
         "@ax-design/shape": "^0.3.0",
-        "@ax-design/surface": "^0.3.0",
+        "@ax-design/surface": "^0.3.3",
         "@ax-design/typed-om": "^0.1.0",
       },
       "devDependencies": {
@@ -18,7 +18,7 @@
   "packages": {
     "@ax-design/shape": ["@ax-design/shape@0.3.0", "", {}, "sha512-rvIpp8dSu7XI1VAFvll+Cl8IND1SALXSByGTFeCj6uY9IKdyt3uT2hnmbMp4F4t5dC0ot/Fe/WDvIUwzwYOWww=="],
 
-    "@ax-design/surface": ["@ax-design/surface@0.3.0", "", { "dependencies": { "@ax-design/shape": "^0.3.0", "@ax-design/typed-om": "^0.1.0" } }, "sha512-ZVxvLeCdddFg3xPtBHrXSyzN9IWigdfSv6qm+KnzLH3wXrt6jhTUv1KfAxlRl4282Ci4nBpm88fvf+LICJr+wQ=="],
+    "@ax-design/surface": ["@ax-design/surface@0.3.3", "", { "dependencies": { "@ax-design/shape": "^0.3.0", "@ax-design/typed-om": "^0.1.0" } }, "sha512-O+q1Ayr1R4XUpHd9QCfnzve+xp6DXc7wHZO5f9Yfin0LPfHQRaJBPWSyRDOOOI6NRFwaGJylbkomJKFKYJQ92g=="],
 
     "@ax-design/typed-om": ["@ax-design/typed-om@0.1.0", "", {}, "sha512-v3I8wDLMFbWDN9cZkDpy9qYonMQfqUU0DIL9DOChTO3dBRzWUk/taZZBUgmNTkA0kvn+g5NbB7pGcSuQAbz9cA=="],
 

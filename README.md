@@ -163,6 +163,7 @@ https://github.com/ax-design/ax-design.github.io/blob/master/stories/templates/R
 * A press from the keyboard plays its ripple from the middle, also inside an `ax-reveal-bound` while the pointer is away, and the ripple reports when it has finished.
 * No highlight is drawn when the effects fall back (forced colors, reduced transparency), like Reveal on Windows. The README shows the border a button needs in forced colors, as WinUI draws it.
 * Slotted buttons keep their focus ring for keyboard focus.
+* 0.7.1: Built on Surface 0.3.3, which maps a pointer through a scaled or zoomed ancestor, so a highlight follows the pointer under a zoomed page.
 
 ## Development
 
