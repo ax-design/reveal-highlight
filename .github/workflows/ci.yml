@@ -3,7 +3,7 @@ name: CI
 on:
   push:
     branches: [master]
-    tags: ['v*']
+    tags: ['v*.*.*']
   pull_request:
 
 jobs:
@@ -31,11 +31,19 @@ jobs:
         with:
           node-version: 22
           registry-url: https://registry.npmjs.org
+      - name: Upgrade npm for OIDC trusted publishing
+        run: npm install -g "npm@^11.5.1" && npm -v
+      - name: Check tag matches package.json version
+        run: |
+          PKG="v$(node -p 'require("./package.json").version')"
+          if [ "$PKG" != "$GITHUB_REF_NAME" ]; then
+            echo "::error::tag $GITHUB_REF_NAME does not match package.json version $PKG"
+            exit 1
+          fi
       - run: bun install
       - run: bun run build
-      - run: npm publish --access public --provenance
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+      - name: Publish to npm (trusted publishing, no token)
+        run: npm publish --access public --provenance
       - run: |
           tar czvf umd.tar.gz -C build .
           tar czvf es.tar.gz -C es .
