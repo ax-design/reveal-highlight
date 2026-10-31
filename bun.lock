@@ -18,7 +18,7 @@
   "packages": {
     "@ax-design/shape": ["@ax-design/shape@0.3.0", "", {}, "sha512-rvIpp8dSu7XI1VAFvll+Cl8IND1SALXSByGTFeCj6uY9IKdyt3uT2hnmbMp4F4t5dC0ot/Fe/WDvIUwzwYOWww=="],
 
-    "@ax-design/surface": ["@ax-design/surface@0.4.1", "", { "dependencies": { "@ax-design/shape": "^0.3.0", "@ax-design/typed-om": "^0.3.0" } }, "sha512-CzNUjd9VO3nXPrhre19C4BgQtyovnv0sBNRzCkNTnrQoQjaQ/fN3tUTfBj+yPwEFseQ/AC864X5GT3trzMjGcQ=="],
+    "@ax-design/surface": ["@ax-design/surface@0.4.4", "", { "dependencies": { "@ax-design/shape": "^0.3.0", "@ax-design/typed-om": "^0.3.1" } }, "sha512-6PrAwLUMbb9Df1s8r+WjEdrqvu7eEtyOWrTObOQ9i/npvX1RjAIPjyWMknRx0GfCzEbGyEqx6W9NqoklSIp0vg=="],
 
     "@ax-design/typed-om": ["@ax-design/typed-om@0.3.0", "", {}, "sha512-zNLME1sVQ/v7fqiIPDoz/2/d2cdkHi1bQhR2opOxZSaIkTSVjet8k9gpUCuNeZhazElWGkqO1yAaf9kH+TIddg=="],
 
@@ -27,5 +27,7 @@
     "playwright-core": ["playwright-core@1.64.0", "", { "bin": { "playwright-core": "cli.js" } }, "sha512-T9r+MZkTECl2+oUcZ26YgZzTrYidTsIhYYkJix+6iDOymOb1FB2RLLSOxRGnZGv5DStt+aduIVbt+E8WygXYpg=="],
 
     "typescript": ["typescript@5.9.3", "", { "bin": { "tsc": "bin/tsc", "tsserver": "bin/tsserver" } }, "sha512-jl1vZzPDinLr9eUt3J/t7V6FgNEw9QjvBPdysz9KfQDD41fQrC2Y4vKQdiaUpFT4bXlb1RHhLpp8wtm6M5TgSw=="],
+
+    "@ax-design/surface/@ax-design/typed-om": ["@ax-design/typed-om@0.3.1", "", {}, "sha512-YvqZdpQKbXTZhRt3/CAUduTaUC+2vLAzb8JPkPQxWMUNVl7zEqwD0m3fDiJ4XAUcZWQMeYLDmxG3i7zyG6CsSQ=="],
   }
 }
